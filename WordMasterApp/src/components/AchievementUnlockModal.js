@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions
 } from 'react-native';
+import hapticService from '../services/HapticService';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +46,9 @@ export default function AchievementUnlockModal({
         anim.rotate.setValue(0);
       });
 
+      // Celebration haptics!
+      hapticService.celebration();
+      
       // Start entrance animation
       Animated.parallel([
         Animated.spring(scaleAnim, {

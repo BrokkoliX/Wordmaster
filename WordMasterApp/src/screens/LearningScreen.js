@@ -18,6 +18,8 @@ import {
 import { createMultipleChoiceQuestion } from '../utils/distractorGenerator';
 import achievementService from '../services/AchievementService';
 import AchievementUnlockModal from '../components/AchievementUnlockModal';
+import ttsService from '../services/TTSService';
+import hapticService from '../services/HapticService';
 
 const WORDS_PER_SESSION = 20;
 
@@ -85,6 +87,13 @@ export default function LearningScreen({ navigation }) {
       setShowFeedback(false);
       setStartTime(Date.now());
       
+      // Pronounce the word automatically (if enabled)
+      // Speak the target language (translation)
+      if (reverseDirection) {
+        // If showing Spanish, speak Spanish
+        await ttsService.speakSpanish(mcQuestion.question);
+      }
+      
       // Fade in animation
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -104,6 +113,13 @@ export default function LearningScreen({ navigation }) {
     
     const responseTime = Date.now() - startTime;
     const isCorrect = option.isCorrect;
+    
+    // Haptic feedback
+    if (isCorrect) {
+      hapticService.success();
+    } else {
+      hapticService.error();
+    }
     
     // Update progress
     try {
@@ -267,6 +283,18 @@ export default function LearningScreen({ navigation }) {
           {/* Question */}
           <View style={styles.questionCard}>
             <Text style={styles.questionText}>{question.question}</Text>
+            {/* Speaker button for pronunciation */}
+            {question.questionLabel.includes('Spanish') && (
+              <TouchableOpacity
+                style={styles.speakerButton}
+                onPress={async () => {
+                  hapticService.light();
+                  await ttsService.speakSpanish(question.question);
+                }}
+              >
+                <Text style={styles.speakerIcon}>🔊</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <Text style={styles.instructionText}>Select the correct translation:</Text>
@@ -419,6 +447,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2C3E50',
     textAlign: 'center',
+  },
+  speakerButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    padding: 8,
+    backgroundColor: '#3498DB',
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  speakerIcon: {
+    fontSize: 24,
   },
   instructionText: {
     fontSize: 16,
