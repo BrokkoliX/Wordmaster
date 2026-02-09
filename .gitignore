@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+WordMasterApp/node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+*.xcuserdata
+*.xcuserdatad
+ios/Pods/
+android/.gradle/
+android/app/build/
+android/build/
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.vscode/
+.idea/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+*.swp
+*.swo
+*~
+
+# Database (exclude runtime database)
+WordMasterApp/wordmaster.db
+WordMasterApp/wordmaster.db-shm
+WordMasterApp/wordmaster.db-wal
+
+# Temporary files
+.tmp/
+tmp/
+temp/
+/tmp/
+*.tmp
+
+# Environment
+.env
+.env.local
+.env.*.local
