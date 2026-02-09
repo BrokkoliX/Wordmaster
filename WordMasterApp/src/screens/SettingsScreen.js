@@ -131,6 +131,16 @@ export default function SettingsScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Help Button */}
+        <TouchableOpacity
+          style={styles.helpButton}
+          onPress={() => navigation.navigate('Help')}
+        >
+          <Text style={styles.helpIcon}>❓</Text>
+          <Text style={styles.helpButtonText}>Help & FAQ</Text>
+          <Text style={styles.helpArrow}>→</Text>
+        </TouchableOpacity>
+
         {/* Known Language */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>I speak...</Text>
@@ -366,6 +376,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#757575',
     fontStyle: 'italic',
+  },
+  helpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  helpIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  helpButtonText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2C3E50',
+  },
+  helpArrow: {
+    fontSize: 18,
+    color: '#3498DB',
   },
   section: {
     marginBottom: 24,

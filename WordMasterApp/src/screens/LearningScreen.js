@@ -34,6 +34,8 @@ export default function LearningScreen({ navigation }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [startTime, setStartTime] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(1));
+  const [scaleAnim] = useState(new Animated.Value(1));
+  const [buttonScale] = useState(new Animated.Value(1));
   const [achievementModalVisible, setAchievementModalVisible] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState(null);
   const [achievementQueue, setAchievementQueue] = useState([]);
@@ -94,12 +96,21 @@ export default function LearningScreen({ navigation }) {
         await ttsService.speakSpanish(mcQuestion.question);
       }
       
-      // Fade in animation
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      // Smooth entrance animations
+      scaleAnim.setValue(0.8);
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        })
+      ]).start();
     } catch (error) {
       console.error('Error loading question:', error);
     }
@@ -107,6 +118,21 @@ export default function LearningScreen({ navigation }) {
 
   const handleOptionPress = async (option) => {
     if (showFeedback) return;
+    
+    // Button press animation
+    Animated.sequence([
+      Animated.timing(buttonScale, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(buttonScale, {
+        toValue: 1,
+        tension: 100,
+        friction: 3,
+        useNativeDriver: true,
+      })
+    ]).start();
     
     setSelectedOption(option);
     setShowFeedback(true);
@@ -276,7 +302,13 @@ export default function LearningScreen({ navigation }) {
           </Text>
         </View>
 
-        <Animated.View style={[styles.questionContainer, { opacity: fadeAnim }]}>
+        <Animated.View style={[
+          styles.questionContainer, 
+          { 
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }
+        ]}>
           {/* Direction indicator */}
           <Text style={styles.directionLabel}>{question.questionLabel}</Text>
 

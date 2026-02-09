@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { initDatabase } from './src/services/database';
 import HomeScreen from './src/screens/HomeScreen';
@@ -11,12 +12,16 @@ import SummaryScreen from './src/screens/SummaryScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import AchievementsScreen from './src/screens/AchievementsScreen';
 import TestScreen from './src/screens/TestScreen';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import HelpScreen from './src/screens/HelpScreen';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     prepareApp();
@@ -27,6 +32,11 @@ export default function App() {
       console.log('Initializing WordMaster...');
       await initDatabase();
       console.log('Database initialized successfully');
+      
+      // Check if onboarding was completed
+      const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
+      setShowOnboarding(onboardingCompleted !== 'true');
+      
       setIsReady(true);
     } catch (err) {
       console.error('Failed to initialize app:', err);
@@ -52,10 +62,10 @@ export default function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Home"
+          initialRouteName={showOnboarding ? "Onboarding" : "Home"}
           screenOptions={{
             headerStyle: {
               backgroundColor: '#3498DB',
@@ -67,6 +77,11 @@ export default function App() {
           }}
         >
           <Stack.Screen
+            name="Onboarding"
+            component={OnboardingScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{ headerShown: false }}
@@ -76,6 +91,14 @@ export default function App() {
             component={SettingsScreen}
             options={{
               title: 'Settings',
+              headerBackTitle: 'Back'
+            }}
+          />
+          <Stack.Screen
+            name="Help"
+            component={HelpScreen}
+            options={{
+              title: 'Help & FAQ',
               headerBackTitle: 'Back'
             }}
           />
@@ -114,7 +137,7 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
       <StatusBar style="auto" />
-    </>
+    </ErrorBoundary>
   );
 }
 
