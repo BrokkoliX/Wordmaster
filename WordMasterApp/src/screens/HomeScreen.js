@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator } from 'react-native';
 import { getUserStatistics } from '../services/database';
 import { getStreakEmoji, getStreakMessage, formatStreakDisplay } from '../services/streakService';
 import achievementService from '../services/AchievementService';
+import { showErrorAlert } from '../utils/errorMessages';
 
 export default function HomeScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -40,10 +41,23 @@ export default function HomeScreen({ navigation }) {
       setAchievementStats(achStats);
     } catch (error) {
       console.error('Error loading statistics:', error);
+      showErrorAlert(error, () => loadStats());
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading indicator
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={[styles.content, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color="#3498DB" />
+          <Text style={styles.loadingText}>Loading your progress...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -296,5 +310,14 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: '#95A5A6',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#7F8C8D',
   },
 });

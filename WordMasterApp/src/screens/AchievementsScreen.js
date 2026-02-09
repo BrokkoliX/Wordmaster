@@ -38,7 +38,7 @@ const CATEGORY_NAMES = {
   special: '✨ Special'
 };
 
-export default function AchievementsScreen({ navigation }) {
+function AchievementsScreen({ navigation }) {
   const [achievements, setAchievements] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -280,6 +280,8 @@ export default function AchievementsScreen({ navigation }) {
     </View>
   );
 }
+
+export default React.memo(AchievementsScreen);
 
 const styles = StyleSheet.create({
   container: {
