@@ -1,0 +1,2026 @@
+[
+  {
+    "id": "1",
+    "word": "hello",
+    "translation": "hola",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 1
+  },
+  {
+    "id": "2",
+    "word": "goodbye",
+    "translation": "adiós",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 2
+  },
+  {
+    "id": "3",
+    "word": "good morning",
+    "translation": "buenos días",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 3
+  },
+  {
+    "id": "4",
+    "word": "good afternoon",
+    "translation": "buenas tardes",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 4
+  },
+  {
+    "id": "5",
+    "word": "good evening",
+    "translation": "buenas noches",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 5
+  },
+  {
+    "id": "6",
+    "word": "good night",
+    "translation": "buena noche",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 6
+  },
+  {
+    "id": "7",
+    "word": "see you later",
+    "translation": "hasta luego",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 7
+  },
+  {
+    "id": "8",
+    "word": "see you soon",
+    "translation": "hasta pronto",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 8
+  },
+  {
+    "id": "9",
+    "word": "welcome",
+    "translation": "bienvenido",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 9
+  },
+  {
+    "id": "10",
+    "word": "how are you",
+    "translation": "cómo estás",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 10
+  },
+  {
+    "id": "11",
+    "word": "nice to meet you",
+    "translation": "mucho gusto",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 11
+  },
+  {
+    "id": "12",
+    "word": "pleased to meet you",
+    "translation": "encantado",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 12
+  },
+  {
+    "id": "13",
+    "word": "what's up",
+    "translation": "qué tal",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 13
+  },
+  {
+    "id": "14",
+    "word": "how's it going",
+    "translation": "cómo te va",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 14
+  },
+  {
+    "id": "15",
+    "word": "long time no see",
+    "translation": "cuánto tiempo",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 15
+  },
+  {
+    "id": "16",
+    "word": "have a good day",
+    "translation": "que tengas un buen día",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 16
+  },
+  {
+    "id": "17",
+    "word": "take care",
+    "translation": "cuídate",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 17
+  },
+  {
+    "id": "18",
+    "word": "see you tomorrow",
+    "translation": "hasta mañana",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 18
+  },
+  {
+    "id": "19",
+    "word": "bye",
+    "translation": "chao",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 19
+  },
+  {
+    "id": "20",
+    "word": "hi",
+    "translation": "hola",
+    "difficulty": 1,
+    "category": "greetings",
+    "frequency_rank": 20
+  },
+  {
+    "id": "21",
+    "word": "please",
+    "translation": "por favor",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 21
+  },
+  {
+    "id": "22",
+    "word": "thank you",
+    "translation": "gracias",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 22
+  },
+  {
+    "id": "23",
+    "word": "you're welcome",
+    "translation": "de nada",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 23
+  },
+  {
+    "id": "24",
+    "word": "excuse me",
+    "translation": "perdón",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 24
+  },
+  {
+    "id": "25",
+    "word": "sorry",
+    "translation": "lo siento",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 25
+  },
+  {
+    "id": "26",
+    "word": "pardon me",
+    "translation": "disculpe",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 26
+  },
+  {
+    "id": "27",
+    "word": "my apologies",
+    "translation": "mis disculpas",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 27
+  },
+  {
+    "id": "28",
+    "word": "may I",
+    "translation": "puedo",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 28
+  },
+  {
+    "id": "29",
+    "word": "could you",
+    "translation": "podrías",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 29
+  },
+  {
+    "id": "30",
+    "word": "would you mind",
+    "translation": "te importaría",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 30
+  },
+  {
+    "id": "31",
+    "word": "if you don't mind",
+    "translation": "si no te importa",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 31
+  },
+  {
+    "id": "32",
+    "word": "bless you",
+    "translation": "salud",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 32
+  },
+  {
+    "id": "33",
+    "word": "congratulations",
+    "translation": "felicidades",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 33
+  },
+  {
+    "id": "34",
+    "word": "good luck",
+    "translation": "buena suerte",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 34
+  },
+  {
+    "id": "35",
+    "word": "with pleasure",
+    "translation": "con mucho gusto",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 35
+  },
+  {
+    "id": "36",
+    "word": "don't worry",
+    "translation": "no te preocupes",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 36
+  },
+  {
+    "id": "37",
+    "word": "no problem",
+    "translation": "no hay problema",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 37
+  },
+  {
+    "id": "38",
+    "word": "of course",
+    "translation": "por supuesto",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 38
+  },
+  {
+    "id": "39",
+    "word": "certainly",
+    "translation": "ciertamente",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 39
+  },
+  {
+    "id": "40",
+    "word": "absolutely",
+    "translation": "absolutamente",
+    "difficulty": 1,
+    "category": "politeness",
+    "frequency_rank": 40
+  },
+  {
+    "id": "41",
+    "word": "yes",
+    "translation": "sí",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 41
+  },
+  {
+    "id": "42",
+    "word": "no",
+    "translation": "no",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 42
+  },
+  {
+    "id": "43",
+    "word": "maybe",
+    "translation": "quizás",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 43
+  },
+  {
+    "id": "44",
+    "word": "okay",
+    "translation": "vale",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 44
+  },
+  {
+    "id": "45",
+    "word": "fine",
+    "translation": "bien",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 45
+  },
+  {
+    "id": "46",
+    "word": "here",
+    "translation": "aquí",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 46
+  },
+  {
+    "id": "47",
+    "word": "there",
+    "translation": "allí",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 47
+  },
+  {
+    "id": "48",
+    "word": "where",
+    "translation": "dónde",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 48
+  },
+  {
+    "id": "49",
+    "word": "when",
+    "translation": "cuándo",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 49
+  },
+  {
+    "id": "50",
+    "word": "why",
+    "translation": "por qué",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 50
+  },
+  {
+    "id": "51",
+    "word": "how",
+    "translation": "cómo",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 51
+  },
+  {
+    "id": "52",
+    "word": "what",
+    "translation": "qué",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 52
+  },
+  {
+    "id": "53",
+    "word": "who",
+    "translation": "quién",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 53
+  },
+  {
+    "id": "54",
+    "word": "which",
+    "translation": "cuál",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 54
+  },
+  {
+    "id": "55",
+    "word": "because",
+    "translation": "porque",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 55
+  },
+  {
+    "id": "56",
+    "word": "but",
+    "translation": "pero",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 56
+  },
+  {
+    "id": "57",
+    "word": "and",
+    "translation": "y",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 57
+  },
+  {
+    "id": "58",
+    "word": "or",
+    "translation": "o",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 58
+  },
+  {
+    "id": "59",
+    "word": "with",
+    "translation": "con",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 59
+  },
+  {
+    "id": "60",
+    "word": "without",
+    "translation": "sin",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 60
+  },
+  {
+    "id": "61",
+    "word": "for",
+    "translation": "para",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 61
+  },
+  {
+    "id": "62",
+    "word": "from",
+    "translation": "de",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 62
+  },
+  {
+    "id": "63",
+    "word": "to",
+    "translation": "a",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 63
+  },
+  {
+    "id": "64",
+    "word": "in",
+    "translation": "en",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 64
+  },
+  {
+    "id": "65",
+    "word": "on",
+    "translation": "sobre",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 65
+  },
+  {
+    "id": "66",
+    "word": "at",
+    "translation": "en",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 66
+  },
+  {
+    "id": "67",
+    "word": "by",
+    "translation": "por",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 67
+  },
+  {
+    "id": "68",
+    "word": "more",
+    "translation": "más",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 68
+  },
+  {
+    "id": "69",
+    "word": "less",
+    "translation": "menos",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 69
+  },
+  {
+    "id": "70",
+    "word": "very",
+    "translation": "muy",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 70
+  },
+  {
+    "id": "71",
+    "word": "too",
+    "translation": "también",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 71
+  },
+  {
+    "id": "72",
+    "word": "also",
+    "translation": "también",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 72
+  },
+  {
+    "id": "73",
+    "word": "not",
+    "translation": "no",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 73
+  },
+  {
+    "id": "74",
+    "word": "never",
+    "translation": "nunca",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 74
+  },
+  {
+    "id": "75",
+    "word": "always",
+    "translation": "siempre",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 75
+  },
+  {
+    "id": "76",
+    "word": "sometimes",
+    "translation": "a veces",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 76
+  },
+  {
+    "id": "77",
+    "word": "now",
+    "translation": "ahora",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 77
+  },
+  {
+    "id": "78",
+    "word": "later",
+    "translation": "después",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 78
+  },
+  {
+    "id": "79",
+    "word": "before",
+    "translation": "antes",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 79
+  },
+  {
+    "id": "80",
+    "word": "after",
+    "translation": "después",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 80
+  },
+  {
+    "id": "81",
+    "word": "here",
+    "translation": "aquí",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 81
+  },
+  {
+    "id": "82",
+    "word": "there",
+    "translation": "allí",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 82
+  },
+  {
+    "id": "83",
+    "word": "everywhere",
+    "translation": "en todas partes",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 83
+  },
+  {
+    "id": "84",
+    "word": "somewhere",
+    "translation": "en algún lugar",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 84
+  },
+  {
+    "id": "85",
+    "word": "nowhere",
+    "translation": "en ningún lugar",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 85
+  },
+  {
+    "id": "86",
+    "word": "all",
+    "translation": "todo",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 86
+  },
+  {
+    "id": "87",
+    "word": "some",
+    "translation": "algunos",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 87
+  },
+  {
+    "id": "88",
+    "word": "many",
+    "translation": "muchos",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 88
+  },
+  {
+    "id": "89",
+    "word": "few",
+    "translation": "pocos",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 89
+  },
+  {
+    "id": "90",
+    "word": "none",
+    "translation": "ninguno",
+    "difficulty": 1,
+    "category": "basic",
+    "frequency_rank": 90
+  },
+  {
+    "id": "91",
+    "word": "zero",
+    "translation": "cero",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 91
+  },
+  {
+    "id": "92",
+    "word": "one",
+    "translation": "uno",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 92
+  },
+  {
+    "id": "93",
+    "word": "two",
+    "translation": "dos",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 93
+  },
+  {
+    "id": "94",
+    "word": "three",
+    "translation": "tres",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 94
+  },
+  {
+    "id": "95",
+    "word": "four",
+    "translation": "cuatro",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 95
+  },
+  {
+    "id": "96",
+    "word": "five",
+    "translation": "cinco",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 96
+  },
+  {
+    "id": "97",
+    "word": "six",
+    "translation": "seis",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 97
+  },
+  {
+    "id": "98",
+    "word": "seven",
+    "translation": "siete",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 98
+  },
+  {
+    "id": "99",
+    "word": "eight",
+    "translation": "ocho",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 99
+  },
+  {
+    "id": "100",
+    "word": "nine",
+    "translation": "nueve",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 100
+  },
+  {
+    "id": "101",
+    "word": "ten",
+    "translation": "diez",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 101
+  },
+  {
+    "id": "102",
+    "word": "eleven",
+    "translation": "once",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 102
+  },
+  {
+    "id": "103",
+    "word": "twelve",
+    "translation": "doce",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 103
+  },
+  {
+    "id": "104",
+    "word": "thirteen",
+    "translation": "trece",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 104
+  },
+  {
+    "id": "105",
+    "word": "fourteen",
+    "translation": "catorce",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 105
+  },
+  {
+    "id": "106",
+    "word": "fifteen",
+    "translation": "quince",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 106
+  },
+  {
+    "id": "107",
+    "word": "sixteen",
+    "translation": "dieciséis",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 107
+  },
+  {
+    "id": "108",
+    "word": "seventeen",
+    "translation": "diecisiete",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 108
+  },
+  {
+    "id": "109",
+    "word": "eighteen",
+    "translation": "dieciocho",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 109
+  },
+  {
+    "id": "110",
+    "word": "nineteen",
+    "translation": "diecinueve",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 110
+  },
+  {
+    "id": "111",
+    "word": "twenty",
+    "translation": "veinte",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 111
+  },
+  {
+    "id": "112",
+    "word": "thirty",
+    "translation": "treinta",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 112
+  },
+  {
+    "id": "113",
+    "word": "forty",
+    "translation": "cuarenta",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 113
+  },
+  {
+    "id": "114",
+    "word": "fifty",
+    "translation": "cincuenta",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 114
+  },
+  {
+    "id": "115",
+    "word": "sixty",
+    "translation": "sesenta",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 115
+  },
+  {
+    "id": "116",
+    "word": "seventy",
+    "translation": "setenta",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 116
+  },
+  {
+    "id": "117",
+    "word": "eighty",
+    "translation": "ochenta",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 117
+  },
+  {
+    "id": "118",
+    "word": "ninety",
+    "translation": "noventa",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 118
+  },
+  {
+    "id": "119",
+    "word": "hundred",
+    "translation": "cien",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 119
+  },
+  {
+    "id": "120",
+    "word": "thousand",
+    "translation": "mil",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 120
+  },
+  {
+    "id": "121",
+    "word": "million",
+    "translation": "millón",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 121
+  },
+  {
+    "id": "122",
+    "word": "first",
+    "translation": "primero",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 122
+  },
+  {
+    "id": "123",
+    "word": "second",
+    "translation": "segundo",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 123
+  },
+  {
+    "id": "124",
+    "word": "third",
+    "translation": "tercero",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 124
+  },
+  {
+    "id": "125",
+    "word": "last",
+    "translation": "último",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 125
+  },
+  {
+    "id": "126",
+    "word": "half",
+    "translation": "mitad",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 126
+  },
+  {
+    "id": "127",
+    "word": "quarter",
+    "translation": "cuarto",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 127
+  },
+  {
+    "id": "128",
+    "word": "plus",
+    "translation": "más",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 128
+  },
+  {
+    "id": "129",
+    "word": "minus",
+    "translation": "menos",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 129
+  },
+  {
+    "id": "130",
+    "word": "equals",
+    "translation": "igual",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 130
+  },
+  {
+    "id": "131",
+    "word": "number",
+    "translation": "número",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 131
+  },
+  {
+    "id": "132",
+    "word": "count",
+    "translation": "contar",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 132
+  },
+  {
+    "id": "133",
+    "word": "add",
+    "translation": "sumar",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 133
+  },
+  {
+    "id": "134",
+    "word": "subtract",
+    "translation": "restar",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 134
+  },
+  {
+    "id": "135",
+    "word": "multiply",
+    "translation": "multiplicar",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 135
+  },
+  {
+    "id": "136",
+    "word": "divide",
+    "translation": "dividir",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 136
+  },
+  {
+    "id": "137",
+    "word": "percent",
+    "translation": "por ciento",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 137
+  },
+  {
+    "id": "138",
+    "word": "double",
+    "translation": "doble",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 138
+  },
+  {
+    "id": "139",
+    "word": "triple",
+    "translation": "triple",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 139
+  },
+  {
+    "id": "140",
+    "word": "dozen",
+    "translation": "docena",
+    "difficulty": 1,
+    "category": "numbers_math",
+    "frequency_rank": 140
+  },
+  {
+    "id": "141",
+    "word": "time",
+    "translation": "tiempo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 141
+  },
+  {
+    "id": "142",
+    "word": "hour",
+    "translation": "hora",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 142
+  },
+  {
+    "id": "143",
+    "word": "minute",
+    "translation": "minuto",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 143
+  },
+  {
+    "id": "144",
+    "word": "second",
+    "translation": "segundo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 144
+  },
+  {
+    "id": "145",
+    "word": "day",
+    "translation": "día",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 145
+  },
+  {
+    "id": "146",
+    "word": "week",
+    "translation": "semana",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 146
+  },
+  {
+    "id": "147",
+    "word": "month",
+    "translation": "mes",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 147
+  },
+  {
+    "id": "148",
+    "word": "year",
+    "translation": "año",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 148
+  },
+  {
+    "id": "149",
+    "word": "today",
+    "translation": "hoy",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 149
+  },
+  {
+    "id": "150",
+    "word": "tomorrow",
+    "translation": "mañana",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 150
+  },
+  {
+    "id": "151",
+    "word": "yesterday",
+    "translation": "ayer",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 151
+  },
+  {
+    "id": "152",
+    "word": "Monday",
+    "translation": "lunes",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 152
+  },
+  {
+    "id": "153",
+    "word": "Tuesday",
+    "translation": "martes",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 153
+  },
+  {
+    "id": "154",
+    "word": "Wednesday",
+    "translation": "miércoles",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 154
+  },
+  {
+    "id": "155",
+    "word": "Thursday",
+    "translation": "jueves",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 155
+  },
+  {
+    "id": "156",
+    "word": "Friday",
+    "translation": "viernes",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 156
+  },
+  {
+    "id": "157",
+    "word": "Saturday",
+    "translation": "sábado",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 157
+  },
+  {
+    "id": "158",
+    "word": "Sunday",
+    "translation": "domingo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 158
+  },
+  {
+    "id": "159",
+    "word": "January",
+    "translation": "enero",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 159
+  },
+  {
+    "id": "160",
+    "word": "February",
+    "translation": "febrero",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 160
+  },
+  {
+    "id": "161",
+    "word": "March",
+    "translation": "marzo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 161
+  },
+  {
+    "id": "162",
+    "word": "April",
+    "translation": "abril",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 162
+  },
+  {
+    "id": "163",
+    "word": "May",
+    "translation": "mayo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 163
+  },
+  {
+    "id": "164",
+    "word": "June",
+    "translation": "junio",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 164
+  },
+  {
+    "id": "165",
+    "word": "July",
+    "translation": "julio",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 165
+  },
+  {
+    "id": "166",
+    "word": "August",
+    "translation": "agosto",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 166
+  },
+  {
+    "id": "167",
+    "word": "September",
+    "translation": "septiembre",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 167
+  },
+  {
+    "id": "168",
+    "word": "October",
+    "translation": "octubre",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 168
+  },
+  {
+    "id": "169",
+    "word": "November",
+    "translation": "noviembre",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 169
+  },
+  {
+    "id": "170",
+    "word": "December",
+    "translation": "diciembre",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 170
+  },
+  {
+    "id": "171",
+    "word": "spring",
+    "translation": "primavera",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 171
+  },
+  {
+    "id": "172",
+    "word": "summer",
+    "translation": "verano",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 172
+  },
+  {
+    "id": "173",
+    "word": "autumn",
+    "translation": "otoño",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 173
+  },
+  {
+    "id": "174",
+    "word": "winter",
+    "translation": "invierno",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 174
+  },
+  {
+    "id": "175",
+    "word": "morning",
+    "translation": "mañana",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 175
+  },
+  {
+    "id": "176",
+    "word": "afternoon",
+    "translation": "tarde",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 176
+  },
+  {
+    "id": "177",
+    "word": "evening",
+    "translation": "noche",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 177
+  },
+  {
+    "id": "178",
+    "word": "night",
+    "translation": "noche",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 178
+  },
+  {
+    "id": "179",
+    "word": "midnight",
+    "translation": "medianoche",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 179
+  },
+  {
+    "id": "180",
+    "word": "noon",
+    "translation": "mediodía",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 180
+  },
+  {
+    "id": "181",
+    "word": "early",
+    "translation": "temprano",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 181
+  },
+  {
+    "id": "182",
+    "word": "late",
+    "translation": "tarde",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 182
+  },
+  {
+    "id": "183",
+    "word": "often",
+    "translation": "a menudo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 183
+  },
+  {
+    "id": "184",
+    "word": "rarely",
+    "translation": "rara vez",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 184
+  },
+  {
+    "id": "185",
+    "word": "daily",
+    "translation": "diario",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 185
+  },
+  {
+    "id": "186",
+    "word": "weekly",
+    "translation": "semanal",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 186
+  },
+  {
+    "id": "187",
+    "word": "monthly",
+    "translation": "mensual",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 187
+  },
+  {
+    "id": "188",
+    "word": "yearly",
+    "translation": "anual",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 188
+  },
+  {
+    "id": "189",
+    "word": "century",
+    "translation": "siglo",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 189
+  },
+  {
+    "id": "190",
+    "word": "decade",
+    "translation": "década",
+    "difficulty": 1,
+    "category": "time",
+    "frequency_rank": 190
+  },
+  {
+    "id": "191",
+    "word": "color",
+    "translation": "color",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 191
+  },
+  {
+    "id": "192",
+    "word": "red",
+    "translation": "rojo",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 192
+  },
+  {
+    "id": "193",
+    "word": "blue",
+    "translation": "azul",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 193
+  },
+  {
+    "id": "194",
+    "word": "green",
+    "translation": "verde",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 194
+  },
+  {
+    "id": "195",
+    "word": "yellow",
+    "translation": "amarillo",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 195
+  },
+  {
+    "id": "196",
+    "word": "orange",
+    "translation": "naranja",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 196
+  },
+  {
+    "id": "197",
+    "word": "purple",
+    "translation": "morado",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 197
+  },
+  {
+    "id": "198",
+    "word": "pink",
+    "translation": "rosa",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 198
+  },
+  {
+    "id": "199",
+    "word": "brown",
+    "translation": "marrón",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 199
+  },
+  {
+    "id": "200",
+    "word": "black",
+    "translation": "negro",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 200
+  },
+  {
+    "id": "201",
+    "word": "white",
+    "translation": "blanco",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 201
+  },
+  {
+    "id": "202",
+    "word": "gray",
+    "translation": "gris",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 202
+  },
+  {
+    "id": "203",
+    "word": "silver",
+    "translation": "plateado",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 203
+  },
+  {
+    "id": "204",
+    "word": "gold",
+    "translation": "dorado",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 204
+  },
+  {
+    "id": "205",
+    "word": "light",
+    "translation": "claro",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 205
+  },
+  {
+    "id": "206",
+    "word": "dark",
+    "translation": "oscuro",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 206
+  },
+  {
+    "id": "207",
+    "word": "bright",
+    "translation": "brillante",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 207
+  },
+  {
+    "id": "208",
+    "word": "pale",
+    "translation": "pálido",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 208
+  },
+  {
+    "id": "209",
+    "word": "beige",
+    "translation": "beige",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 209
+  },
+  {
+    "id": "210",
+    "word": "turquoise",
+    "translation": "turquesa",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 210
+  },
+  {
+    "id": "211",
+    "word": "violet",
+    "translation": "violeta",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 211
+  },
+  {
+    "id": "212",
+    "word": "maroon",
+    "translation": "granate",
+    "difficulty": 1,
+    "category": "colors",
+    "frequency_rank": 212
+  },
+  {
+    "id": "213",
+    "word": "family",
+    "translation": "familia",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 213
+  },
+  {
+    "id": "214",
+    "word": "mother",
+    "translation": "madre",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 214
+  },
+  {
+    "id": "215",
+    "word": "father",
+    "translation": "padre",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 215
+  },
+  {
+    "id": "216",
+    "word": "mom",
+    "translation": "mamá",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 216
+  },
+  {
+    "id": "217",
+    "word": "dad",
+    "translation": "papá",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 217
+  },
+  {
+    "id": "218",
+    "word": "parents",
+    "translation": "padres",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 218
+  },
+  {
+    "id": "219",
+    "word": "son",
+    "translation": "hijo",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 219
+  },
+  {
+    "id": "220",
+    "word": "daughter",
+    "translation": "hija",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 220
+  },
+  {
+    "id": "221",
+    "word": "brother",
+    "translation": "hermano",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 221
+  },
+  {
+    "id": "222",
+    "word": "sister",
+    "translation": "hermana",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 222
+  },
+  {
+    "id": "223",
+    "word": "grandfather",
+    "translation": "abuelo",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 223
+  },
+  {
+    "id": "224",
+    "word": "grandmother",
+    "translation": "abuela",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 224
+  },
+  {
+    "id": "225",
+    "word": "grandparents",
+    "translation": "abuelos",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 225
+  },
+  {
+    "id": "226",
+    "word": "uncle",
+    "translation": "tío",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 226
+  },
+  {
+    "id": "227",
+    "word": "aunt",
+    "translation": "tía",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 227
+  },
+  {
+    "id": "228",
+    "word": "cousin",
+    "translation": "primo",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 228
+  },
+  {
+    "id": "229",
+    "word": "nephew",
+    "translation": "sobrino",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 229
+  },
+  {
+    "id": "230",
+    "word": "niece",
+    "translation": "sobrina",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 230
+  },
+  {
+    "id": "231",
+    "word": "husband",
+    "translation": "esposo",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 231
+  },
+  {
+    "id": "232",
+    "word": "wife",
+    "translation": "esposa",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 232
+  },
+  {
+    "id": "233",
+    "word": "child",
+    "translation": "niño",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 233
+  },
+  {
+    "id": "234",
+    "word": "children",
+    "translation": "niños",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 234
+  },
+  {
+    "id": "235",
+    "word": "baby",
+    "translation": "bebé",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 235
+  },
+  {
+    "id": "236",
+    "word": "boy",
+    "translation": "niño",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 236
+  },
+  {
+    "id": "237",
+    "word": "girl",
+    "translation": "niña",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 237
+  },
+  {
+    "id": "238",
+    "word": "man",
+    "translation": "hombre",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 238
+  },
+  {
+    "id": "239",
+    "word": "woman",
+    "translation": "mujer",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 239
+  },
+  {
+    "id": "240",
+    "word": "person",
+    "translation": "persona",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 240
+  },
+  {
+    "id": "241",
+    "word": "people",
+    "translation": "gente",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 241
+  },
+  {
+    "id": "242",
+    "word": "friend",
+    "translation": "amigo",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 242
+  },
+  {
+    "id": "243",
+    "word": "boyfriend",
+    "translation": "novio",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 243
+  },
+  {
+    "id": "244",
+    "word": "girlfriend",
+    "translation": "novia",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 244
+  },
+  {
+    "id": "245",
+    "word": "partner",
+    "translation": "pareja",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 245
+  },
+  {
+    "id": "246",
+    "word": "spouse",
+    "translation": "cónyuge",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 246
+  },
+  {
+    "id": "247",
+    "word": "relative",
+    "translation": "pariente",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 247
+  },
+  {
+    "id": "248",
+    "word": "ancestor",
+    "translation": "antepasado",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 248
+  },
+  {
+    "id": "249",
+    "word": "descendant",
+    "translation": "descendiente",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 249
+  },
+  {
+    "id": "250",
+    "word": "twins",
+    "translation": "gemelos",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 250
+  },
+  {
+    "id": "251",
+    "word": "sibling",
+    "translation": "hermano",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 251
+  },
+  {
+    "id": "252",
+    "word": "stepfather",
+    "translation": "padrastro",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 252
+  },
+  {
+    "id": "253",
+    "word": "stepmother",
+    "translation": "madrastra",
+    "difficulty": 1,
+    "category": "family",
+    "frequency_rank": 253
+  }
+]

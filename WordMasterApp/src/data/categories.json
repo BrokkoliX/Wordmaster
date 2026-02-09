@@ -1,0 +1,366 @@
+[
+  {
+    "id": "greetings",
+    "name": "Greetings & Basics",
+    "icon": "👋",
+    "color": "#FF6B6B",
+    "description": "Essential phrases for daily communication"
+  },
+  {
+    "id": "food_drink",
+    "name": "Food & Drink",
+    "icon": "🍽️",
+    "color": "#4ECDC4",
+    "description": "Words related to food, drinks, and dining"
+  },
+  {
+    "id": "home_family",
+    "name": "Home & Family",
+    "icon": "🏠",
+    "color": "#95E1D3",
+    "description": "House, furniture, and family members"
+  },
+  {
+    "id": "clothing",
+    "name": "Clothing & Fashion",
+    "icon": "👗",
+    "color": "#F38181",
+    "description": "Clothes, accessories, and fashion items"
+  },
+  {
+    "id": "transport",
+    "name": "Transportation",
+    "icon": "🚗",
+    "color": "#AA96DA",
+    "description": "Vehicles and travel methods"
+  },
+  {
+    "id": "health",
+    "name": "Health & Body",
+    "icon": "🏥",
+    "color": "#FCBAD3",
+    "description": "Medical terms and body parts"
+  },
+  {
+    "id": "work_business",
+    "name": "Work & Business",
+    "icon": "💼",
+    "color": "#FFFFD2",
+    "description": "Office, jobs, and professional vocabulary"
+  },
+  {
+    "id": "education",
+    "name": "Education & School",
+    "icon": "🏫",
+    "color": "#A8D8EA",
+    "description": "School, learning, and academic terms"
+  },
+  {
+    "id": "places",
+    "name": "City & Places",
+    "icon": "🌆",
+    "color": "#FFD97D",
+    "description": "Buildings, locations, and landmarks"
+  },
+  {
+    "id": "time",
+    "name": "Time & Calendar",
+    "icon": "⏰",
+    "color": "#EE9CA7",
+    "description": "Days, months, seasons, and time expressions"
+  },
+  {
+    "id": "weather",
+    "name": "Weather & Climate",
+    "icon": "🌤️",
+    "color": "#9FACE6",
+    "description": "Weather conditions and natural phenomena"
+  },
+  {
+    "id": "hobbies",
+    "name": "Hobbies & Entertainment",
+    "icon": "🎮",
+    "color": "#FF8B94",
+    "description": "Leisure activities and pastimes"
+  },
+  {
+    "id": "sports",
+    "name": "Sports & Fitness",
+    "icon": "🏋️",
+    "color": "#FFD6A5",
+    "description": "Athletic activities and exercise"
+  },
+  {
+    "id": "arts_culture",
+    "name": "Arts & Culture",
+    "icon": "🎨",
+    "color": "#CAFFBF",
+    "description": "Art, music, theater, and cultural activities"
+  },
+  {
+    "id": "music",
+    "name": "Music",
+    "icon": "🎵",
+    "color": "#9BF6FF",
+    "description": "Musical instruments and terms"
+  },
+  {
+    "id": "reading",
+    "name": "Reading & Writing",
+    "icon": "📚",
+    "color": "#BDB2FF",
+    "description": "Books, literature, and writing"
+  },
+  {
+    "id": "cooking",
+    "name": "Cooking",
+    "icon": "🍳",
+    "color": "#FFC6FF",
+    "description": "Kitchen equipment and cooking methods"
+  },
+  {
+    "id": "shopping",
+    "name": "Shopping",
+    "icon": "🛍️",
+    "color": "#FEE440",
+    "description": "Stores, purchases, and commerce"
+  },
+  {
+    "id": "money_finance",
+    "name": "Money & Finance",
+    "icon": "💰",
+    "color": "#00BBF9",
+    "description": "Currency, banking, and financial terms"
+  },
+  {
+    "id": "housing",
+    "name": "Housing",
+    "icon": "🏡",
+    "color": "#00F5FF",
+    "description": "Types of homes and living spaces"
+  },
+  {
+    "id": "tools",
+    "name": "Tools & Equipment",
+    "icon": "🔧",
+    "color": "#FFB5E8",
+    "description": "Hardware and repair items"
+  },
+  {
+    "id": "travel_tourism",
+    "name": "Travel & Tourism",
+    "icon": "✈️",
+    "color": "#B9FBC0",
+    "description": "Essential vocabulary for travelers"
+  },
+  {
+    "id": "hotels",
+    "name": "Hotels & Accommodation",
+    "icon": "🏨",
+    "color": "#98F5E1",
+    "description": "Lodging and hotel services"
+  },
+  {
+    "id": "directions",
+    "name": "Directions & Navigation",
+    "icon": "🗺️",
+    "color": "#8EECF5",
+    "description": "Finding your way around"
+  },
+  {
+    "id": "restaurants",
+    "name": "Restaurants & Dining",
+    "icon": "🍴",
+    "color": "#90DBF4",
+    "description": "Eating out and ordering food"
+  },
+  {
+    "id": "sightseeing",
+    "name": "Sightseeing",
+    "icon": "🏛️",
+    "color": "#A3C4F3",
+    "description": "Tourist attractions and activities"
+  },
+  {
+    "id": "geography",
+    "name": "Geography",
+    "icon": "🌍",
+    "color": "#B9AFFF",
+    "description": "Countries, continents, and landforms"
+  },
+  {
+    "id": "common_phrases",
+    "name": "Common Phrases",
+    "icon": "🗣️",
+    "color": "#D0BFFF",
+    "description": "Useful everyday expressions"
+  },
+  {
+    "id": "people",
+    "name": "People & Relationships",
+    "icon": "👥",
+    "color": "#FEC89A",
+    "description": "Social connections and roles"
+  },
+  {
+    "id": "conversation",
+    "name": "Conversation",
+    "icon": "💬",
+    "color": "#FFD5C2",
+    "description": "Dialogue and communication skills"
+  },
+  {
+    "id": "events",
+    "name": "Events & Celebrations",
+    "icon": "🎉",
+    "color": "#F8E6B2",
+    "description": "Parties, festivals, and special occasions"
+  },
+  {
+    "id": "emotions",
+    "name": "Emotions & Feelings",
+    "icon": "❤️",
+    "color": "#FDE4CF",
+    "description": "Expressing how you feel"
+  },
+  {
+    "id": "politeness",
+    "name": "Greetings & Politeness",
+    "icon": "🤝",
+    "color": "#FFCFD2",
+    "description": "Polite expressions and etiquette"
+  },
+  {
+    "id": "family",
+    "name": "Family",
+    "icon": "👨‍👩‍👧",
+    "color": "#F1C0E8",
+    "description": "Family members and relations"
+  },
+  {
+    "id": "friendship",
+    "name": "Friendship",
+    "icon": "👫",
+    "color": "#CFBAF0",
+    "description": "Friends and social bonds"
+  },
+  {
+    "id": "romance",
+    "name": "Romance & Dating",
+    "icon": "💑",
+    "color": "#A3C4F3",
+    "description": "Love and romantic relationships"
+  },
+  {
+    "id": "nature",
+    "name": "Nature & Environment",
+    "icon": "🌳",
+    "color": "#8EECF5",
+    "description": "Natural world and ecology"
+  },
+  {
+    "id": "animals",
+    "name": "Animals",
+    "icon": "🐕",
+    "color": "#98F5E1",
+    "description": "Wild and domestic creatures"
+  },
+  {
+    "id": "plants",
+    "name": "Plants & Flowers",
+    "icon": "🌺",
+    "color": "#B9FBC0",
+    "description": "Flora and vegetation"
+  },
+  {
+    "id": "water_ocean",
+    "name": "Water & Ocean",
+    "icon": "🌊",
+    "color": "#90DBF4",
+    "description": "Marine life and aquatic terms"
+  },
+  {
+    "id": "science",
+    "name": "Science",
+    "icon": "🔬",
+    "color": "#FDE4CF",
+    "description": "Scientific concepts and terminology"
+  },
+  {
+    "id": "technology",
+    "name": "Technology",
+    "icon": "💻",
+    "color": "#CAFFBF",
+    "description": "Computers and digital devices"
+  },
+  {
+    "id": "digital",
+    "name": "Digital & Internet",
+    "icon": "📱",
+    "color": "#9BF6FF",
+    "description": "Online and social media vocabulary"
+  },
+  {
+    "id": "thinking",
+    "name": "Thinking & Ideas",
+    "icon": "🧠",
+    "color": "#BDB2FF",
+    "description": "Mental processes and concepts"
+  },
+  {
+    "id": "numbers_math",
+    "name": "Numbers & Math",
+    "icon": "📊",
+    "color": "#FFC6FF",
+    "description": "Numerical and mathematical terms"
+  },
+  {
+    "id": "law_politics",
+    "name": "Law & Politics",
+    "icon": "⚖️",
+    "color": "#FFFFFC",
+    "description": "Government and legal vocabulary"
+  },
+  {
+    "id": "colors",
+    "name": "Colors",
+    "icon": "🌈",
+    "color": "#FFD6A5",
+    "description": "Color names and shades"
+  },
+  {
+    "id": "shapes",
+    "name": "Shapes & Sizes",
+    "icon": "📏",
+    "color": "#FDFFB6",
+    "description": "Geometric forms and measurements"
+  },
+  {
+    "id": "verbs",
+    "name": "Action Verbs",
+    "icon": "⚡",
+    "color": "#CAFFBF",
+    "description": "Common action words"
+  },
+  {
+    "id": "adjectives",
+    "name": "Descriptive Adjectives",
+    "icon": "✨",
+    "color": "#9BF6FF",
+    "description": "Words that describe things"
+  },
+  {
+    "id": "objects",
+    "name": "Common Objects",
+    "icon": "📦",
+    "color": "#A0C4FF",
+    "description": "Everyday items and things"
+  },
+  {
+    "id": "basic",
+    "name": "Basic Essentials",
+    "icon": "⭐",
+    "color": "#BDB2FF",
+    "description": "Fundamental words every learner needs"
+  }
+]
