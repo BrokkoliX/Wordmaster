@@ -70,7 +70,7 @@ export const importAllWords = async () => {
           imported++;
           } catch (error) {
             console.error(`Error importing word ${word.id}:`, error.message);
-            skipped++;\n          }
+            skipped++;          }
         }
         
         await db.execAsync('COMMIT');
