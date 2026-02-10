@@ -169,7 +169,13 @@ export const getWordsDueForReview = async (limit = 20) => {
     
     if (words.length === 0) {
       console.log(`⚠️  No words available for ${knownLanguage} → ${learningLanguage} at ${cefrLevel} level`);
-      console.log(`   Available: en → es only (for now)`);
+      console.log(`   Try checking if words exist in database for this language pair`);
+      // Debug: Check total words for this pair
+      const totalWords = await db.getFirstAsync(
+        'SELECT COUNT(*) as count FROM words WHERE source_lang = ? AND target_lang = ?',
+        [knownLanguage, learningLanguage]
+      );
+      console.log(`   Total words in DB for ${knownLanguage}→${learningLanguage}: ${totalWords?.count || 0}`);
     }
     
     return words;
