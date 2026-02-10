@@ -24,8 +24,7 @@ const LANGUAGES = [
   { code: 'es', name: 'Spanish', flag: '🇪🇸' },
   { code: 'fr', name: 'French', flag: '🇫🇷' },
   { code: 'de', name: 'German', flag: '🇩🇪' },
-  { code: 'it', name: 'Italian', flag: '🇮🇹' },
-  { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
+  { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
 ];
 
 export default function SettingsScreen({ navigation }) {
@@ -69,32 +68,16 @@ export default function SettingsScreen({ navigation }) {
       await AsyncStorage.setItem('learningLanguage', learningLanguage);
       await AsyncStorage.setItem('cefrLevel', cefrLevel);
 
-      // Check if this language pair is available
-      const isAvailable = knownLanguage === 'en' && learningLanguage === 'es';
-      
-      if (!isAvailable) {
-        Alert.alert(
-          'Language Pair Not Available Yet',
-          `Sorry! We currently only have English → Spanish available.\n\nYour settings have been saved for future use, but for now please choose:\n• I speak: English 🇬🇧\n• I want to learn: Spanish 🇪🇸`,
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Home')
-            }
-          ]
-        );
-      } else {
-        Alert.alert(
-          'Settings Saved!',
-          `You're learning ${LANGUAGES.find(l => l.code === learningLanguage)?.name} at ${cefrLevel} level`,
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Home')
-            }
-          ]
-        );
-      }
+      Alert.alert(
+        'Settings Saved!',
+        `You're learning ${LANGUAGES.find(l => l.code === learningLanguage)?.name} at ${cefrLevel} level`,
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Home')
+          }
+        ]
+      );
     } catch (error) {
       console.error('Error saving settings:', error);
       Alert.alert('Error', 'Could not save settings');
@@ -123,11 +106,11 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Info Banner */}
         <View style={styles.infoBanner}>
-          <Text style={styles.infoIcon}>ℹ️</Text>
+          <Text style={styles.infoIcon}>🌍</Text>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Currently Available:</Text>
-            <Text style={styles.infoText}>English 🇬🇧 → Spanish 🇪🇸 (6,423 words)</Text>
-            <Text style={styles.infoSubtext}>More language pairs coming soon!</Text>
+            <Text style={styles.infoTitle}>252,000+ Words Available!</Text>
+            <Text style={styles.infoText}>14 language pairs across 4 languages</Text>
+            <Text style={styles.infoSubtext}>English, Spanish, French, German, Hungarian</Text>
           </View>
         </View>
 
