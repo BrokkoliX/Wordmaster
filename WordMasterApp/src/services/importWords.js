@@ -4,20 +4,31 @@
  */
 
 import * as SQLite from 'expo-sqlite';
-import wordsSpanish from '../data/words_translated.json';
-import wordsFrench from '../data/words_french.json';
-import wordsGerman from '../data/words_german.json';
-import wordsHungarian from '../data/words_hungarian.json';
+import wordsEnToEs from '../data/words_translated.json';
+import wordsEnToFr from '../data/words_french.json';
+import wordsEnToDe from '../data/words_german.json';
+import wordsEnToHu from '../data/words_hungarian.json';
+import wordsEsToEn from '../data/words_spanish_to_english.json';
+import wordsFrToEn from '../data/words_french_to_english.json';
+import wordsDeToEn from '../data/words_german_to_english.json';
+import wordsHuToEn from '../data/words_hungarian_to_english.json';
 
 const DB_NAME = 'wordmaster.db';
 const db = SQLite.openDatabaseSync(DB_NAME);
 
-// All language datasets
+// All language datasets (bidirectional)
+// NOTE: Only English-Spanish has real translations currently
+// Other languages have placeholder translations and need translation API
 const ALL_LANGUAGES = [
-  { name: 'Spanish', data: wordsSpanish, flag: '🇪🇸' },
-  { name: 'French', data: wordsFrench, flag: '🇫🇷' },
-  { name: 'German', data: wordsGerman, flag: '🇩🇪' },
-  { name: 'Hungarian', data: wordsHungarian, flag: '🇭🇺' }
+  { name: 'English → Spanish', data: wordsEnToEs, flag: '🇬🇧→🇪🇸' },
+  { name: 'Spanish → English', data: wordsEsToEn, flag: '🇪🇸→🇬🇧' },
+  // Disabled until translation API is integrated:
+  // { name: 'English → French', data: wordsEnToFr, flag: '🇬🇧→🇫🇷' },
+  // { name: 'English → German', data: wordsEnToDe, flag: '🇬🇧→🇩🇪' },
+  // { name: 'English → Hungarian', data: wordsEnToHu, flag: '🇬🇧→🇭🇺' },
+  // { name: 'French → English', data: wordsFrToEn, flag: '🇫🇷→🇬🇧' },
+  // { name: 'German → English', data: wordsDeToEn, flag: '🇩🇪→🇬🇧' },
+  // { name: 'Hungarian → English', data: wordsHuToEn, flag: '🇭🇺→🇬🇧' }
 ];
 
 export const importAllWords = async () => {

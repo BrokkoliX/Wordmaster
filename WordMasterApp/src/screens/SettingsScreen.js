@@ -22,9 +22,10 @@ const CEFR_LEVELS = [
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-  { code: 'fr', name: 'French', flag: '🇫🇷' },
-  { code: 'de', name: 'German', flag: '🇩🇪' },
-  { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
+  // Note: French, German, Hungarian temporarily disabled - need translation API
+  // { code: 'fr', name: 'French', flag: '🇫🇷' },
+  // { code: 'de', name: 'German', flag: '🇩🇪' },
+  // { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
 ];
 
 export default function SettingsScreen({ navigation }) {
@@ -106,11 +107,11 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Info Banner */}
         <View style={styles.infoBanner}>
-          <Text style={styles.infoIcon}>🌍</Text>
+          <Text style={styles.infoIcon}>📚</Text>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>252,000+ Words Available!</Text>
-            <Text style={styles.infoText}>14 language pairs across 4 languages</Text>
-            <Text style={styles.infoSubtext}>English, Spanish, French, German, Hungarian</Text>
+            <Text style={styles.infoTitle}>Currently Available:</Text>
+            <Text style={styles.infoText}>English ↔ Spanish (60,000 words)</Text>
+            <Text style={styles.infoSubtext}>More languages coming soon with translation API!</Text>
           </View>
         </View>
 
