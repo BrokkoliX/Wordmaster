@@ -211,7 +211,7 @@ export default function LearningScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error finishing session:', error);
-      navigation.navigate('Home');
+      navigation.navigate('Home', { screen: 'Dashboard' });
     }
   };
   
@@ -268,7 +268,7 @@ export default function LearningScreen({ navigation }) {
           <Text style={styles.emptyText}>Check back later or add new words.</Text>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('Home', { screen: 'Dashboard' })}
           >
             <Text style={styles.backButtonText}>Back to Home</Text>
           </TouchableOpacity>

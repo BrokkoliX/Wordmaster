@@ -104,7 +104,7 @@ export default function SettingsScreen({ navigation }) {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Home')
+            onPress: () => navigation.navigate('Home', { screen: 'Dashboard' })
           }
         ]
       );

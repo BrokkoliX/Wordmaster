@@ -196,7 +196,7 @@ export default function TestScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.buttonNav}
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('MainApp', { screen: 'Home', params: { screen: 'Dashboard' } })}
           >
             <Text style={styles.buttonText}>🏠 Back to Home</Text>
           </TouchableOpacity>

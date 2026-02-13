@@ -6,14 +6,9 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { initDatabase } from './src/services/database';
-import HomeScreen from './src/screens/HomeScreen';
-import LearningScreen from './src/screens/LearningScreen';
-import SummaryScreen from './src/screens/SummaryScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
-import AchievementsScreen from './src/screens/AchievementsScreen';
+import MainTabs from './src/navigation/MainTabs';
 import TestScreen from './src/screens/TestScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
-import HelpScreen from './src/screens/HelpScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
@@ -65,73 +60,32 @@ export default function App() {
     <ErrorBoundary>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName={showOnboarding ? "Onboarding" : "Home"}
+          initialRouteName={showOnboarding ? "Onboarding" : "MainApp"}
           screenOptions={{
-            headerStyle: {
-              backgroundColor: '#3498DB',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
+            headerShown: false,
           }}
         >
           <Stack.Screen
             name="Onboarding"
             component={OnboardingScreen}
-            options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Settings"
-            component={SettingsScreen}
-            options={{
-              title: 'Settings',
-              headerBackTitle: 'Back'
-            }}
-          />
-          <Stack.Screen
-            name="Help"
-            component={HelpScreen}
-            options={{
-              title: 'Help & FAQ',
-              headerBackTitle: 'Back'
-            }}
-          />
-          <Stack.Screen
-            name="Achievements"
-            component={AchievementsScreen}
-            options={{
-              title: 'Achievements',
-              headerBackTitle: 'Back'
-            }}
+            name="MainApp"
+            component={MainTabs}
           />
           <Stack.Screen
             name="Test"
             component={TestScreen}
             options={{
+              headerShown: true,
               title: '🧪 Achievement Tests',
-              headerBackTitle: 'Back'
-            }}
-          />
-          <Stack.Screen
-            name="Learning"
-            component={LearningScreen}
-            options={{
-              title: 'Learning Session',
-              headerBackTitle: 'Home'
-            }}
-          />
-          <Stack.Screen
-            name="Summary"
-            component={SummaryScreen}
-            options={{
-              title: 'Session Summary',
-              headerLeft: () => null,
+              headerStyle: {
+                backgroundColor: '#3498DB',
+              },
+              headerTintColor: '#fff',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
             }}
           />
         </Stack.Navigator>

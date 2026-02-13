@@ -69,7 +69,7 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.headerButtons}>
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => navigation.navigate('Achievements')}
+              onPress={() => navigation.navigate('Progress', { screen: 'AchievementsList' })}
             >
               <Text style={styles.headerIcon}>🏆</Text>
               {achievementStats.unlocked > 0 && (
@@ -80,7 +80,7 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => navigation.navigate('Settings')}
+              onPress={() => navigation.navigate('Profile', { screen: 'SettingsMain' })}
             >
               <Text style={styles.headerIcon}>⚙️</Text>
             </TouchableOpacity>
@@ -129,7 +129,7 @@ export default function HomeScreen({ navigation }) {
         {/* Main CTA Button */}
         <TouchableOpacity
           style={styles.startButton}
-          onPress={() => navigation.navigate('Learning')}
+          onPress={() => navigation.navigate('Learn', { screen: 'Learning' })}
         >
           <Text style={styles.startButtonText}>Start Learning</Text>
         </TouchableOpacity>
