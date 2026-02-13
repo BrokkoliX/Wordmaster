@@ -6,9 +6,12 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SQLite from 'expo-sqlite';
+import exportService from '../services/exportService';
 
 const CEFR_LEVELS = [
   { id: 'A1', name: 'A1 - Beginner', description: '500 most common words', wordCount: 500 },
@@ -22,10 +25,9 @@ const CEFR_LEVELS = [
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-  // Note: French, German, Hungarian temporarily disabled - need translation API
-  // { code: 'fr', name: 'French', flag: '🇫🇷' },
-  // { code: 'de', name: 'German', flag: '🇩🇪' },
-  // { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
+  { code: 'fr', name: 'French', flag: '🇫🇷' },     // ✅ 73.8% (22,147/30k from Wiktionary)
+  { code: 'de', name: 'German', flag: '🇩🇪' },     // ✅ 63.5% (19,044/30k from Wiktionary)
+  { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },  // ✅ 39.1% (11,718/30k from Wiktionary)
 ];
 
 export default function SettingsScreen({ navigation }) {
@@ -35,10 +37,18 @@ export default function SettingsScreen({ navigation }) {
   const [showKnownLanguagePicker, setShowKnownLanguagePicker] = useState(false);
   const [showLearningLanguagePicker, setShowLearningLanguagePicker] = useState(false);
   const [showLevelPicker, setShowLevelPicker] = useState(false);
+  const [availableWordCount, setAvailableWordCount] = useState(null);
+  const [loadingWordCount, setLoadingWordCount] = useState(false);
+  const [exportingBackup, setExportingBackup] = useState(false);
+  const [importingBackup, setImportingBackup] = useState(false);
 
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    checkAvailableWords();
+  }, [knownLanguage, learningLanguage]);
 
   const loadSettings = async () => {
     try {
@@ -51,6 +61,25 @@ export default function SettingsScreen({ navigation }) {
       if (savedLevel) setCefrLevel(savedLevel);
     } catch (error) {
       console.error('Error loading settings:', error);
+    }
+  };
+
+  const checkAvailableWords = async () => {
+    try {
+      setLoadingWordCount(true);
+      const db = SQLite.openDatabaseSync('wordmaster.db');
+      
+      const result = await db.getFirstAsync(
+        'SELECT COUNT(*) as count FROM words WHERE source_lang = ? AND target_lang = ?',
+        [knownLanguage, learningLanguage]
+      );
+      
+      setAvailableWordCount(result?.count || 0);
+      setLoadingWordCount(false);
+    } catch (error) {
+      console.error('Error checking available words:', error);
+      setAvailableWordCount(0);
+      setLoadingWordCount(false);
     }
   };
 
@@ -97,6 +126,84 @@ export default function SettingsScreen({ navigation }) {
     return CEFR_LEVELS.find(l => l.id === level);
   };
 
+  const handleExportBackup = async () => {
+    try {
+      setExportingBackup(true);
+      await exportService.shareBackup();
+      Alert.alert(
+        'Success',
+        'Backup exported successfully! You can save it to your device or share it.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Export error:', error);
+      Alert.alert(
+        'Export Failed',
+        error.message || 'Could not export backup. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setExportingBackup(false);
+    }
+  };
+
+  const handleImportBackup = async () => {
+    Alert.alert(
+      'Import Backup',
+      'Choose how to handle existing progress:',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Merge',
+          onPress: () => importBackup('merge')
+        },
+        {
+          text: 'Replace',
+          onPress: () => importBackup('replace'),
+          style: 'destructive'
+        }
+      ]
+    );
+  };
+
+  const importBackup = async (mode) => {
+    try {
+      setImportingBackup(true);
+      const stats = await exportService.importFromFile(mode);
+      
+      if (stats) {
+        Alert.alert(
+          'Import Complete',
+          `Successfully imported:\n` +
+          `• ${stats.progressImported + stats.progressUpdated} word progress entries\n` +
+          `• ${stats.sessionsImported} learning sessions\n` +
+          `• ${stats.achievementsImported} achievements`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Reload settings
+                loadSettings();
+              }
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      Alert.alert(
+        'Import Failed',
+        error.message || 'Could not import backup. Please check the file and try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setImportingBackup(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
@@ -107,11 +214,11 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Info Banner */}
         <View style={styles.infoBanner}>
-          <Text style={styles.infoIcon}>📚</Text>
+          <Text style={styles.infoIcon}>🌍</Text>
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Currently Available:</Text>
-            <Text style={styles.infoText}>English ↔ Spanish (60,000 words)</Text>
-            <Text style={styles.infoSubtext}>More languages coming soon with translation API!</Text>
+            <Text style={styles.infoTitle}>5 Languages Available!</Text>
+            <Text style={styles.infoText}>English, Spanish, French, German, Hungarian</Text>
+            <Text style={styles.infoSubtext}>Professional translations from Wiktionary. Spanish has highest coverage (~100%), others 40-74%.</Text>
           </View>
         </View>
 
@@ -277,16 +384,72 @@ export default function SettingsScreen({ navigation }) {
             </View>
             <View style={styles.divider} />
             <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Available:</Text>
+              {loadingWordCount ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.summaryValue}>
+                  {availableWordCount?.toLocaleString() || '0'} words
+                </Text>
+              )}
+            </View>
+            {availableWordCount > 0 && availableWordCount < 10000 && (
+              <View style={styles.warningBadge}>
+                <Text style={styles.warningText}>
+                  ⚠️ Limited vocabulary - try English-based pairs for best experience
+                </Text>
+              </View>
+            )}
+            <View style={styles.divider} />
+            <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Level:</Text>
               <Text style={styles.summaryValue}>{cefrLevel}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Words:</Text>
+              <Text style={styles.summaryLabel}>Target:</Text>
               <Text style={styles.summaryValue}>
-                {getLevelInfo(cefrLevel)?.wordCount.toLocaleString()}
+                {getLevelInfo(cefrLevel)?.wordCount.toLocaleString()} words
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* Backup & Restore Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Backup & Restore</Text>
+          <Text style={styles.backupDescription}>
+            Save your learning progress and restore it on another device
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.backupButton}
+            onPress={handleExportBackup}
+            disabled={exportingBackup}
+          >
+            {exportingBackup ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <>
+                <Text style={styles.backupIcon}>💾</Text>
+                <Text style={styles.backupButtonText}>Export Backup</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.restoreButton}
+            onPress={handleImportBackup}
+            disabled={importingBackup}
+          >
+            {importingBackup ? (
+              <ActivityIndicator size="small" color="#3498DB" />
+            ) : (
+              <>
+                <Text style={styles.backupIcon}>📥</Text>
+                <Text style={styles.restoreButtonText}>Import Backup</Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Save Button */}
@@ -528,6 +691,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
     marginVertical: 12,
   },
+  warningBadge: {
+    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 8,
+  },
+  warningText: {
+    fontSize: 12,
+    color: '#FFF9C4',
+    textAlign: 'center',
+  },
   saveButton: {
     backgroundColor: '#27AE60',
     padding: 16,
@@ -553,5 +727,54 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#7F8C8D',
     fontSize: 16,
+  },
+  backupDescription: {
+    fontSize: 14,
+    color: '#7F8C8D',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  backupButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#27AE60',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  backupIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  backupButtonText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '600',
+  },
+  restoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#3498DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  restoreButtonText: {
+    fontSize: 16,
+    color: '#3498DB',
+    fontWeight: '600',
   },
 });

@@ -248,4 +248,3 @@ console.log('  ✅ Cross-language pairs via English bridge (NEW - limited to 100
 console.log('\n💡 To expand cross-language pairs:');
 console.log('  - Use translation API for direct translation');
 console.log('  - Or increase the matching limit in this script\n');
- 

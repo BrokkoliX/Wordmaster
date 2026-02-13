@@ -232,6 +232,7 @@ class TTSService {
       'en': 'en-US',  // English (US)
       'fr': 'fr-FR',  // French (France)
       'de': 'de-DE',  // German (Germany)
+      'hu': 'hu-HU',  // Hungarian (Hungary) - ADDED
       'it': 'it-IT',  // Italian (Italy)
       'pt': 'pt-BR',  // Portuguese (Brazil)
       'ru': 'ru-RU',  // Russian

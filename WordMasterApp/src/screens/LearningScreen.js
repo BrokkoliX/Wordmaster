@@ -81,7 +81,9 @@ export default function LearningScreen({ navigation }) {
   const loadQuestion = async () => {
     try {
       const word = words[currentIndex];
-      const reverseDirection = Math.random() > 0.5;
+      // Always show target language word and ask for source language translation
+      // e.g., if learning Hungarian from English: show Hungarian, ask for English
+      const reverseDirection = false; // Never reverse - keep consistent direction
       const mcQuestion = await createMultipleChoiceQuestion(word, reverseDirection);
       
       setQuestion(mcQuestion);
@@ -90,10 +92,11 @@ export default function LearningScreen({ navigation }) {
       setStartTime(Date.now());
       
       // Pronounce the word automatically (if enabled)
-      // Speak the target language (translation)
-      if (reverseDirection) {
-        // If showing Spanish, speak Spanish
-        await ttsService.speakSpanish(mcQuestion.question);
+      // Speak in the target language (the language being learned)
+      const targetLang = word.target_lang; // 'es', 'fr', 'de', 'hu', etc.
+      if (targetLang && mcQuestion.question) {
+        // Auto-pronounce the question word in its native language
+        await ttsService.speakWord(mcQuestion.question, targetLang);
       }
       
       // Smooth entrance animations
@@ -315,18 +318,17 @@ export default function LearningScreen({ navigation }) {
           {/* Question */}
           <View style={styles.questionCard}>
             <Text style={styles.questionText}>{question.question}</Text>
-            {/* Speaker button for pronunciation */}
-            {question.questionLabel.includes('Spanish') && (
-              <TouchableOpacity
-                style={styles.speakerButton}
-                onPress={async () => {
-                  hapticService.light();
-                  await ttsService.speakSpanish(question.question);
-                }}
-              >
-                <Text style={styles.speakerIcon}>🔊</Text>
-              </TouchableOpacity>
-            )}
+            {/* Speaker button for pronunciation - works for ALL languages */}
+            <TouchableOpacity
+              style={styles.speakerButton}
+              onPress={async () => {
+                hapticService.light();
+                const targetLang = question.word?.target_lang || 'es';
+                await ttsService.speakWord(question.question, targetLang);
+              }}
+            >
+              <Text style={styles.speakerIcon}>🔊</Text>
+            </TouchableOpacity>
           </View>
 
           <Text style={styles.instructionText}>Select the correct translation:</Text>

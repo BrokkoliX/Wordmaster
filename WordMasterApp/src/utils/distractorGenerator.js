@@ -12,16 +12,22 @@ export const generateDistractors = async (correctWord, count = 3) => {
   const distractors = [];
   const usedIds = new Set([correctWord.id]);
   
+  // CRITICAL: Filter by language pair to prevent cross-language mixing
+  const sourceLang = correctWord.source_lang || 'en';
+  const targetLang = correctWord.target_lang || 'es';
+  
   try {
     // Strategy 1: Same category (40% of distractors)
     const sameCategoryCount = Math.ceil(count * 0.4);
     if (correctWord.category && sameCategoryCount > 0) {
       const categoryDistractors = await db.getAllAsync(`
         SELECT * FROM words 
-        WHERE category = ? AND id != ? 
+        WHERE category = ? AND id != ?
+        AND source_lang = ? AND target_lang = ?
+        AND translation NOT LIKE '[%'
         ORDER BY RANDOM() 
         LIMIT ?
-      `, [correctWord.category, correctWord.id, sameCategoryCount]);
+      `, [correctWord.category, correctWord.id, sourceLang, targetLang, sameCategoryCount]);
       
       categoryDistractors.forEach(word => {
         if (distractors.length < count && !usedIds.has(word.id)) {
@@ -38,6 +44,8 @@ export const generateDistractors = async (correctWord, count = 3) => {
         SELECT * FROM words 
         WHERE difficulty BETWEEN ? AND ? 
         AND id != ?
+        AND source_lang = ? AND target_lang = ?
+        AND translation NOT LIKE '[%'
         AND id NOT IN (${Array(distractors.length).fill('?').join(',') || 'NULL'})
         ORDER BY RANDOM() 
         LIMIT ?
@@ -45,6 +53,8 @@ export const generateDistractors = async (correctWord, count = 3) => {
         Math.max(1, correctWord.difficulty - 1),
         correctWord.difficulty + 1,
         correctWord.id,
+        sourceLang,
+        targetLang,
         ...distractors.map(d => d.id),
         similarDifficultyCount
       ]);
@@ -63,10 +73,12 @@ export const generateDistractors = async (correctWord, count = 3) => {
       const randomDistractors = await db.getAllAsync(`
         SELECT * FROM words 
         WHERE id != ?
+        AND source_lang = ? AND target_lang = ?
+        AND translation NOT LIKE '[%'
         AND id NOT IN (${Array(distractors.length).fill('?').join(',') || 'NULL'})
         ORDER BY RANDOM() 
         LIMIT ?
-      `, [correctWord.id, ...distractors.map(d => d.id), remaining]);
+      `, [correctWord.id, sourceLang, targetLang, ...distractors.map(d => d.id), remaining]);
       
       randomDistractors.forEach(word => {
         if (distractors.length < count && !usedIds.has(word.id)) {
@@ -79,13 +91,17 @@ export const generateDistractors = async (correctWord, count = 3) => {
     return distractors;
   } catch (error) {
     console.error('Error generating distractors:', error);
-    // Fallback: return random words
+    // Fallback: return random words (still filtered by language pair!)
+    const sourceLang = correctWord.source_lang || 'en';
+    const targetLang = correctWord.target_lang || 'es';
     const fallbackDistractors = await db.getAllAsync(`
       SELECT * FROM words 
-      WHERE id != ? 
+      WHERE id != ?
+      AND source_lang = ? AND target_lang = ?
+      AND translation NOT LIKE '[%'
       ORDER BY RANDOM() 
       LIMIT ?
-    `, [correctWord.id, count]);
+    `, [correctWord.id, sourceLang, targetLang, count]);
     
     return fallbackDistractors;
   }
@@ -110,9 +126,21 @@ export const createMultipleChoiceQuestion = async (correctWord, reverseDirection
   // Shuffle options
   const shuffledOptions = options.sort(() => Math.random() - 0.5);
   
+  // Create dynamic language labels
+  const languageNames = {
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'hu': 'Hungarian'
+  };
+  
+  const targetLangName = languageNames[correctWord.target_lang] || correctWord.target_lang;
+  const sourceLangName = languageNames[correctWord.source_lang] || correctWord.source_lang;
+  
   return {
     question: reverseDirection ? correctWord.translation : correctWord.word,
-    questionLabel: reverseDirection ? 'English → Spanish' : 'Spanish → English',
+    questionLabel: reverseDirection ? `${sourceLangName} → ${targetLangName}` : `${targetLangName} → ${sourceLangName}`,
     correctAnswer: correctWord.id,
     options: shuffledOptions,
     word: correctWord
