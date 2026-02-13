@@ -24,6 +24,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
         SELECT * FROM words 
         WHERE category = ? AND id != ?
         AND source_lang = ? AND target_lang = ?
+        AND word NOT LIKE '[%'
         AND translation NOT LIKE '[%'
         ORDER BY RANDOM() 
         LIMIT ?
@@ -45,6 +46,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
         WHERE difficulty BETWEEN ? AND ? 
         AND id != ?
         AND source_lang = ? AND target_lang = ?
+        AND word NOT LIKE '[%'
         AND translation NOT LIKE '[%'
         AND id NOT IN (${Array(distractors.length).fill('?').join(',') || 'NULL'})
         ORDER BY RANDOM() 
@@ -74,6 +76,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
         SELECT * FROM words 
         WHERE id != ?
         AND source_lang = ? AND target_lang = ?
+        AND word NOT LIKE '[%'
         AND translation NOT LIKE '[%'
         AND id NOT IN (${Array(distractors.length).fill('?').join(',') || 'NULL'})
         ORDER BY RANDOM() 
@@ -98,6 +101,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
       SELECT * FROM words 
       WHERE id != ?
       AND source_lang = ? AND target_lang = ?
+      AND word NOT LIKE '[%'
       AND translation NOT LIKE '[%'
       ORDER BY RANDOM() 
       LIMIT ?

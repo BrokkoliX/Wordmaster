@@ -155,6 +155,7 @@ export const getWordsDueForReview = async (limit = 20) => {
       WHERE w.cefr_level = ?
         AND w.source_lang = ?
         AND w.target_lang = ?
+        AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
         AND (p.next_review_date IS NULL OR p.next_review_date <= ?)
       ORDER BY 
@@ -202,6 +203,7 @@ export const getNewWords = async (limit = 5) => {
         AND w.cefr_level = ?
         AND w.source_lang = ?
         AND w.target_lang = ?
+        AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
       ORDER BY w.frequency_rank ASC, RANDOM()
       LIMIT ?
