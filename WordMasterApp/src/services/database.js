@@ -1,9 +1,8 @@
 import * as SQLite from 'expo-sqlite';
-// import wordsData from '../data/words.json'; // Not needed - using pre-populated database
 import categoriesData from '../data/categories.json';
 import { calculateStreak, checkMilestoneReached } from './streakService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { importAllWords } from './importWords';
+import { syncWordsFromApi, isSyncNeeded } from './wordApiService';
 import { initAchievementTables } from './achievementDatabase';
 
 const DB_NAME = 'wordmaster.db';
@@ -94,18 +93,19 @@ export const initDatabase = async () => {
       ON words(difficulty);
     `);
     
-    // Check if words are already loaded
-    let wordCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM words');
+    // Sync words from backend API (only the user's language pair + level)
+    const wordCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM words');
+    const syncNeeded = await isSyncNeeded();
     
-    if (wordCount.count === 0) {
-      console.log('📥 Database is empty. Importing 30,000 words...');
-      await importAllWords();
-      
-      // Check count again
-      wordCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM words');
-      console.log(`✅ Import complete! Database now contains ${wordCount.count.toLocaleString()} words`);
+    if (wordCount.count === 0 || syncNeeded) {
+      console.log('📡 Syncing words from backend API...');
+      try {
+        await syncWordsFromApi();
+      } catch (error) {
+        console.error('⚠️  API sync failed (will use cached words if available):', error.message);
+      }
     } else {
-      console.log(`✅ Database contains ${wordCount.count.toLocaleString()} words`);
+      console.log(`✅ Local word cache: ${wordCount.count.toLocaleString()} words (up to date)`);
     }
     
     // Check if categories are already loaded

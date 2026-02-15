@@ -4,6 +4,26 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Words table (central vocabulary store for all language pairs and levels)
+CREATE TABLE IF NOT EXISTS words (
+  id VARCHAR(100) PRIMARY KEY,
+  word TEXT NOT NULL,
+  translation TEXT NOT NULL,
+  difficulty INTEGER DEFAULT 1,
+  category VARCHAR(100),
+  frequency_rank INTEGER,
+  cefr_level VARCHAR(10) NOT NULL,
+  source_lang VARCHAR(10) NOT NULL,
+  target_lang VARCHAR(10) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_words_lang_pair
+  ON words(source_lang, target_lang);
+CREATE INDEX IF NOT EXISTS idx_words_lang_level
+  ON words(source_lang, target_lang, cefr_level);
+CREATE INDEX IF NOT EXISTS idx_words_frequency
+  ON words(source_lang, target_lang, frequency_rank);
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

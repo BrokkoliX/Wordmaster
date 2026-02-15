@@ -54,3 +54,8 @@ temp/
 .env
 .env.local
 .env.*.local
+
+# Credentials and secrets
+credentials
+**/credentials
+*.secret

@@ -12,6 +12,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from 'expo-sqlite';
 import exportService from '../services/exportService';
+import { syncWordsFromApi } from '../services/wordApiService';
 
 const CEFR_LEVELS = [
   { id: 'A1', name: 'A1 - Beginner', description: '500 most common words', wordCount: 500 },
@@ -98,16 +99,33 @@ export default function SettingsScreen({ navigation }) {
       await AsyncStorage.setItem('learningLanguage', learningLanguage);
       await AsyncStorage.setItem('cefrLevel', cefrLevel);
 
-      Alert.alert(
-        'Settings Saved!',
-        `You're learning ${LANGUAGES.find(l => l.code === learningLanguage)?.name} at ${cefrLevel} level`,
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Home', { screen: 'Dashboard' })
-          }
-        ]
-      );
+      // Sync words from backend for the new selection
+      Alert.alert('Syncing Words', 'Downloading vocabulary for your selection...');
+      try {
+        const count = await syncWordsFromApi();
+        Alert.alert(
+          'Settings Saved!',
+          `Downloaded ${count.toLocaleString()} words for ${LANGUAGES.find(l => l.code === learningLanguage)?.name} at ${cefrLevel} level`,
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Home', { screen: 'Dashboard' })
+            }
+          ]
+        );
+      } catch (syncError) {
+        console.error('Word sync failed:', syncError);
+        Alert.alert(
+          'Settings Saved',
+          'Settings saved but word download failed. The app will retry on next launch.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Home', { screen: 'Dashboard' })
+            }
+          ]
+        );
+      }
     } catch (error) {
       console.error('Error saving settings:', error);
       Alert.alert('Error', 'Could not save settings');

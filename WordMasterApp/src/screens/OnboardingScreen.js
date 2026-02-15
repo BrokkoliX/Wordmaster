@@ -107,10 +107,10 @@ export default function OnboardingScreen({ navigation }) {
       await AsyncStorage.setItem('onboarding_completed', 'true');
       
       // Navigate to home
-      navigation.replace('Home');
+      navigation.replace('MainApp');
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      navigation.replace('Home');
+      navigation.replace('MainApp');
     }
   };
 

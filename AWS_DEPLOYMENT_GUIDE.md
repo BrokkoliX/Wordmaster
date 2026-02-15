@@ -29,8 +29,10 @@ We'll deploy:
 
 ### 1.1 Get IAM User Credentials
 
+**IMPORTANT: Use the classic IAM service, not IAM Identity Center.** IAM Identity Center (formerly AWS SSO) is a separate service that requires SSO infrastructure and issues temporary session-based credentials. The steps below require a classic IAM user with static access keys. When searching in the AWS Console, select the service labeled just **IAM**, not "IAM Identity Center."
+
 1. Go to AWS Console: https://console.aws.amazon.com
-2. Navigate to **IAM** → **Users**
+2. Navigate to **IAM** → **Users** (create a user here if you don't have one)
 3. Click on your IAM user
 4. Go to **Security credentials** tab
 5. Click **Create access key**
@@ -38,6 +40,8 @@ We'll deploy:
 7. **Save both**:
    - Access Key ID
    - Secret Access Key
+
+**SECURITY WARNING: Never share your Access Key ID or Secret Access Key in chat messages, commits, pull requests, documentation, or any location other than the `aws configure` prompt in your own terminal.** If a key is ever exposed, immediately deactivate and delete it in the IAM console, then generate a new one.
 
 ### 1.2 Configure AWS CLI
 
