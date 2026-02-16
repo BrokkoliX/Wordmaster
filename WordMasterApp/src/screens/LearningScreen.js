@@ -318,13 +318,14 @@ export default function LearningScreen({ navigation }) {
           {/* Question */}
           <View style={styles.questionCard}>
             <Text style={styles.questionText}>{question.question}</Text>
-            {/* Speaker button for pronunciation - works for ALL languages */}
+            {/* Speaker button for pronunciation - always works on tap */}
             <TouchableOpacity
               style={styles.speakerButton}
               onPress={async () => {
                 hapticService.light();
                 const targetLang = question.word?.target_lang || 'es';
-                await ttsService.speakWord(question.question, targetLang);
+                const langCode = ttsService.getLanguageCode(targetLang);
+                await ttsService.speak(question.question, langCode, { force: true });
               }}
             >
               <Text style={styles.speakerIcon}>🔊</Text>

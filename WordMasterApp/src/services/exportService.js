@@ -3,14 +3,11 @@
  * Handles backup and restore of user progress
  */
 
-import * as SQLite from 'expo-sqlite';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const DB_NAME = 'wordmaster.db';
-const db = SQLite.openDatabaseSync(DB_NAME);
+import db from './db';
 
 /**
  * Export user progress to JSON

@@ -7,12 +7,14 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Switch
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SQLite from 'expo-sqlite';
+import db from '../services/db';
 import exportService from '../services/exportService';
 import { syncWordsFromApi } from '../services/wordApiService';
+import ttsService from '../services/TTSService';
 
 const CEFR_LEVELS = [
   { id: 'A1', name: 'A1 - Beginner', description: '500 most common words', wordCount: 500 },
@@ -42,6 +44,7 @@ export default function SettingsScreen({ navigation }) {
   const [loadingWordCount, setLoadingWordCount] = useState(false);
   const [exportingBackup, setExportingBackup] = useState(false);
   const [importingBackup, setImportingBackup] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -56,10 +59,12 @@ export default function SettingsScreen({ navigation }) {
       const savedKnownLang = await AsyncStorage.getItem('knownLanguage');
       const savedLearningLang = await AsyncStorage.getItem('learningLanguage');
       const savedLevel = await AsyncStorage.getItem('cefrLevel');
+      const savedVoice = await AsyncStorage.getItem('tts_enabled');
 
       if (savedKnownLang) setKnownLanguage(savedKnownLang);
       if (savedLearningLang) setLearningLanguage(savedLearningLang);
       if (savedLevel) setCefrLevel(savedLevel);
+      setVoiceEnabled(savedVoice === 'true');
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -68,8 +73,6 @@ export default function SettingsScreen({ navigation }) {
   const checkAvailableWords = async () => {
     try {
       setLoadingWordCount(true);
-      const db = SQLite.openDatabaseSync('wordmaster.db');
-      
       const result = await db.getFirstAsync(
         'SELECT COUNT(*) as count FROM words WHERE source_lang = ? AND target_lang = ?',
         [knownLanguage, learningLanguage]
@@ -99,13 +102,16 @@ export default function SettingsScreen({ navigation }) {
       await AsyncStorage.setItem('learningLanguage', learningLanguage);
       await AsyncStorage.setItem('cefrLevel', cefrLevel);
 
-      // Sync words from backend for the new selection
-      Alert.alert('Syncing Words', 'Downloading vocabulary for your selection...');
+      // Sync words from backend (falls back to bundled data if API is unreachable)
+      Alert.alert('Syncing Words', 'Loading vocabulary for your selection...');
       try {
         const count = await syncWordsFromApi();
+        const langName = LANGUAGES.find(l => l.code === learningLanguage)?.name;
         Alert.alert(
           'Settings Saved!',
-          `Downloaded ${count.toLocaleString()} words for ${LANGUAGES.find(l => l.code === learningLanguage)?.name} at ${cefrLevel} level`,
+          count > 0
+            ? `Loaded ${count.toLocaleString()} words for ${langName} at ${cefrLevel} level`
+            : `No words available for ${langName} at ${cefrLevel} level. Please try a different pair or level.`,
           [
             {
               text: 'OK',
@@ -117,7 +123,7 @@ export default function SettingsScreen({ navigation }) {
         console.error('Word sync failed:', syncError);
         Alert.alert(
           'Settings Saved',
-          'Settings saved but word download failed. The app will retry on next launch.',
+          'Settings saved but word loading failed. The app will retry on next launch.',
           [
             {
               text: 'OK',
@@ -219,6 +225,15 @@ export default function SettingsScreen({ navigation }) {
       );
     } finally {
       setImportingBackup(false);
+    }
+  };
+
+  const handleVoiceToggle = async (value) => {
+    setVoiceEnabled(value);
+    if (value) {
+      await ttsService.enable();
+    } else {
+      await ttsService.disable();
     }
   };
 
@@ -381,6 +396,25 @@ export default function SettingsScreen({ navigation }) {
               ))}
             </View>
           )}
+        </View>
+
+        {/* Voice Pronunciation */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Voice Pronunciation</Text>
+          <View style={styles.voiceToggleRow}>
+            <View style={styles.voiceToggleInfo}>
+              <Text style={styles.voiceToggleLabel}>Auto-pronounce words</Text>
+              <Text style={styles.voiceToggleDescription}>
+                Speak each word aloud during practice
+              </Text>
+            </View>
+            <Switch
+              value={voiceEnabled}
+              onValueChange={handleVoiceToggle}
+              trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
+              thumbColor={voiceEnabled ? '#3498DB' : '#F4F3F4'}
+            />
+          </View>
         </View>
 
         {/* Current Selection Summary */}
@@ -794,5 +828,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#3498DB',
     fontWeight: '600',
+  },
+  voiceToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  voiceToggleInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  voiceToggleLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2C3E50',
+    marginBottom: 4,
+  },
+  voiceToggleDescription: {
+    fontSize: 13,
+    color: '#7F8C8D',
+    lineHeight: 18,
   },
 });

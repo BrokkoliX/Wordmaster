@@ -1,10 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// API Base URL - points to the AWS backend in both dev and production
 const API_BASE_URL = 'http://3.91.69.195/api';
 
-// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
@@ -49,24 +47,22 @@ api.interceptors.response.use(
           throw new Error('No refresh token');
         }
 
-        // Try to refresh the token
         const { data } = await axios.post(
-          `${API_BASE_URL.replace('/api', '')}/api/auth/refresh-token`,
+          `${API_BASE_URL}/auth/refresh-token`,
           { refreshToken }
         );
 
-        // Save new access token
         await AsyncStorage.setItem('accessToken', data.accessToken);
 
-        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return axios(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, logout user
-        await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
-        
-        // You can emit an event here to notify app to navigate to login
-        // For now, just reject
+        // Refresh failed -- clear tokens so AuthContext detects the logout.
+        await AsyncStorage.multiRemove([
+          'accessToken',
+          'refreshToken',
+          'wordmaster_user',
+        ]);
         return Promise.reject(refreshError);
       }
     }

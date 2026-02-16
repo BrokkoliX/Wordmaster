@@ -3,7 +3,6 @@
  * Called on first app launch when database is empty
  */
 
-import * as SQLite from 'expo-sqlite';
 import wordsEnToEs from '../data/words_translated.json';
 import wordsEnToFr from '../data/words_french.json';
 import wordsEnToDe from '../data/words_german.json';
@@ -12,9 +11,7 @@ import wordsEsToEn from '../data/words_spanish_to_english.json';
 import wordsFrToEn from '../data/words_french_to_english.json';
 import wordsDeToEn from '../data/words_german_to_english.json';
 import wordsHuToEn from '../data/words_hungarian_to_english.json';
-
-const DB_NAME = 'wordmaster.db';
-const db = SQLite.openDatabaseSync(DB_NAME);
+import db from './db';
 
 // All language datasets (bidirectional)
 // Translations are sourced from frequency word lists

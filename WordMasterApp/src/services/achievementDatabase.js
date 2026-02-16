@@ -1,7 +1,4 @@
-import * as SQLite from 'expo-sqlite';
-
-const DB_NAME = 'wordmaster.db';
-const db = SQLite.openDatabaseSync(DB_NAME);
+import db from './db';
 
 /**
  * Initialize Achievement System Tables

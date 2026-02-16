@@ -11,7 +11,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert
-} from 'react';
+} from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 
 const GuestEntryScreen = ({ navigation }) => {

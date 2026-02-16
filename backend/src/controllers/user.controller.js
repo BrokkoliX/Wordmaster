@@ -118,8 +118,8 @@ exports.changePassword = async (req, res) => {
 
     const { currentPassword, newPassword } = req.body;
 
-    // Get user with password hash
-    const user = await UserModel.findById(req.user.id);
+    // Get user with password hash for verification
+    const user = await UserModel.findByIdWithPassword(req.user.id);
     if (!user) {
       return res.status(404).json({
         error: {
@@ -173,8 +173,8 @@ exports.deleteAccount = async (req, res) => {
       });
     }
 
-    // Get user with password hash
-    const user = await UserModel.findById(req.user.id);
+    // Get user with password hash for verification
+    const user = await UserModel.findByIdWithPassword(req.user.id);
     if (!user) {
       return res.status(404).json({
         error: {

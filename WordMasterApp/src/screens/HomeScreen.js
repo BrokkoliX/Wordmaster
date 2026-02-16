@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserStatistics } from '../services/database';
 import { getStreakEmoji, getStreakMessage, formatStreakDisplay } from '../services/streakService';
 import achievementService from '../services/AchievementService';
 import { showErrorAlert } from '../utils/errorMessages';
+
+const LANGUAGE_NAMES = {
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+  hu: 'Hungarian',
+};
 
 export default function HomeScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -18,6 +27,7 @@ export default function HomeScreen({ navigation }) {
     total: 0,
     totalPoints: 0
   });
+  const [learningLanguage, setLearningLanguage] = useState('es');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,12 +43,12 @@ export default function HomeScreen({ navigation }) {
 
   const loadStats = async () => {
     try {
-      const [statistics, achStats] = await Promise.all([
-        getUserStatistics(),
-        achievementService.getStats()
-      ]);
+      const statistics = await getUserStatistics();
+      const achStats = await achievementService.getStats();
+      const savedLearningLang = await AsyncStorage.getItem('learningLanguage');
       setStats(statistics);
       setAchievementStats(achStats);
+      if (savedLearningLang) setLearningLanguage(savedLearningLang);
     } catch (error) {
       console.error('Error loading statistics:', error);
       showErrorAlert(error, () => loadStats());
@@ -65,7 +75,7 @@ export default function HomeScreen({ navigation }) {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>WordMaster</Text>
-          <Text style={styles.subtitle}>Learn Spanish Vocabulary</Text>
+          <Text style={styles.subtitle}>Learn {LANGUAGE_NAMES[learningLanguage] || 'Vocabulary'} Vocabulary</Text>
           <View style={styles.headerButtons}>
             <TouchableOpacity
               style={styles.headerButton}

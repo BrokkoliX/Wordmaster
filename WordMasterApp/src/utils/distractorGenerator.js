@@ -1,6 +1,4 @@
-import * as SQLite from 'expo-sqlite';
-
-const db = SQLite.openDatabaseSync('wordmaster.db');
+import db from '../services/db';
 
 /**
  * Generate distractor options (wrong answers) for a word

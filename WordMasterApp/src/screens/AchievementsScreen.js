@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Dimensions
+  SafeAreaView
 } from 'react-native';
 import achievementService from '../services/AchievementService';
-
-const { width } = Dimensions.get('window');
+import { showErrorAlert } from '../utils/errorMessages';
 
 const RARITY_COLORS = {
   common: '#9CA3AF',      // Gray
@@ -38,33 +37,46 @@ const CATEGORY_NAMES = {
   special: '✨ Special'
 };
 
+const CATEGORY_ORDER = {
+  first_steps: 1,
+  streaks: 2,
+  mastery: 3,
+  speed: 4,
+  accuracy: 5,
+  explorer: 6,
+  special: 7
+};
+
 function AchievementsScreen({ navigation }) {
   const [achievements, setAchievements] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'unlocked', 'locked'
-  const [categoryFilter, setCategoryFilter] = useState('all');
 
-  useEffect(() => {
-    loadAchievements();
-  }, []);
-
-  const loadAchievements = async () => {
+  const loadAchievements = useCallback(async () => {
     try {
       setLoading(true);
-      const [achievementsData, statsData] = await Promise.all([
-        achievementService.getAllUserAchievements(),
-        achievementService.getStats()
-      ]);
-      
+      const achievementsData = await achievementService.getAllUserAchievements();
+      const statsData = await achievementService.getStats();
       setAchievements(achievementsData);
       setStats(statsData);
     } catch (error) {
       console.error('Error loading achievements:', error);
+      showErrorAlert(error, () => loadAchievements());
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadAchievements();
+
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadAchievements();
+    });
+
+    return unsubscribe;
+  }, [navigation, loadAchievements]);
 
   const getFilteredAchievements = () => {
     let filtered = achievements;
@@ -74,11 +86,6 @@ function AchievementsScreen({ navigation }) {
       filtered = filtered.filter(a => a.unlocked);
     } else if (filter === 'locked') {
       filtered = filtered.filter(a => !a.unlocked);
-    }
-
-    // Filter by category
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(a => a.category === categoryFilter);
     }
 
     // Hide hidden achievements if locked
@@ -185,10 +192,10 @@ function AchievementsScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Loading achievements...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -196,7 +203,7 @@ function AchievementsScreen({ navigation }) {
   const groupedAchievements = groupByCategory(filteredAchievements);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header with Stats */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🏆 Achievements</Text>
@@ -260,28 +267,17 @@ function AchievementsScreen({ navigation }) {
           </View>
         ) : (
           Object.keys(groupedAchievements)
-            .sort((a, b) => {
-              const orderMap = {
-                first_steps: 1,
-                streaks: 2,
-                mastery: 3,
-                speed: 4,
-                accuracy: 5,
-                explorer: 6,
-                special: 7
-              };
-              return (orderMap[a] || 99) - (orderMap[b] || 99);
-            })
+            .sort((a, b) => (CATEGORY_ORDER[a] || 99) - (CATEGORY_ORDER[b] || 99))
             .map(category => 
               renderCategorySection(category, groupedAchievements[category])
             )
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
-export default React.memo(AchievementsScreen);
+export default AchievementsScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -302,7 +298,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#FFFFFF',
     padding: 20,
-    paddingTop: 60,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB'
   },

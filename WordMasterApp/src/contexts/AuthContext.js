@@ -192,10 +192,10 @@ export const AuthProvider = ({ children }) => {
   /**
    * Delete account
    */
-  const deleteAccount = async () => {
+  const deleteAccount = async (password) => {
     try {
       setLoading(true);
-      const { error } = await authService.deleteAccount();
+      const { error } = await authService.deleteAccount(password);
       
       if (!error) {
         setUser(null);

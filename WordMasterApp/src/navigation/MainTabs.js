@@ -10,6 +10,7 @@ import SummaryScreen from '../screens/SummaryScreen';
 import AchievementsScreen from '../screens/AchievementsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import HelpScreen from '../screens/HelpScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -95,9 +96,14 @@ function ProfileStack() {
       }}
     >
       <Stack.Screen
+        name="ProfileMain"
+        component={ProfileScreen}
+        options={{ title: 'My Profile' }}
+      />
+      <Stack.Screen
         name="SettingsMain"
         component={SettingsScreen}
-        options={{ title: 'Profile & Settings' }}
+        options={{ title: 'Settings' }}
       />
     </Stack.Navigator>
   );

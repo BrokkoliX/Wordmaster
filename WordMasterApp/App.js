@@ -9,14 +9,20 @@ import { initDatabase } from './src/services/database';
 import MainTabs from './src/navigation/MainTabs';
 import TestScreen from './src/screens/TestScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import SignupScreen from './src/screens/SignupScreen';
+import GuestEntryScreen from './src/screens/GuestEntryScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState(null);
+function RootNavigator() {
+  const { user, loading: authLoading, initialized } = useAuth();
+  const [dbReady, setDbReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [initError, setInitError] = useState(null);
 
   useEffect(() => {
     prepareApp();
@@ -24,30 +30,27 @@ export default function App() {
 
   const prepareApp = async () => {
     try {
-      console.log('Initializing WordMaster...');
       await initDatabase();
-      console.log('Database initialized successfully');
-      
-      // Check if onboarding was completed
+
       const onboardingCompleted = await AsyncStorage.getItem('onboarding_completed');
       setShowOnboarding(onboardingCompleted !== 'true');
-      
-      setIsReady(true);
+
+      setDbReady(true);
     } catch (err) {
       console.error('Failed to initialize app:', err);
-      setError(err.message);
+      setInitError(err.message);
     }
   };
 
-  if (error) {
+  if (initError) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+        <Text style={styles.errorText}>Error: {initError}</Text>
       </View>
     );
   }
 
-  if (!isReady) {
+  if (!dbReady || !initialized) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#3498DB" />
@@ -56,40 +59,55 @@ export default function App() {
     );
   }
 
+  // Determine initial route based on auth + onboarding state
+  const isAuthenticated = user !== null;
+
+  // Build the screen list conditionally based on auth state.
+  // React Navigation treats the first screen as the initial route.
+  const authScreens = (
+    <>
+      {showOnboarding && (
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      )}
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="GuestEntry" component={GuestEntryScreen} />
+    </>
+  );
+
+  const appScreens = (
+    <>
+      <Stack.Screen name="MainApp" component={MainTabs} />
+      <Stack.Screen
+        name="Test"
+        component={TestScreen}
+        options={{
+          headerShown: true,
+          title: 'Achievement Tests',
+          headerStyle: { backgroundColor: '#3498DB' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+    </>
+  );
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? appScreens : authScreens}
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
   return (
     <ErrorBoundary>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName={showOnboarding ? "Onboarding" : "MainApp"}
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen
-            name="Onboarding"
-            component={OnboardingScreen}
-          />
-          <Stack.Screen
-            name="MainApp"
-            component={MainTabs}
-          />
-          <Stack.Screen
-            name="Test"
-            component={TestScreen}
-            options={{
-              headerShown: true,
-              title: '🧪 Achievement Tests',
-              headerStyle: {
-                backgroundColor: '#3498DB',
-              },
-              headerTintColor: '#fff',
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              },
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AuthProvider>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </AuthProvider>
       <StatusBar style="auto" />
     </ErrorBoundary>
   );

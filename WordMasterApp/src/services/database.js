@@ -1,14 +1,9 @@
-import * as SQLite from 'expo-sqlite';
 import categoriesData from '../data/categories.json';
 import { calculateStreak, checkMilestoneReached } from './streakService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { syncWordsFromApi, isSyncNeeded } from './wordApiService';
 import { initAchievementTables } from './achievementDatabase';
-
-const DB_NAME = 'wordmaster.db';
-
-// Open database
-const db = SQLite.openDatabaseSync(DB_NAME);
+import db from './db';
 
 // Initialize database with schema
 export const initDatabase = async () => {
@@ -136,6 +131,15 @@ export const initDatabase = async () => {
   }
 };
 
+// CEFR level ordering used to include all levels at or below the selected one
+const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+const getAllowedCefrLevels = (level) => {
+  const idx = CEFR_ORDER.indexOf(level);
+  if (idx === -1) return ['A1'];
+  return CEFR_ORDER.slice(0, idx + 1);
+};
+
 // Get words due for review
 export const getWordsDueForReview = async (limit = 20) => {
   try {
@@ -146,13 +150,16 @@ export const getWordsDueForReview = async (limit = 20) => {
     const knownLanguage = await AsyncStorage.getItem('knownLanguage') || 'en';
     const learningLanguage = await AsyncStorage.getItem('learningLanguage') || 'es';
     
+    const allowedLevels = getAllowedCefrLevels(cefrLevel);
+    const levelPlaceholders = allowedLevels.map(() => '?').join(',');
+    
     const words = await db.getAllAsync(`
       SELECT w.*, p.id as progress_id, p.status, p.confidence_level,
              p.consecutive_correct, p.ease_factor, p.interval_days,
              p.times_shown, p.times_correct, p.times_incorrect
       FROM words w
       LEFT JOIN user_word_progress p ON w.id = p.word_id
-      WHERE w.cefr_level = ?
+      WHERE w.cefr_level IN (${levelPlaceholders})
         AND w.source_lang = ?
         AND w.target_lang = ?
         AND w.word NOT LIKE '[%'
@@ -167,7 +174,7 @@ export const getWordsDueForReview = async (limit = 20) => {
         p.next_review_date ASC,
         w.frequency_rank ASC
       LIMIT ?
-    `, [cefrLevel, knownLanguage, learningLanguage, today, today, limit]);
+    `, [...allowedLevels, knownLanguage, learningLanguage, today, today, limit]);
     
     if (words.length === 0) {
       console.log(`⚠️  No words available for ${knownLanguage} → ${learningLanguage} at ${cefrLevel} level`);
@@ -195,19 +202,22 @@ export const getNewWords = async (limit = 5) => {
     const knownLanguage = await AsyncStorage.getItem('knownLanguage') || 'en';
     const learningLanguage = await AsyncStorage.getItem('learningLanguage') || 'es';
     
+    const allowedLevels = getAllowedCefrLevels(cefrLevel);
+    const levelPlaceholders = allowedLevels.map(() => '?').join(',');
+    
     const words = await db.getAllAsync(`
       SELECT w.*
       FROM words w
       LEFT JOIN user_word_progress p ON w.id = p.word_id
       WHERE p.id IS NULL
-        AND w.cefr_level = ?
+        AND w.cefr_level IN (${levelPlaceholders})
         AND w.source_lang = ?
         AND w.target_lang = ?
         AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
       ORDER BY w.frequency_rank ASC, RANDOM()
       LIMIT ?
-    `, [cefrLevel, knownLanguage, learningLanguage, limit]);
+    `, [...allowedLevels, knownLanguage, learningLanguage, limit]);
     
     return words;
   } catch (error) {

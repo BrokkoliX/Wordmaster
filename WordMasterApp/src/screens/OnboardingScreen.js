@@ -106,11 +106,11 @@ export default function OnboardingScreen({ navigation }) {
       // Mark onboarding as complete
       await AsyncStorage.setItem('onboarding_completed', 'true');
       
-      // Navigate to home
-      navigation.replace('MainApp');
+      // Navigate to auth flow (Welcome screen)
+      navigation.replace('Welcome');
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      navigation.replace('MainApp');
+      navigation.replace('Welcome');
     }
   };
 

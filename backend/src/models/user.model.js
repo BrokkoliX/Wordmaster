@@ -47,6 +47,18 @@ class UserModel {
   }
 
   /**
+   * Find user by ID including password hash (for password verification flows)
+   */
+  static async findByIdWithPassword(id) {
+    const result = await query(
+      'SELECT * FROM users WHERE id = $1',
+      [id]
+    );
+
+    return result.rows[0];
+  }
+
+  /**
    * Find user by username
    */
   static async findByUsername(username) {

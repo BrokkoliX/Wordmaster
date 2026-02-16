@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 class TTSService {
   constructor() {
     this.isSpeaking = false;
-    this.isEnabled = true;
+    this.isEnabled = false; // Off by default; user enables via Settings
     this.rate = 0.75; // Slower for learning (0.5 = slow, 1.0 = normal)
     this.loadSettings();
   }
@@ -54,8 +54,7 @@ class TTSService {
    * @param {object} options - Additional options
    */
   async speak(text, language = 'es-ES', options = {}) {
-    if (!this.isEnabled) {
-      console.log('TTS is disabled');
+    if (!this.isEnabled && !options.force) {
       return;
     }
 
