@@ -4,10 +4,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
+
   ActivityIndicator,
-  Animated
+  Animated,
+  ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   getWordsDueForReview,
   getNewWords,
@@ -289,7 +291,12 @@ export default function LearningScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Progress bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -378,7 +385,7 @@ export default function LearningScreen({ navigation }) {
             </TouchableOpacity>
           )}
         </Animated.View>
-      </View>
+      </ScrollView>
       
       {/* Achievement Unlock Modal */}
       <AchievementUnlockModal
@@ -397,6 +404,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 20,
   },
   loadingContainer: {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -45,7 +46,10 @@ class ErrorBoundary extends React.Component {
       // Error UI
       return (
         <SafeAreaView style={styles.container}>
-          <View style={styles.content}>
+          <ScrollView
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
             <Text style={styles.emoji}>😕</Text>
             <Text style={styles.title}>Oops! Something went wrong</Text>
             <Text style={styles.message}>
@@ -85,7 +89,7 @@ class ErrorBoundary extends React.Component {
             <Text style={styles.helpText}>
               If this keeps happening, please restart the app.
             </Text>
-          </View>
+          </ScrollView>
         </SafeAreaView>
       );
     }
@@ -101,7 +105,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F7FA',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 30,

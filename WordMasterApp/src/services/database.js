@@ -379,14 +379,11 @@ export const getUserStatistics = async () => {
     `);
     
     // Initialize user_statistics if it doesn't exist
-    let userStats = await db.getFirstAsync('SELECT * FROM user_statistics WHERE id = 1');
-    if (!userStats) {
-      await db.runAsync(`
-        INSERT INTO user_statistics (id, current_streak_days, longest_streak_days)
-        VALUES (1, 0, 0)
-      `);
-      userStats = { current_streak_days: 0, longest_streak_days: 0, last_activity_date: null };
-    }
+    await db.runAsync(`
+      INSERT OR IGNORE INTO user_statistics (id, current_streak_days, longest_streak_days)
+      VALUES (1, 0, 0)
+    `);
+    const userStats = await db.getFirstAsync('SELECT * FROM user_statistics WHERE id = 1');
     
     return {
       wordsLearned: stats.words_learned || 0,
@@ -445,14 +442,11 @@ export const completeSession = async (sessionId, wordsReviewed, correctAnswers) 
     `, [wordsReviewed, correctAnswers, accuracy, sessionId]);
     
     // Update streak
-    let userStats = await db.getFirstAsync('SELECT * FROM user_statistics WHERE id = 1');
-    if (!userStats) {
-      await db.runAsync(`
-        INSERT INTO user_statistics (id, current_streak_days, longest_streak_days)
-        VALUES (1, 0, 0)
-      `);
-      userStats = { current_streak_days: 0, longest_streak_days: 0, last_activity_date: null };
-    }
+    await db.runAsync(`
+      INSERT OR IGNORE INTO user_statistics (id, current_streak_days, longest_streak_days)
+      VALUES (1, 0, 0)
+    `);
+    const userStats = await db.getFirstAsync('SELECT * FROM user_statistics WHERE id = 1');
     
     const today = new Date().toISOString().split('T')[0];
     const oldStreak = userStats.current_streak_days;

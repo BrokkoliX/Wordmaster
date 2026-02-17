@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { getStreakEmoji, formatStreakDisplay } from '../services/streakService';
 
 export default function SummaryScreen({ route, navigation }) {
@@ -19,7 +20,11 @@ export default function SummaryScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <Text style={styles.title}>Session Complete!</Text>
           <Text style={styles.encouragement}>{getEncouragementMessage(accuracy)}</Text>
@@ -75,7 +80,7 @@ export default function SummaryScreen({ route, navigation }) {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.continueButton}
-            onPress={() => navigation.navigate('Learning')}
+            onPress={() => navigation.navigate('ModeSelection')}
           >
             <Text style={styles.continueButtonText}>Continue Learning</Text>
           </TouchableOpacity>
@@ -87,7 +92,7 @@ export default function SummaryScreen({ route, navigation }) {
             <Text style={styles.homeButtonText}>Back to Home</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -97,8 +102,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F7FA',
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 20,
   },
   header: {

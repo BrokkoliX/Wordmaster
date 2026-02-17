@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserStatistics } from '../services/database';
 import { getStreakEmoji, getStreakMessage, formatStreakDisplay } from '../services/streakService';
@@ -139,7 +140,7 @@ export default function HomeScreen({ navigation }) {
         {/* Main CTA Button */}
         <TouchableOpacity
           style={styles.startButton}
-          onPress={() => navigation.navigate('Learn', { screen: 'Learning' })}
+          onPress={() => navigation.navigate('Learn', { screen: 'ModeSelection' })}
         >
           <Text style={styles.startButtonText}>Start Learning</Text>
         </TouchableOpacity>

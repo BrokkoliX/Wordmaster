@@ -5,7 +5,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
+import ModeSelectionScreen from '../screens/ModeSelectionScreen';
 import LearningScreen from '../screens/LearningScreen';
+import MatchingPairsScreen from '../screens/MatchingPairsScreen';
 import SummaryScreen from '../screens/SummaryScreen';
 import AchievementsScreen from '../screens/AchievementsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -50,9 +52,19 @@ function LearnStack() {
       }}
     >
       <Stack.Screen
+        name="ModeSelection"
+        component={ModeSelectionScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="Learning"
         component={LearningScreen}
-        options={{ title: 'Learning Session' }}
+        options={{ title: 'Multiple Choice' }}
+      />
+      <Stack.Screen
+        name="MatchingPairs"
+        component={MatchingPairsScreen}
+        options={{ title: 'Matching Pairs' }}
       />
       <Stack.Screen
         name="Summary"

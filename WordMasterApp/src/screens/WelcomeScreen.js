@@ -12,16 +12,20 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  SafeAreaView,
+  ScrollView,
   StatusBar
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4A90E2" />
       
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Logo/Icon */}
         <View style={styles.logoContainer}>
           <Text style={styles.logoEmoji}>🌍</Text>
@@ -75,7 +79,7 @@ const WelcomeScreen = ({ navigation }) => {
             100% Free • No Ads • Works Offline
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4A90E2',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 30,
     paddingTop: 60,
     paddingBottom: 40,
