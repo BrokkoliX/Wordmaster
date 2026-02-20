@@ -43,13 +43,13 @@ function isGrammaticalDescription(text) {
     // Case markers
     /\b(nominative|accusative|dative|genitive)\b/i,
 
-    // Verb forms and tenses
-    /\b(first|second|third) person\b/i,
+    // Verb forms and tenses (with and without hyphens)
+    /\b(first|second|third)[ -]person\b/i,
     /\b(singular|plural) (of|form)\b/i,
-    /\bpast (tense|participle|of)\b/i,
-    /\bpresent (tense|participle|of)\b/i,
-    /\bfuture (tense|of)\b/i,
-    /\bperfect (tense|of)\b/i,
+    /\bpast[ -](tense|participle|of)\b/i,
+    /\bpresent[ -](tense|participle|of)\b/i,
+    /\bfuture[ -](tense|of)\b/i,
+    /\bperfect[ -](tense|of)\b/i,
     /\bimperative (of|form)\b/i,
     /\bsubjunctive (of|form)\b/i,
     /\binfinitive (of|form)\b/i,
@@ -115,7 +115,12 @@ function isGrammaticalDescription(text) {
   }
 
   // Skip entries with parenthetical grammatical explanations
-  if (/\([^)]*\b(pronoun|verb|noun|adjective|adverb|preposition|conjunction)\b[^)]*\)/i.test(text)) {
+  if (/\([^)]*\b(pronoun|verb|noun|adjective|adverb|preposition|conjunction|personal|cardinal|ordinal|co-?ordinating)\b[^)]*\)/i.test(text)) {
+    return true;
+  }
+
+  // Skip abbreviations and acronyms
+  if (/\b(initialism|abbreviation|acronym)\b/i.test(text)) {
     return true;
   }
 

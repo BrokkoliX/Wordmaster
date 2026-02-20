@@ -31,15 +31,23 @@ async function cleanGrammaticalEntries() {
         OR translation ILIKE '%dative%'
         OR translation ILIKE '%genitive%'
         
-        -- Verb forms and tenses
+        -- Verb forms and tenses (with and without hyphens)
         OR translation ILIKE '%first person%'
+        OR translation ILIKE '%first-person%'
         OR translation ILIKE '%second person%'
+        OR translation ILIKE '%second-person%'
         OR translation ILIKE '%third person%'
+        OR translation ILIKE '%third-person%'
         OR translation ILIKE '%past tense%'
+        OR translation ILIKE '%past-tense%'
         OR translation ILIKE '%present tense%'
+        OR translation ILIKE '%present-tense%'
         OR translation ILIKE '%future tense%'
+        OR translation ILIKE '%future-tense%'
         OR translation ILIKE '%past participle%'
+        OR translation ILIKE '%past-participle%'
         OR translation ILIKE '%present participle%'
+        OR translation ILIKE '%present-participle%'
         OR translation ILIKE '%imperative%'
         OR translation ILIKE '%subjunctive%'
         OR translation ILIKE '%infinitive of%'
@@ -67,7 +75,7 @@ async function cleanGrammaticalEntries() {
         -- Definitions with colons
         OR translation LIKE '%:%'
         
-        -- Parenthetical grammatical terms
+        -- Parenthetical grammatical terms and explanations
         OR translation ILIKE '%(pronoun%'
         OR translation ILIKE '%(verb%'
         OR translation ILIKE '%(noun%'
@@ -75,6 +83,16 @@ async function cleanGrammaticalEntries() {
         OR translation ILIKE '%(adverb%'
         OR translation ILIKE '%(preposition%'
         OR translation ILIKE '%(conjunction%'
+        OR translation ILIKE '%(personal%'
+        OR translation ILIKE '%(cardinal%'
+        OR translation ILIKE '%(ordinal%'
+        OR translation ILIKE '%(co-ordinating%'
+        OR translation ILIKE '%(coordinating%'
+        
+        -- Abbreviations and acronyms
+        OR translation ILIKE '%initialism%'
+        OR translation ILIKE '%abbreviation%'
+        OR translation ILIKE '%acronym%'
         
         -- Common definition phrases
         OR translation ILIKE '%refers to%'
