@@ -75,8 +75,6 @@ export default function HomeScreen({ navigation }) {
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>WordMaster</Text>
-          <Text style={styles.subtitle}>Learn {LANGUAGE_NAMES[learningLanguage] || 'Vocabulary'} Vocabulary</Text>
           <View style={styles.headerButtons}>
             <TouchableOpacity
               style={styles.headerButton}
@@ -96,6 +94,8 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.headerIcon}>⚙️</Text>
             </TouchableOpacity>
           </View>
+          <Text style={styles.title}>WordMaster</Text>
+          <Text style={styles.subtitle}>Learn {LANGUAGE_NAMES[learningLanguage] || 'Vocabulary'} Vocabulary</Text>
         </View>
 
         {/* Streak Display */}
@@ -180,9 +180,8 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 10,
     marginBottom: 40,
-    position: 'relative',
   },
   title: {
     fontSize: 36,
@@ -195,10 +194,10 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
   },
   headerButtons: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
+    width: '100%',
     flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 10,
   },
   headerButton: {
     padding: 8,

@@ -21,7 +21,7 @@ import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import hapticService from '../services/HapticService';
 
 const PAIRS_PER_ROUND = 5;
-const WORDS_PER_SESSION = 20;
+const DEFAULT_WORDS_PER_SESSION = 20;
 
 const LANGUAGE_NAMES = {
   en: 'English',
@@ -43,7 +43,8 @@ const shuffleArray = (arr) => {
   return shuffled;
 };
 
-export default function MatchingPairsScreen({ navigation }) {
+export default function MatchingPairsScreen({ route, navigation }) {
+  const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
   const [loading, setLoading] = useState(true);
   const [allWords, setAllWords] = useState([]);
   const [roundWords, setRoundWords] = useState([]);
@@ -90,9 +91,9 @@ export default function MatchingPairsScreen({ navigation }) {
       setSessionId(newSessionId);
       await achievementService.startSession(newSessionId);
 
-      let reviewWords = await getWordsDueForReview(15);
-      if (reviewWords.length < WORDS_PER_SESSION) {
-        const newWords = await getNewWords(WORDS_PER_SESSION - reviewWords.length);
+      let reviewWords = await getWordsDueForReview(wordsPerSession);
+      if (reviewWords.length < wordsPerSession) {
+        const newWords = await getNewWords(wordsPerSession - reviewWords.length);
         reviewWords = [...reviewWords, ...newWords];
       }
 

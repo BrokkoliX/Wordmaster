@@ -21,34 +21,80 @@ async function cleanGrammaticalEntries() {
     const beforeCount = await client.query('SELECT COUNT(*) as count FROM words');
     console.log(`📊 Total words before cleaning: ${parseInt(beforeCount.rows[0].count).toLocaleString()}`);
     
-    // Remove entries with grammatical descriptions
+    // Remove entries with grammatical descriptions (AGGRESSIVE)
     const deleteQuery = `
       DELETE FROM words
       WHERE 
+        -- Case markers
         translation ILIKE '%nominative%'
         OR translation ILIKE '%accusative%'
         OR translation ILIKE '%dative%'
         OR translation ILIKE '%genitive%'
+        
+        -- Verb forms and tenses
+        OR translation ILIKE '%first person%'
+        OR translation ILIKE '%second person%'
+        OR translation ILIKE '%third person%'
+        OR translation ILIKE '%past tense%'
+        OR translation ILIKE '%present tense%'
+        OR translation ILIKE '%future tense%'
+        OR translation ILIKE '%past participle%'
+        OR translation ILIKE '%present participle%'
+        OR translation ILIKE '%imperative%'
+        OR translation ILIKE '%subjunctive%'
+        OR translation ILIKE '%infinitive of%'
+        
+        -- Grammatical terms
         OR translation ILIKE '%inflection of%'
         OR translation ILIKE '%conjugation of%'
         OR translation ILIKE '%declension of%'
         OR translation ILIKE '%form of%'
         OR translation ILIKE '%singular of%'
         OR translation ILIKE '%plural of%'
+        OR translation ILIKE '%disjunctive form%'
+        OR translation ILIKE '%alternative form%'
+        OR translation ILIKE '%comparative of%'
+        OR translation ILIKE '%superlative of%'
+        
+        -- Gender markers
         OR translation ILIKE '%masculine%'
         OR translation ILIKE '%feminine%'
         OR translation ILIKE '%neuter%'
-        OR translation ILIKE '%past tense%'
-        OR translation ILIKE '%present tense%'
-        OR translation ILIKE '%comparative of%'
-        OR translation ILIKE '%superlative of%'
-        OR translation ILIKE '%disjunctive form%'
-        OR translation ILIKE '%alternative form%'
+        
+        -- Question words with explanations
+        OR translation ILIKE '%interrogative%'
+        
+        -- Definitions with colons
+        OR translation LIKE '%:%'
+        
+        -- Parenthetical grammatical terms
+        OR translation ILIKE '%(pronoun%'
+        OR translation ILIKE '%(verb%'
+        OR translation ILIKE '%(noun%'
+        OR translation ILIKE '%(adjective%'
+        OR translation ILIKE '%(adverb%'
+        OR translation ILIKE '%(preposition%'
+        OR translation ILIKE '%(conjunction%'
+        
+        -- Common definition phrases
+        OR translation ILIKE '%refers to%'
+        OR translation ILIKE '%used to%'
+        OR translation ILIKE '%indicates%'
+        OR translation ILIKE '%denotes%'
+        
+        -- Alphabet descriptions
+        OR translation ILIKE '%letter of the%alphabet%'
+        OR translation ILIKE '%called%written in%'
+        
+        -- Word in target also has grammatical terms
         OR word ILIKE '%nominative%'
         OR word ILIKE '%accusative%'
         OR word ILIKE '%dative%'
         OR word ILIKE '%genitive%'
-        OR LENGTH(translation) > 100
+        OR word ILIKE '%interrogative%'
+        
+        -- Long descriptions
+        OR LENGTH(translation) > 80
     `;
     
     const result = await client.query(deleteQuery);

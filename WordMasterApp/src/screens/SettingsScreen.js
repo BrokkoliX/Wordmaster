@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from '../services/db';
 import exportService from '../services/exportService';
-import { syncWordsFromApi } from '../services/wordApiService';
+import { syncWordsFromApi, isSyncNeeded } from '../services/wordApiService';
 import ttsService from '../services/TTSService';
 
 const CEFR_LEVELS = [
@@ -101,6 +101,23 @@ export default function SettingsScreen({ navigation }) {
       await AsyncStorage.setItem('knownLanguage', knownLanguage);
       await AsyncStorage.setItem('learningLanguage', learningLanguage);
       await AsyncStorage.setItem('cefrLevel', cefrLevel);
+
+      // Only re-download words when the language pair or level actually changed
+      const needsSync = await isSyncNeeded();
+
+      if (!needsSync) {
+        Alert.alert(
+          'Settings Saved!',
+          'Your preferences have been updated.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Home', { screen: 'Dashboard' })
+            }
+          ]
+        );
+        return;
+      }
 
       // Sync words from backend (falls back to bundled data if API is unreachable)
       Alert.alert('Syncing Words', 'Loading vocabulary for your selection...');

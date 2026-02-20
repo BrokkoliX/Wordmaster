@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { initDatabase } from './src/services/database';
 import MainTabs from './src/navigation/MainTabs';
-import TestScreen from './src/screens/TestScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -79,17 +78,19 @@ function RootNavigator() {
   const appScreens = (
     <>
       <Stack.Screen name="MainApp" component={MainTabs} />
-      <Stack.Screen
-        name="Test"
-        component={TestScreen}
-        options={{
-          headerShown: true,
-          title: 'Achievement Tests',
-          headerStyle: { backgroundColor: '#3498DB' },
-          headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
-      />
+      {__DEV__ && (
+        <Stack.Screen
+          name="Test"
+          component={require('./src/screens/TestScreen').default}
+          options={{
+            headerShown: true,
+            title: 'Achievement Tests',
+            headerStyle: { backgroundColor: '#3498DB' },
+            headerTintColor: '#fff',
+            headerTitleStyle: { fontWeight: 'bold' },
+          }}
+        />
+      )}
     </>
   );
 

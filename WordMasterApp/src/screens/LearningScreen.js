@@ -23,9 +23,10 @@ import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import ttsService from '../services/TTSService';
 import hapticService from '../services/HapticService';
 
-const WORDS_PER_SESSION = 20;
+const DEFAULT_WORDS_PER_SESSION = 20;
 
-export default function LearningScreen({ navigation }) {
+export default function LearningScreen({ route, navigation }) {
+  const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
   const [loading, setLoading] = useState(true);
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -64,11 +65,11 @@ export default function LearningScreen({ navigation }) {
       await achievementService.startSession(newSessionId);
       
       // Get words for review
-      let reviewWords = await getWordsDueForReview(15);
+      let reviewWords = await getWordsDueForReview(wordsPerSession);
       
       // Add new words if needed
-      if (reviewWords.length < WORDS_PER_SESSION) {
-        const newWords = await getNewWords(WORDS_PER_SESSION - reviewWords.length);
+      if (reviewWords.length < wordsPerSession) {
+        const newWords = await getNewWords(wordsPerSession - reviewWords.length);
         reviewWords = [...reviewWords, ...newWords];
       }
       
@@ -166,6 +167,13 @@ export default function LearningScreen({ navigation }) {
         question.word.category,
         isCorrect
       );
+      
+      // Auto-advance on correct answer after a brief delay
+      if (isCorrect) {
+        setTimeout(() => {
+          handleNext();
+        }, 600);
+      }
     } catch (error) {
       console.error('Error updating progress:', error);
     }
@@ -373,19 +381,22 @@ export default function LearningScreen({ navigation }) {
             })}
           </View>
 
-          {/* Next button */}
-          {showFeedback && (
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNext}
-            >
-              <Text style={styles.nextButtonText}>
-                {currentIndex < words.length - 1 ? 'Next →' : 'Finish'}
-              </Text>
-            </TouchableOpacity>
-          )}
         </Animated.View>
       </ScrollView>
+
+      {/* Next button - only shown on incorrect answers, fixed at bottom */}
+      {showFeedback && selectedOption && !selectedOption.isCorrect && (
+        <View style={styles.nextButtonContainer}>
+          <TouchableOpacity
+            style={styles.nextButton}
+            onPress={handleNext}
+          >
+            <Text style={styles.nextButtonText}>
+              {currentIndex < words.length - 1 ? 'Next →' : 'Finish'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       
       {/* Achievement Unlock Modal */}
       <AchievementUnlockModal
@@ -448,7 +459,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   progressContainer: {
-    marginBottom: 30,
+    marginBottom: 16,
   },
   progressBar: {
     height: 8,
@@ -477,10 +488,10 @@ const styles = StyleSheet.create({
   },
   questionCard: {
     backgroundColor: 'white',
-    padding: 30,
+    padding: 20,
     borderRadius: 16,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -523,25 +534,25 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     backgroundColor: 'white',
-    padding: 18,
+    padding: 14,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 10,
     borderWidth: 2,
     borderColor: '#E0E6ED',
   },
   optionButtonCorrect: {
     backgroundColor: '#D4EDDA',
-    padding: 18,
+    padding: 14,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 10,
     borderWidth: 2,
     borderColor: '#28A745',
   },
   optionButtonIncorrect: {
     backgroundColor: '#F8D7DA',
-    padding: 18,
+    padding: 14,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 10,
     borderWidth: 2,
     borderColor: '#DC3545',
   },
@@ -561,12 +572,16 @@ const styles = StyleSheet.create({
     color: '#721C24',
     textAlign: 'center',
   },
+  nextButtonContainer: {
+    padding: 16,
+    paddingBottom: 20,
+    backgroundColor: '#F5F7FA',
+  },
   nextButton: {
     backgroundColor: '#3498DB',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 20,
   },
   nextButtonText: {
     color: 'white',

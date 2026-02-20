@@ -31,52 +31,101 @@ const BATCH_SIZE = 500;
 
 /**
  * Check if a translation is a grammatical description rather than a proper translation
- * Filters out entries like "nominative/accusative form of X"
+ * AGGRESSIVE FILTERING: We want ONLY clean word-to-word translations
  */
 function isGrammaticalDescription(text) {
   if (!text) return true;
-  
+
   const lowerText = text.toLowerCase();
-  
-  // Patterns that indicate grammatical metadata
+
+  // Patterns that indicate grammatical metadata or explanations
   const grammaticalPatterns = [
+    // Case markers
     /\b(nominative|accusative|dative|genitive)\b/i,
+
+    // Verb forms and tenses
+    /\b(first|second|third) person\b/i,
     /\b(singular|plural) (of|form)\b/i,
+    /\bpast (tense|participle|of)\b/i,
+    /\bpresent (tense|participle|of)\b/i,
+    /\bfuture (tense|of)\b/i,
+    /\bperfect (tense|of)\b/i,
+    /\bimperative (of|form)\b/i,
+    /\bsubjunctive (of|form)\b/i,
+    /\binfinitive (of|form)\b/i,
+
+    // Grammatical terms
     /\binflection of\b/i,
-    /\b(masculine|feminine|neuter) (singular|plural|form)\b/i,
+    /\bconjugation of\b/i,
+    /\bdeclension of\b/i,
     /\bform of\b/i,
     /\bdisjunctive form\b/i,
     /\balternative form\b/i,
-    /\bconjugation of\b/i,
-    /\bdeclension of\b/i,
-    /\bcomparative of\b/i,
-    /\bsuperlative of\b/i,
-    /\bpast tense of\b/i,
-    /\bpresent tense of\b/i,
+    /\bcomparative (of|form)\b/i,
+    /\bsuperlative (of|form)\b/i,
+
+    // Gender and number
+    /\b(masculine|feminine|neuter)\b/i,
+
+    // Question words with explanations
+    /\binterrogative\b/i,
+
+    // Common explanation patterns
+    /\bhow\/\s*interrogative/i,
+    /\bwhat\/\s*interrogative/i,
+    /\bwhen\/\s*interrogative/i,
+    /\bwhere\/\s*interrogative/i,
+    /\bwho\/\s*interrogative/i,
+    /\bwhy\/\s*interrogative/i,
+
+    // Entries that are definitions not translations (has colon explanation)
+    /:\s*\w+/,  // "word: explanation"
+
+    // "plural of", "singular of" patterns
+    /\bplural of\b/i,
+    /\bsingular of\b/i,
+
+    // "X form" patterns
+    /\b\w+ form$/i,
+
+    // Starts with grammatical article + description
     /^(the|a|an) .+ (of|form)/i,
+
+    // Common grammatical metadata phrases
+    /\bcalled\b.*\bwritten in\b/i,
+    /\bletter of the\b.*\balphabet\b/i,
   ];
-  
+
   // Check if text matches any grammatical pattern
   for (const pattern of grammaticalPatterns) {
     if (pattern.test(text)) {
       return true;
     }
   }
-  
+
   // Skip very long descriptions (likely definitions not translations)
-  if (text.length > 100) {
+  if (text.length > 80) {  // Reduced from 100 to be stricter
     return true;
   }
-  
+
   // Skip entries with multiple slashes (often grammatical alternatives)
   const slashCount = (text.match(/\//g) || []).length;
   if (slashCount > 2) {
     return true;
   }
-  
+
+  // Skip entries with parenthetical grammatical explanations
+  if (/\([^)]*\b(pronoun|verb|noun|adjective|adverb|preposition|conjunction)\b[^)]*\)/i.test(text)) {
+    return true;
+  }
+
+  // Skip if contains common definition phrases
+  if (/\b(refers to|used to|indicates|denotes)\b/i.test(text)) {
+    return true;
+  }
+
   return false;
 }
-
 async function seedWords() {
   const client = await pool.connect();
 

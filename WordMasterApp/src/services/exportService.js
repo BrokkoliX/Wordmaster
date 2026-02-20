@@ -19,12 +19,12 @@ export const exportProgress = async () => {
 
     // Get user progress
     const progress = await db.getAllAsync(
-      'SELECT * FROM user_word_progress ORDER BY last_reviewed DESC'
+      'SELECT * FROM user_word_progress ORDER BY last_reviewed_at DESC'
     );
 
     // Get session history
     const sessions = await db.getAllAsync(
-      'SELECT * FROM learning_sessions ORDER BY start_time DESC LIMIT 100'
+      'SELECT * FROM sessions ORDER BY started_at DESC LIMIT 100'
     );
 
     // Get achievement progress
@@ -167,7 +167,7 @@ export const importProgress = async (importData, mode = 'merge') => {
     if (mode === 'replace') {
       console.log('⚠️  Clearing existing data...');
       await db.runAsync('DELETE FROM user_word_progress');
-      await db.runAsync('DELETE FROM learning_sessions');
+      await db.runAsync('DELETE FROM sessions');
       await db.runAsync('DELETE FROM user_achievements');
     }
 
@@ -191,9 +191,9 @@ export const importProgress = async (importData, mode = 'merge') => {
                 SET status = ?, confidence_level = ?, consecutive_correct = ?,
                     ease_factor = ?, interval_days = ?, next_review_date = ?,
                     times_shown = ?, times_correct = ?, times_incorrect = ?,
-                    last_reviewed = ?
+                    last_reviewed_at = ?
                 WHERE word_id = ?
-                  AND (last_reviewed IS NULL OR last_reviewed < ?)
+                  AND (last_reviewed_at IS NULL OR last_reviewed_at < ?)
               `, [
                 progressEntry.status,
                 progressEntry.confidence_level,
@@ -204,9 +204,9 @@ export const importProgress = async (importData, mode = 'merge') => {
                 progressEntry.times_shown,
                 progressEntry.times_correct,
                 progressEntry.times_incorrect,
-                progressEntry.last_reviewed,
+                progressEntry.last_reviewed_at,
                 progressEntry.word_id,
-                progressEntry.last_reviewed,
+                progressEntry.last_reviewed_at,
               ]);
               stats.progressUpdated++;
             } else {
@@ -233,13 +233,13 @@ export const importProgress = async (importData, mode = 'merge') => {
       for (const session of importData.data.sessions) {
         try {
           await db.runAsync(`
-            INSERT OR IGNORE INTO learning_sessions 
-            (id, start_time, end_time, words_reviewed, correct_answers, accuracy)
+            INSERT OR IGNORE INTO sessions 
+            (id, started_at, completed_at, words_reviewed, correct_answers, accuracy)
             VALUES (?, ?, ?, ?, ?, ?)
           `, [
             session.id,
-            session.start_time,
-            session.end_time,
+            session.started_at,
+            session.completed_at,
             session.words_reviewed,
             session.correct_answers,
             session.accuracy,
@@ -259,13 +259,13 @@ export const importProgress = async (importData, mode = 'merge') => {
         try {
           await db.runAsync(`
             INSERT OR IGNORE INTO user_achievements 
-            (id, achievement_id, unlocked_at, progress, notification_shown)
+            (id, achievement_id, unlocked_at, progress_value, notification_shown)
             VALUES (?, ?, ?, ?, ?)
           `, [
             achievement.id,
             achievement.achievement_id,
             achievement.unlocked_at,
-            achievement.progress,
+            achievement.progress_value,
             achievement.notification_shown,
           ]);
           stats.achievementsImported++;
@@ -302,7 +302,7 @@ async function insertProgressEntry(entry) {
     INSERT INTO user_word_progress 
     (id, word_id, status, confidence_level, consecutive_correct,
      ease_factor, interval_days, next_review_date,
-     times_shown, times_correct, times_incorrect, last_reviewed)
+     times_shown, times_correct, times_incorrect, last_reviewed_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     entry.id,
@@ -316,7 +316,7 @@ async function insertProgressEntry(entry) {
     entry.times_shown,
     entry.times_correct,
     entry.times_incorrect,
-    entry.last_reviewed,
+    entry.last_reviewed_at,
   ]);
 }
 

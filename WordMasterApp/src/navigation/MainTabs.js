@@ -8,6 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ModeSelectionScreen from '../screens/ModeSelectionScreen';
 import LearningScreen from '../screens/LearningScreen';
 import MatchingPairsScreen from '../screens/MatchingPairsScreen';
+import TypeTranslationScreen from '../screens/TypeTranslationScreen';
 import SummaryScreen from '../screens/SummaryScreen';
 import AchievementsScreen from '../screens/AchievementsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -65,6 +66,11 @@ function LearnStack() {
         name="MatchingPairs"
         component={MatchingPairsScreen}
         options={{ title: 'Matching Pairs' }}
+      />
+      <Stack.Screen
+        name="TypeTranslation"
+        component={TypeTranslationScreen}
+        options={{ title: 'Type Translation' }}
       />
       <Stack.Screen
         name="Summary"
