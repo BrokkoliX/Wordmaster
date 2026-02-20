@@ -1,6 +1,37 @@
 import db from '../services/db';
 
 /**
+ * SQL clause to filter out grammatical descriptions
+ * Prevents entries like "nominative/accusative form of X" from being used
+ */
+const GRAMMATICAL_FILTER = `
+  AND word NOT LIKE '[%'
+  AND translation NOT LIKE '[%'
+  AND translation NOT LIKE '%nominative%'
+  AND translation NOT LIKE '%accusative%'
+  AND translation NOT LIKE '%dative%'
+  AND translation NOT LIKE '%genitive%'
+  AND translation NOT LIKE '%inflection of%'
+  AND translation NOT LIKE '%conjugation of%'
+  AND translation NOT LIKE '%declension of%'
+  AND translation NOT LIKE '%form of%'
+  AND translation NOT LIKE '%singular of%'
+  AND translation NOT LIKE '%plural of%'
+  AND translation NOT LIKE '%masculine%'
+  AND translation NOT LIKE '%feminine%'
+  AND translation NOT LIKE '%neuter%'
+  AND translation NOT LIKE '%past tense%'
+  AND translation NOT LIKE '%present tense%'
+  AND translation NOT LIKE '%comparative of%'
+  AND translation NOT LIKE '%superlative of%'
+  AND word NOT LIKE '%nominative%'
+  AND word NOT LIKE '%accusative%'
+  AND word NOT LIKE '%dative%'
+  AND word NOT LIKE '%genitive%'
+  AND LENGTH(translation) < 100
+`;
+
+/**
  * Generate distractor options (wrong answers) for a word
  * @param {Object} correctWord - The correct word object
  * @param {number} count - Number of distractors to generate (default: 3)
@@ -22,8 +53,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
         SELECT * FROM words 
         WHERE category = ? AND id != ?
         AND source_lang = ? AND target_lang = ?
-        AND word NOT LIKE '[%'
-        AND translation NOT LIKE '[%'
+        ${GRAMMATICAL_FILTER}
         ORDER BY RANDOM() 
         LIMIT ?
       `, [correctWord.category, correctWord.id, sourceLang, targetLang, sameCategoryCount]);
@@ -44,8 +74,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
         WHERE difficulty BETWEEN ? AND ? 
         AND id != ?
         AND source_lang = ? AND target_lang = ?
-        AND word NOT LIKE '[%'
-        AND translation NOT LIKE '[%'
+        ${GRAMMATICAL_FILTER}
         AND id NOT IN (${Array(distractors.length).fill('?').join(',') || 'NULL'})
         ORDER BY RANDOM() 
         LIMIT ?
@@ -74,8 +103,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
         SELECT * FROM words 
         WHERE id != ?
         AND source_lang = ? AND target_lang = ?
-        AND word NOT LIKE '[%'
-        AND translation NOT LIKE '[%'
+        ${GRAMMATICAL_FILTER}
         AND id NOT IN (${Array(distractors.length).fill('?').join(',') || 'NULL'})
         ORDER BY RANDOM() 
         LIMIT ?
@@ -99,8 +127,7 @@ export const generateDistractors = async (correctWord, count = 3) => {
       SELECT * FROM words 
       WHERE id != ?
       AND source_lang = ? AND target_lang = ?
-      AND word NOT LIKE '[%'
-      AND translation NOT LIKE '[%'
+      ${GRAMMATICAL_FILTER}
       ORDER BY RANDOM() 
       LIMIT ?
     `, [correctWord.id, sourceLang, targetLang, count]);

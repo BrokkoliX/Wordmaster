@@ -29,6 +29,54 @@ const LANGUAGE_FILES = [
 
 const BATCH_SIZE = 500;
 
+/**
+ * Check if a translation is a grammatical description rather than a proper translation
+ * Filters out entries like "nominative/accusative form of X"
+ */
+function isGrammaticalDescription(text) {
+  if (!text) return true;
+  
+  const lowerText = text.toLowerCase();
+  
+  // Patterns that indicate grammatical metadata
+  const grammaticalPatterns = [
+    /\b(nominative|accusative|dative|genitive)\b/i,
+    /\b(singular|plural) (of|form)\b/i,
+    /\binflection of\b/i,
+    /\b(masculine|feminine|neuter) (singular|plural|form)\b/i,
+    /\bform of\b/i,
+    /\bdisjunctive form\b/i,
+    /\balternative form\b/i,
+    /\bconjugation of\b/i,
+    /\bdeclension of\b/i,
+    /\bcomparative of\b/i,
+    /\bsuperlative of\b/i,
+    /\bpast tense of\b/i,
+    /\bpresent tense of\b/i,
+    /^(the|a|an) .+ (of|form)/i,
+  ];
+  
+  // Check if text matches any grammatical pattern
+  for (const pattern of grammaticalPatterns) {
+    if (pattern.test(text)) {
+      return true;
+    }
+  }
+  
+  // Skip very long descriptions (likely definitions not translations)
+  if (text.length > 100) {
+    return true;
+  }
+  
+  // Skip entries with multiple slashes (often grammatical alternatives)
+  const slashCount = (text.match(/\//g) || []).length;
+  if (slashCount > 2) {
+    return true;
+  }
+  
+  return false;
+}
+
 async function seedWords() {
   const client = await pool.connect();
 
@@ -50,6 +98,7 @@ async function seedWords() {
 
     let totalImported = 0;
     let totalSkipped = 0;
+    let totalGrammatical = 0;
 
     for (const fileName of LANGUAGE_FILES) {
       const filePath = path.join(DATA_DIR, fileName);
@@ -65,6 +114,7 @@ async function seedWords() {
 
       let fileImported = 0;
       let fileSkipped = 0;
+      let fileGrammatical = 0;
 
       for (let i = 0; i < words.length; i += BATCH_SIZE) {
         const batch = words.slice(i, i + BATCH_SIZE);
@@ -77,6 +127,18 @@ async function seedWords() {
         for (const w of batch) {
           if (!w.source_word || w.source_word.trim() === '' || w.source_word.startsWith('[TRANSLATE')) {
             fileSkipped++;
+            continue;
+          }
+          
+          // Skip grammatical descriptions in translation
+          if (isGrammaticalDescription(w.source_word)) {
+            fileGrammatical++;
+            continue;
+          }
+          
+          // Skip grammatical descriptions in target word
+          if (isGrammaticalDescription(w.target_word)) {
+            fileGrammatical++;
             continue;
           }
 
@@ -113,16 +175,18 @@ async function seedWords() {
         }
       }
 
-      console.log(`   ✅ Imported ${fileImported.toLocaleString()}, skipped ${fileSkipped}`);
+      console.log(`   ✅ Imported ${fileImported.toLocaleString()}, skipped ${fileSkipped}, grammatical ${fileGrammatical}`);
       totalImported += fileImported;
       totalSkipped += fileSkipped;
+      totalGrammatical += fileGrammatical;
     }
 
     // Final count
     const countResult = await client.query('SELECT COUNT(*) as count FROM words');
     console.log(`\n✅ Seed complete.`);
     console.log(`   Imported: ${totalImported.toLocaleString()}`);
-    console.log(`   Skipped:  ${totalSkipped}`);
+    console.log(`   Skipped (empty/invalid): ${totalSkipped}`);
+    console.log(`   Skipped (grammatical): ${totalGrammatical}`);
     console.log(`   Total words in database: ${parseInt(countResult.rows[0].count).toLocaleString()}`);
   } catch (error) {
     console.error('❌ Seed failed:', error);

@@ -164,17 +164,28 @@ export const getWordsDueForReview = async (limit = 20) => {
         AND w.target_lang = ?
         AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
+        AND w.translation NOT LIKE '%nominative%'
+        AND w.translation NOT LIKE '%accusative%'
+        AND w.translation NOT LIKE '%dative%'
+        AND w.translation NOT LIKE '%genitive%'
+        AND w.translation NOT LIKE '%inflection of%'
+        AND w.translation NOT LIKE '%conjugation of%'
+        AND w.translation NOT LIKE '%form of%'
+        AND w.translation NOT LIKE '%singular of%'
+        AND w.translation NOT LIKE '%plural of%'
+        AND LENGTH(w.translation) < 100
         AND (p.next_review_date IS NULL OR p.next_review_date <= ?)
       ORDER BY 
         CASE 
-          WHEN p.next_review_date IS NULL THEN 0
-          WHEN p.next_review_date < ? THEN 1
-          ELSE 2
+          WHEN p.next_review_date IS NOT NULL AND p.next_review_date < ? THEN 0
+          WHEN p.next_review_date IS NOT NULL THEN 1
+          WHEN w.cefr_level = ? THEN 2
+          ELSE 3
         END,
         p.next_review_date ASC,
         w.frequency_rank ASC
       LIMIT ?
-    `, [...allowedLevels, knownLanguage, learningLanguage, today, today, limit]);
+    `, [...allowedLevels, knownLanguage, learningLanguage, today, today, cefrLevel, limit]);
     
     if (words.length === 0) {
       console.log(`⚠️  No words available for ${knownLanguage} → ${learningLanguage} at ${cefrLevel} level`);
@@ -215,9 +226,22 @@ export const getNewWords = async (limit = 5) => {
         AND w.target_lang = ?
         AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
-      ORDER BY w.frequency_rank ASC, RANDOM()
+        AND w.translation NOT LIKE '%nominative%'
+        AND w.translation NOT LIKE '%accusative%'
+        AND w.translation NOT LIKE '%dative%'
+        AND w.translation NOT LIKE '%genitive%'
+        AND w.translation NOT LIKE '%inflection of%'
+        AND w.translation NOT LIKE '%conjugation of%'
+        AND w.translation NOT LIKE '%form of%'
+        AND w.translation NOT LIKE '%singular of%'
+        AND w.translation NOT LIKE '%plural of%'
+        AND LENGTH(w.translation) < 100
+      ORDER BY
+        CASE WHEN w.cefr_level = ? THEN 0 ELSE 1 END,
+        w.frequency_rank ASC,
+        RANDOM()
       LIMIT ?
-    `, [...allowedLevels, knownLanguage, learningLanguage, limit]);
+    `, [...allowedLevels, knownLanguage, learningLanguage, cefrLevel, limit]);
     
     return words;
   } catch (error) {

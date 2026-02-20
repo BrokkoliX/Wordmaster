@@ -96,6 +96,53 @@ const insert = db.prepare(`
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
+/**
+ * Check if a translation is a grammatical description rather than a proper translation
+ */
+function isGrammaticalDescription(text) {
+  if (!text) return true;
+  
+  const lowerText = text.toLowerCase();
+  
+  // Patterns that indicate grammatical metadata
+  const grammaticalPatterns = [
+    /\b(nominative|accusative|dative|genitive)\b/i,
+    /\b(singular|plural) (of|form)\b/i,
+    /\binflection of\b/i,
+    /\b(masculine|feminine|neuter) (singular|plural|form)\b/i,
+    /\bform of\b/i,
+    /\bdisjunctive form\b/i,
+    /\balternative form\b/i,
+    /\bconjugation of\b/i,
+    /\bdeclension of\b/i,
+    /\bcomparative of\b/i,
+    /\bsuperlative of\b/i,
+    /\bpast tense of\b/i,
+    /\bpresent tense of\b/i,
+    /^(the|a|an) .+ (of|form)/i,
+  ];
+  
+  // Check if text matches any grammatical pattern
+  for (const pattern of grammaticalPatterns) {
+    if (pattern.test(text)) {
+      return true;
+    }
+  }
+  
+  // Skip very long descriptions (likely definitions not translations)
+  if (text.length > 100) {
+    return true;
+  }
+  
+  // Skip entries with multiple slashes (often grammatical alternatives)
+  const slashCount = (text.match(/\//g) || []).length;
+  if (slashCount > 2) {
+    return true;
+  }
+  
+  return false;
+}
+
 // Import with CORRECT mapping
 console.log('💾 Importing words with correct mapping...');
 console.log('   word = Spanish (target_word)');
@@ -103,10 +150,24 @@ console.log('   translation = English (source_word)\n');
 
 const importMany = db.transaction((words) => {
   let skipped = 0;
+  let skippedGrammatical = 0;
+  
   for (const w of words) {
     // Skip words without English translation
     if (!w.source_word || w.source_word.trim() === '') {
       skipped++;
+      continue;
+    }
+    
+    // Skip grammatical descriptions
+    if (isGrammaticalDescription(w.source_word)) {
+      skippedGrammatical++;
+      continue;
+    }
+    
+    // Skip if target word is also a grammatical description
+    if (isGrammaticalDescription(w.target_word)) {
+      skippedGrammatical++;
       continue;
     }
     
@@ -122,8 +183,12 @@ const importMany = db.transaction((words) => {
       'es'               // target_lang = Spanish
     );
   }
+  
   if (skipped > 0) {
     console.log(`   ⚠️  Skipped ${skipped} words without translations`);
+  }
+  if (skippedGrammatical > 0) {
+    console.log(`   ⚠️  Skipped ${skippedGrammatical} grammatical descriptions`);
   }
 });
 
