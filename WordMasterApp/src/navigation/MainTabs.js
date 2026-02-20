@@ -9,6 +9,7 @@ import ModeSelectionScreen from '../screens/ModeSelectionScreen';
 import LearningScreen from '../screens/LearningScreen';
 import MatchingPairsScreen from '../screens/MatchingPairsScreen';
 import TypeTranslationScreen from '../screens/TypeTranslationScreen';
+import FillInBlankScreen from '../screens/FillInBlankScreen';
 import SummaryScreen from '../screens/SummaryScreen';
 import AchievementsScreen from '../screens/AchievementsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -71,6 +72,11 @@ function LearnStack() {
         name="TypeTranslation"
         component={TypeTranslationScreen}
         options={{ title: 'Type Translation' }}
+      />
+      <Stack.Screen
+        name="FillInBlank"
+        component={FillInBlankScreen}
+        options={{ title: 'Fill in the Blank' }}
       />
       <Stack.Screen
         name="Summary"

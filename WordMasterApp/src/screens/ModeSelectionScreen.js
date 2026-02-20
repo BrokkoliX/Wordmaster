@@ -102,6 +102,23 @@ export default function ModeSelectionScreen({ navigation }) {
             </Text>
           </View>
         </TouchableOpacity>
+
+        {/* Fill in the Blank */}
+        <TouchableOpacity
+          style={styles.modeCard}
+          onPress={() => navigation.navigate('FillInBlank', { wordsPerSession })}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.modeIconContainer, styles.modeIconGrammar]}>
+            <Text style={styles.modeIcon}>_ab</Text>
+          </View>
+          <View style={styles.modeInfo}>
+            <Text style={styles.modeName}>Fill in the Blank</Text>
+            <Text style={styles.modeDescription}>
+              Complete sentences by choosing the correct missing word. Trains grammar in context.
+            </Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -117,27 +134,27 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    padding: 24,
+    padding: 16,
     justifyContent: 'center',
   },
   wordCountSection: {
-    marginBottom: 28,
+    marginBottom: 18,
   },
   wordCountLabel: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#2C3E50',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   wordCountRow: {
     flexDirection: 'row',
     justifyContent: 'center',
   },
   wordCountPill: {
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 18,
     backgroundColor: 'white',
     marginHorizontal: 6,
     borderWidth: 2,
@@ -148,7 +165,7 @@ const styles = StyleSheet.create({
     borderColor: '#3498DB',
   },
   wordCountPillText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#7F8C8D',
   },
@@ -156,41 +173,41 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#2C3E50',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#7F8C8D',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   modeCard: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 20,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
     borderWidth: 2,
     borderColor: '#E0E6ED',
   },
   modeIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     backgroundColor: '#FDEBEB',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 12,
   },
   modeIconMatching: {
     backgroundColor: '#E8F8F5',
@@ -198,8 +215,11 @@ const styles = StyleSheet.create({
   modeIconTyping: {
     backgroundColor: '#EDE7F6',
   },
+  modeIconGrammar: {
+    backgroundColor: '#F3E5F5',
+  },
   modeIcon: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#E53935',
   },
@@ -207,14 +227,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modeName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#2C3E50',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   modeDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#7F8C8D',
-    lineHeight: 20,
+    lineHeight: 18,
   },
 });

@@ -2,6 +2,7 @@ import categoriesData from '../data/categories.json';
 import { calculateStreak, checkMilestoneReached } from './streakService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { syncWordsFromApi, isSyncNeeded } from './wordApiService';
+import { syncSentencesFromApi, isSentenceSyncNeeded, initSentenceTable } from './sentenceApiService';
 import { initAchievementTables } from './achievementDatabase';
 import db from './db';
 
@@ -101,6 +102,18 @@ export const initDatabase = async () => {
       }
     } else {
       console.log(`✅ Local word cache: ${wordCount.count.toLocaleString()} words (up to date)`);
+    }
+
+    // Sync sentence templates for fill-in-the-blank exercises
+    await initSentenceTable();
+    const sentenceSyncNeeded = await isSentenceSyncNeeded();
+    if (sentenceSyncNeeded) {
+      console.log('📡 Syncing sentence templates...');
+      try {
+        await syncSentencesFromApi();
+      } catch (error) {
+        console.error('⚠️  Sentence sync failed:', error.message);
+      }
     }
     
     // Check if categories are already loaded

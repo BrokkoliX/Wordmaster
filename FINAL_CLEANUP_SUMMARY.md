@@ -1,231 +1,109 @@
-# Final Vocabulary Cleanup Summary
+# Vocabulary Cleanup: Grammatical Entry Removal
 
-**Date**: February 20, 2026  
-**Database**: AWS RDS PostgreSQL (wordmaster-db.ck5yaysaaeea.us-east-1.rds.amazonaws.com)
+**Date**: Session update
+**Scope**: All JSON data files, backend seeder, API layer, mobile app fallback
 
-## Executive Summary
+## Problem
 
-✅ **ULTRA-AGGRESSIVE CLEANING COMPLETE**
+The Wiktionary-sourced dictionary data contained grammatical descriptions instead of plain word translations. Examples of bad entries that appeared in the app:
 
-Your AWS database has been thoroughly cleaned to remove ALL grammatical descriptions, explanations, and metadata. Only clean, word-to-word translations remain.
-
-## Results
-
-### Before → After
-- **Starting**: 188,793 words
-- **After Cleanup**: 144,704 words  
-- **Removed**: 44,089 entries (23.3%)
-
-### Current Database Statistics
-
-**Total Clean Words**: 144,704
-
-**By Language**:
-- English (en): 115,371 words
-- French (fr): 11,769 words
-- German (de): 10,746 words
-- Hungarian (hu): 6,529 words
-- Spanish (es): 289 words
-
-## What Was Removed
-
-### Grammatical Descriptions
-- ✅ Case markers: nominative, accusative, dative, genitive
-- ✅ Verb forms: first/second/third person (with/without hyphens)
-- ✅ Tenses: past/present/future tense, past/present participle
-- ✅ Forms: imperative, subjunctive, infinitive
-- ✅ Gender: masculine, feminine, neuter
-
-### Explanations & Definitions
-- ✅ "interrogative" descriptions
-- ✅ Entries with colons (word: explanation)
-- ✅ "plural of", "singular of"
-- ✅ "form of", "inflection of", "conjugation of"
-- ✅ "comparative of", "superlative of"
-
-### Parenthetical Explanations
-- ✅ (pronoun), (verb), (noun), (adjective)
-- ✅ (personal), (cardinal), (ordinal)
-- ✅ (co-ordinating), (subordinating)
-- ✅ (informal), (formal), (colloquial)
-- ✅ (local), (temporal), (direction)
-- ✅ (direct object), (indirect object)
-- ✅ (accompaniment), (location)
-
-### Metadata & Technical Terms
-- ✅ "initialism", "abbreviation", "acronym"
-- ✅ "refers to", "used to", "indicates", "denotes"
-- ✅ "letter of the alphabet"
-- ✅ "called...written in..."
-- ✅ "literally"
-- ✅ "contraction of"
-- ✅ "substitutes for"
-- ✅ "used before"
-- ✅ "followed by"
-- ✅ "version anglaise", "dubbed in", "english-language"
-
-### Malformed Entries
-- ✅ Entries with orphaned closing parentheses
-- ✅ Entries with multiple consecutive spaces
-- ✅ Capital-letter-only abbreviations (EC, USA, etc.)
-- ✅ Entries with grave/acute/circumflex accent explanations
-- ✅ Entries over 80 characters (definitions, not translations)
-
-## Examples of Removed Entries
-
-### Before (BAD ❌):
 ```
-das → nominative/accusative neuter singular of der: the
-mir → dative of ich: me/to me  
-ist → third-person singular present of sein
-ich → I  pronoun)
-ça → that/(informal) that (distal demonstrative pronoun)
-à → A with grave accent
-du → contraction of de + le/literally "of the"
-y → a letter in the French alphabet/after x and before z
-va → "version anglaise" — English-language version
+das -> nominative/accusative neuter singular of der: the
+mir -> dative of ich: me/to me
+ist -> third-person singular present of sein
+hogy -> how?/(interrogative) how?
+azt -> accusative singular of az
+ça  -> that/(informal) that (distal demonstrative pronoun)
 ```
 
-### After (GOOD ✅):
-```
-das → the
-mir → me
-ist → (removed - was grammatical)
-ich → (removed - was malformed)
-ça → (removed - had explanation)
-à → (removed - was explanation)
-du → (removed - was definition)
-y → (removed - was explanation)
-va → (removed - was definition)
-```
+## Solution: Four-layer defense
 
-## Sample Clean Entries
+The fix addresses this at every stage of the data pipeline, preventing grammatical entries from reaching users now and in the future when new languages are added.
 
-### German (de):
-```
-sie → she/it
-du → you/thou
-nicht → not/non-
-der → the
-wir → we
-zu → to/towards
-in → in/inside
-mit → with/by
-wie → how
-auf → on/upon
-aber → but/however
-so → so/such
-```
+**Layer 1 -- Source data generation** (`parseKaikkiDictionary.js`): Wiktionary glosses matching grammatical patterns are rejected before they enter any JSON file. This is the only layer needed for new languages.
 
-### French (fr):
+**Layer 2 -- JSON data files** (cleaned by `cleanJsonDataFiles.js`): All existing JSON files were stripped of grammatical entries and salvageable entries had their annotations removed while preserving the core translation. For example, `"I  pronoun)"` was salvaged to `"I"`, and `"what/(interrogative) what"` was deduplicated to `"what"`.
+
+**Layer 3 -- Backend seed/serve** (`seedWords.js` and `words.controller.js`): The seeder validates every entry before inserting into PostgreSQL. The API controller applies SQL-level `NOT ILIKE` conditions to exclude any stray entries from responses.
+
+**Layer 4 -- Mobile app** (`wordApiService.js` and `database.js`): The local fallback importer runs the same validation. The SQLite query layer applies `NOT LIKE` conditions as a final safety net.
+
+## Cleanup Results
+
+| File | Before | After | Removed | Salvaged |
+|------|--------|-------|---------|----------|
+| words_french.json | 30,000 | 11,871 | 18,129 (60%) | 452 |
+| words_german.json | 30,000 | 10,883 | 19,117 (64%) | 421 |
+| words_hungarian.json | 30,000 | 6,793 | 23,207 (77%) | 307 |
+| words_translated.json (es) | 29,999 | 289 | 29,710 (99%) | 0 |
+
+The reverse-direction files (e.g. `words_french_to_english.json`) mirror the same counts. The Spanish files have only 289 entries because the translation step failed for most words (marked `[TRANSLATE: ...]`), which is a separate data gap to address.
+
+## Patterns Detected and Removed
+
+Grammatical cases (nominative, accusative, dative, genitive, plus 15+ Hungarian-specific cases like inessive, illative, elative, superessive, sublative, delative, adessive, allative, translative, terminative, essive, causal-final, sociative, partitive, comitative). Person markers (first/second/third-person). Tense and mood descriptions (past/present/future tense, participles, imperative, subjunctive, infinitive, conditional, preterite, imperfect). Morphological derivations (inflection of, conjugation of, declension of, form of, contraction of, apocopic/clitic/prevocalic form of, diminutive of, causative of, frequentative of). Gender markers (masculine, feminine, neuter). Metadata entries (initialism, abbreviation, acronym, ISO codes, alphabet descriptions). Placeholder entries (`[TRANSLATE: ...]`, `[NEED: ...]`). Overly long definitions (>80 characters).
+
+## Salvage Examples
+
+Entries that contained a valid translation buried under annotations were cleaned instead of removed:
+
 ```
-de → of/from
-est → east
-pas → step/pace
-tu → you
-un → an/a
-et → and
-il → he/it
-en → in/to
-on → one/people
-pour → for/to
-qui → who/whom
-mais → but/although
+"I  pronoun)"                              -> "I"
+"and/(co-ordinating) and"                  -> "and"
+"what/(interrogative) what"                -> "what"
+"he/(personal) he"                         -> "he"
+"one/(cardinal number) one"                -> "one"
+"the/Used before abstract nouns"           -> "the"
+"that/(informal) that (distal dem...)"     -> "that"
+"how?/(interrogative) how?"                -> "how?"
+"if )/when"                                -> "if/when"
+"I/(personal) I (first-person singular)"   -> "I"
 ```
 
-## Filtering Patterns Applied
+## Deploying to AWS
 
-### Import-Time Filters (seedWords.js)
-- Detects 60+ grammatical patterns
-- Blocks entries before database insertion
-- Prevents future contamination
+After committing these changes, deploy to the EC2 instance:
 
-### Cleanup Queries (cleanGrammaticalEntries.js)
-- Removes existing problematic entries
-- Multiple passes for thoroughness
-- SQL pattern matching for precision
+```bash
+# From the project root
+bash backend/src/scripts/deployCleanup.sh
+```
 
-### Additional Manual Cleanup
-- Targeted queries for edge cases
-- Malformed entry removal
-- Orphaned parentheses cleanup
+This pushes to GitHub, pulls on EC2, runs the database cleanup, re-seeds with clean data, and restarts the backend.
 
-## Mobile App Database
+Alternatively, deploy manually by SSH-ing to EC2 and running:
 
-⚠️ **IMPORTANT**: The mobile app uses a LOCAL SQLite database that is SEPARATE from AWS.
+```bash
+cd ~/Wordmaster/backend
+git pull origin main
+npm install --production
+node src/scripts/cleanGrammaticalEntries.js --apply
+node src/scripts/seedWords.js
+pm2 restart wordmaster-api
+```
 
-### To clean the mobile app database:
+## Adding New Languages
+
+When adding a new language to the project, the `parseKaikkiDictionary.js` script now filters grammatical glosses at parse time. Run it, then run `cleanJsonDataFiles.js` as a second pass to catch any edge cases.
 
 ```bash
 cd WordMasterApp/scripts
-node createCorrectDatabase.js
+node parseKaikkiDictionary.js --lang=it
+node cleanJsonDataFiles.js --apply
 ```
 
-This will create a clean local database with the same aggressive filtering applied.
+Then re-seed the backend database with `seedWords.js`.
 
-## Verification
+## Files Modified
 
-### Zero Grammatical Entries
-```sql
-SELECT COUNT(*) FROM words 
-WHERE translation ILIKE '%nominative%' 
-   OR translation ILIKE '%third person%'
-   OR translation ILIKE '%interrogative%';
--- Result: 0
 ```
-
-### Clean Samples
-All remaining entries are clean word-to-word translations without grammatical metadata.
-
-## Next Steps
-
-### 1. Update Mobile App Database
-Run the mobile app import script to create a clean local database.
-
-### 2. Test in App
-- Launch the app
-- Start a learning session
-- Verify all translations are clean
-- Type mode should work perfectly now
-
-### 3. Future Imports
-All future imports will automatically filter grammatical entries using the updated scripts.
-
-## Files Updated
-
-### Backend (AWS)
-- ✅ `backend/src/scripts/seedWords.js` - Enhanced filtering
-- ✅ `backend/src/scripts/cleanGrammaticalEntries.js` - Aggressive cleanup
-
-### Mobile App
-- ✅ `WordMasterApp/scripts/createCorrectDatabase.js` - Enhanced filtering  
-- ✅ `WordMasterApp/scripts/cleanGrammaticalEntries.js` - Cleanup tool
-
-### Filtering Enhancements
-- Hyphenated forms: third-person, past-tense
-- Parenthetical terms: (personal), (cardinal), (informal)
-- Initialisms and abbreviations
-- Explanatory phrases: "literally", "followed by", "used to"
-- Malformed entries: orphaned parentheses, multiple spaces
-- Definition patterns: colons, em-dashes, quotes
-
-## Performance Impact
-
-- Database size reduced by 23.3%
-- Higher quality vocabulary
-- Faster queries (fewer rows to scan)
-- Better user experience (no confusing entries)
-
-## Success Metrics
-
-✅ **44,089 problematic entries removed**  
-✅ **0 grammatical descriptions remain**  
-✅ **144,704 clean translations**  
-✅ **5 languages supported**  
-✅ **Ready for production use**
-
----
-
-**Status**: ✅ COMPLETE - Database is clean and ready!
-
-The vocabulary is now as clean as possible with pure word-to-word translations. Users will have a much better learning experience.
+WordMasterApp/src/data/words_*.json          -- cleaned source data
+WordMasterApp/scripts/cleanJsonDataFiles.js  -- JSON data cleaner
+WordMasterApp/scripts/verifyCleanData.js     -- verification tool
+WordMasterApp/scripts/parseKaikkiDictionary.js -- source-level filtering
+WordMasterApp/src/services/wordApiService.js -- app fallback validation
+backend/src/scripts/seedWords.js             -- backend seed validation
+backend/src/scripts/cleanGrammaticalEntries.js -- AWS DB cleanup
+backend/src/scripts/deployCleanup.sh         -- deployment script
+backend/src/controllers/words.controller.js  -- API response filtering
+```

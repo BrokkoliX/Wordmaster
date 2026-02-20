@@ -24,6 +24,27 @@ CREATE INDEX IF NOT EXISTS idx_words_lang_level
 CREATE INDEX IF NOT EXISTS idx_words_frequency
   ON words(source_lang, target_lang, frequency_rank);
 
+-- Sentence templates for fill-in-the-blank grammar exercises
+CREATE TABLE IF NOT EXISTS sentence_templates (
+  id VARCHAR(100) PRIMARY KEY,
+  language VARCHAR(10) NOT NULL,          -- target language: 'es','fr','de','hu'
+  cefr_level VARCHAR(10) NOT NULL,        -- 'A1','A2','B1', etc.
+  sentence TEXT NOT NULL,                 -- "Ich ___ Student." (blank = ___)
+  answer TEXT NOT NULL,                   -- "bin"
+  answer_word_id VARCHAR(100),            -- FK to words.id (nullable)
+  distractors TEXT,                       -- JSON array: '["bist","ist","sind"]'
+  hint TEXT,                              -- "to be, first person singular"
+  grammar_topic VARCHAR(100),             -- 'present_tense','articles','cases', etc.
+  difficulty INTEGER DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentences_lang
+  ON sentence_templates(language);
+CREATE INDEX IF NOT EXISTS idx_sentences_lang_level
+  ON sentence_templates(language, cefr_level);
+CREATE INDEX IF NOT EXISTS idx_sentences_topic
+  ON sentence_templates(language, grammar_topic);
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

@@ -297,15 +297,15 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#FFFFFF',
-    padding: 20,
+    padding: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB'
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: 16
+    marginBottom: 10
   },
   statsContainer: {
     flexDirection: 'row',
@@ -315,14 +315,14 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#007AFF'
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6B7280',
-    marginTop: 4
+    marginTop: 2
   },
   filterContainer: {
     backgroundColor: '#FFFFFF',
@@ -374,15 +374,15 @@ const styles = StyleSheet.create({
   },
   achievementCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
     borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 2,
-    elevation: 2
+    elevation: 1
   },
   lockedCard: {
     opacity: 0.6
@@ -392,8 +392,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start'
   },
   icon: {
-    fontSize: 40,
-    marginRight: 12
+    fontSize: 32,
+    marginRight: 10
   },
   lockedIcon: {
     opacity: 0.5
@@ -402,15 +402,15 @@ const styles = StyleSheet.create({
     flex: 1
   },
   title: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: 4
+    marginBottom: 2
   },
   description: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#6B7280',
-    lineHeight: 20
+    lineHeight: 18
   },
   lockedText: {
     color: '#9CA3AF'
@@ -419,8 +419,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: 8,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6'
   },

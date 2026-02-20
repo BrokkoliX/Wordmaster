@@ -88,6 +88,45 @@ function readFrequencyWords(filePath, limit = 30000) {
 }
 
 /**
+ * Patterns that indicate a Wiktionary gloss is a grammatical description
+ * rather than a usable translation.
+ */
+const GRAMMATICAL_GLOSS_PATTERNS = [
+  /\b(nominative|accusative|dative|genitive|ablative|vocative|instrumental|locative|inessive|illative|elative|superessive|sublative|delative|adessive|allative|translative|terminative|essive|causal-final|causal|sociative|partitive|comitative|distributive|temporal)\b/i,
+  /\b(first|second|third)[\s-]person\b/i,
+  /\b(singular|plural)\s+(of|form)\b/i,
+  /\bpast[\s-](tense|participle)\s+of\b/i,
+  /\bpresent[\s-](tense|participle)\s+of\b/i,
+  /\bfuture[\s-](tense)\s+of\b/i,
+  /\b(inflection|conjugation|declension)\s+of\b/i,
+  /\bform\s+of\b/i,
+  /\balternative\s+form\s+of\b/i,
+  /\b(comparative|superlative)\s+of\b/i,
+  /\b(causative|frequentative|diminutive|augmentative|supine|gerund|participle)\s+of\b/i,
+  /\bcontraction\s+of\b/i,
+  /\bapocopic\s+form\s+of\b/i,
+  /\bclitic\s+form\s+of\b/i,
+  /\b(masculine|feminine|neuter)\b/i,
+  /\binterrogative\b/i,
+  /\bletter\b.*\balphabet\b/i,
+  /\bcalled\b.*\bwritten in\b/i,
+  /\b(initialism|abbreviation|acronym)\s+of\b/i,
+  /\b(refers to|used to|indicates|denotes)\b/i,
+  /\bliterally\b/i,
+  /\bversion anglaise\b/i,
+  /\bISO\s+3166\b/i,
+];
+
+function isGrammaticalGloss(text) {
+  if (!text) return true;
+  if (text.length > 80) return true;
+  for (const p of GRAMMATICAL_GLOSS_PATTERNS) {
+    if (p.test(text)) return true;
+  }
+  return false;
+}
+
+/**
  * Extract English translations from Kaikki.org dictionary entry
  */
 function extractTranslations(entry) {
@@ -106,17 +145,17 @@ function extractTranslations(entry) {
                 .replace(/\[.*?\]/g, '') // Remove bracketed notes
                 .split(/[;,]/)           // Split on semicolon or comma
                 .map(t => t.trim())
-                .filter(t => t.length > 0 && t.length < 50); // Reasonable length
+                .filter(t => t.length > 0 && t.length < 50 && !isGrammaticalGloss(t));
               
               clean.forEach(t => translations.add(t));
             }
           });
         }
         
-        // Also check raw_glosses
+        // Also check raw_glosses (skip grammatical ones)
         if (sense.raw_glosses && Array.isArray(sense.raw_glosses)) {
           sense.raw_glosses.forEach(gloss => {
-            if (gloss && typeof gloss === 'string' && gloss.length < 50) {
+            if (gloss && typeof gloss === 'string' && gloss.length < 50 && !isGrammaticalGloss(gloss)) {
               translations.add(gloss.trim());
             }
           });

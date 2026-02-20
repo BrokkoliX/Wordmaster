@@ -15,6 +15,35 @@ const db = require('../config/database');
  */
 const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
+// Defense-in-depth: SQL conditions that exclude any remaining grammatical entries
+const CLEAN_WORD_CONDITIONS = `
+  AND word NOT LIKE '[%'
+  AND translation NOT LIKE '[%'
+  AND translation NOT ILIKE '%nominative%'
+  AND translation NOT ILIKE '%accusative%'
+  AND translation NOT ILIKE '%dative%'
+  AND translation NOT ILIKE '%genitive%'
+  AND translation NOT ILIKE '%inflection of%'
+  AND translation NOT ILIKE '%conjugation of%'
+  AND translation NOT ILIKE '%declension of%'
+  AND translation NOT ILIKE '%form of%'
+  AND translation NOT ILIKE '%singular of%'
+  AND translation NOT ILIKE '%plural of%'
+  AND translation NOT ILIKE '%first-person%'
+  AND translation NOT ILIKE '%second-person%'
+  AND translation NOT ILIKE '%third-person%'
+  AND translation NOT ILIKE '%past participle%'
+  AND translation NOT ILIKE '%present participle%'
+  AND translation NOT ILIKE '%contraction of%'
+  AND translation NOT ILIKE '%interrogative%'
+  AND translation NOT ILIKE '%masculine%'
+  AND translation NOT ILIKE '%feminine%'
+  AND translation NOT ILIKE '%neuter%'
+  AND translation NOT ILIKE '%letter of the%alphabet%'
+  AND LENGTH(translation) <= 80
+  AND LENGTH(word) <= 80
+`;
+
 const getWords = async (req, res) => {
   try {
     const { source_lang, target_lang, cefr_level, category, limit = 500, offset = 0 } = req.query;
@@ -45,7 +74,7 @@ const getWords = async (req, res) => {
       paramIndex++;
     }
 
-    const where = conditions.join(' AND ');
+    const where = conditions.join(' AND ') + CLEAN_WORD_CONDITIONS;
 
     // Get total count for this filter
     const countResult = await db.query(
@@ -104,7 +133,7 @@ const getWordCount = async (req, res) => {
     }
 
     const result = await db.query(
-      `SELECT COUNT(*) as total FROM words WHERE ${conditions.join(' AND ')}`,
+      `SELECT COUNT(*) as total FROM words WHERE ${conditions.join(' AND ')}${CLEAN_WORD_CONDITIONS}`,
       params
     );
 

@@ -27,6 +27,34 @@ const PAGE_SIZE = 500;
 const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 /**
+ * Defense-in-depth: reject entries that look like grammatical descriptions.
+ * The JSON data files are pre-cleaned, so this should rarely trigger.
+ */
+const BAD_PATTERNS = [
+  /\b(nominative|accusative|dative|genitive|ablative|vocative|instrumental|locative|inessive|illative|elative|superessive|sublative|delative|adessive|allative|translative|terminative|essive|causal-final|partitive)\b/i,
+  /\b(first|second|third)[\s-]person\b/i,
+  /\b(inflection|conjugation|declension|form|singular|plural)\s+of\b/i,
+  /\bpast[\s-](tense|participle)\s+of\b/i,
+  /\bpresent[\s-](tense|participle)\s+of\b/i,
+  /\bcontraction\s+of\b/i,
+  /\b(masculine|feminine|neuter)\b/i,
+  /\binterrogative\b/i,
+  /\bletter\b.*\balphabet\b/i,
+];
+
+const isBadEntry = (text) => {
+  if (!text) return true;
+  const t = text.trim();
+  if (!t) return true;
+  if (t.startsWith('[TRANSLATE') || t.startsWith('[NEED')) return true;
+  if (t.length > 80) return true;
+  for (const p of BAD_PATTERNS) {
+    if (p.test(t)) return true;
+  }
+  return false;
+};
+
+/**
  * Returns the bundled JSON dataset for a given language pair, or null if
  * no local data is available.
  */
@@ -72,7 +100,7 @@ const importFromLocalData = async (sourceLang, targetLang, cefrLevel) => {
     await db.execAsync('BEGIN TRANSACTION');
 
     for (const w of batch) {
-      if (!w.source_word || w.source_word.trim() === '' || w.source_word.startsWith('[TRANSLATE')) {
+      if (isBadEntry(w.source_word) || isBadEntry(w.target_word)) {
         continue;
       }
       if (!allowedLevels.has(w.cefr_level)) {

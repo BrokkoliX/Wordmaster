@@ -7,6 +7,9 @@
  * This reads every language-pair JSON file from the mobile app's data
  * directory and inserts all words into the backend database. It is
  * idempotent -- duplicate IDs are skipped via ON CONFLICT DO NOTHING.
+ *
+ * The JSON files should already be cleaned by cleanJsonDataFiles.js.
+ * This script applies a second layer of validation as defense-in-depth.
  */
 
 require('dotenv').config();
@@ -29,108 +32,74 @@ const LANGUAGE_FILES = [
 
 const BATCH_SIZE = 500;
 
+// ── Patterns that indicate the text is a grammatical description ────────
+const DESCRIPTION_PATTERNS = [
+  /\b(nominative|accusative|dative|genitive|ablative|vocative|instrumental|locative|inessive|illative|elative|superessive|sublative|delative|adessive|allative|translative|terminative|essive|causal-final|causal|sociative|partitive|comitative|distributive|temporal)\s+(singular|plural|of)\b/i,
+  /^(nominative|accusative|dative|genitive|ablative|vocative|instrumental|locative|inessive|illative|elative|superessive|sublative|delative|adessive|allative|translative|terminative|essive|causal-final|causal|sociative|partitive)\b/i,
+  /^(first|second|third)[\s-]person\b/i,
+  /^(singular|plural|feminine|masculine|neuter)\s+(singular|plural|of)\b/i,
+  /\b(singular|plural)\s+of\b/i,
+  /\b(feminine|masculine)\s+(singular\s+)?of\b/i,
+  /^past[\s-](tense|participle)\s+of\b/i,
+  /^present[\s-](tense|participle)\s+of\b/i,
+  /^future[\s-](tense)\s+of\b/i,
+  /\b(inflection|conjugation|declension)\s+of\b/i,
+  /\bform\s+of\b/i,
+  /\bdisjunctive\s+form\b/i,
+  /\balternative\s+form\s+of\b/i,
+  /\b(comparative|superlative)\s+of\b/i,
+  /\b(causative|frequentative|diminutive|augmentative|supine|gerund|participle)\s+of\b/i,
+  /\bcontraction\s+of\b/i,
+  /\bapocopic\s+form\s+of\b/i,
+  /\bclitic\s+form\s+of\b/i,
+  /\bprevocalic\s+form\s+of\b/i,
+  /\bletter\b.*\balphabet\b/i,
+  /\bcalled\b.*\bwritten in\b/i,
+  /\bISO\s+3166\b/i,
+  /\bversion anglaise\b/i,
+  /\bdubbed in\b/i,
+  /\benglish[\s-]language\b/i,
+  /^(Impersonal|Personal)\s+pronoun\s+used\s+to\b/i,
+  /^the\s+plural\s+personal\s+pronoun\b/i,
+  /^forms\s+the\s+/i,
+  /\b(initialism|abbreviation|acronym)\s+of\b/i,
+  /\b(refers to|used to|indicates|denotes)\b/i,
+  /\binterrogative\b/i,
+  /\b(masculine|feminine|neuter)\b/i,
+  /\bliterally\b/i,
+  /\bsubstitutes\s+for\b/i,
+  /\bdistal\s+demonstrative\b/i,
+  /\bcontraction\s+of\b/i,
+];
+
 /**
- * Check if a translation is a grammatical description rather than a proper translation
- * AGGRESSIVE FILTERING: We want ONLY clean word-to-word translations
+ * Return true if the text is NOT a valid plain-word translation.
  */
-function isGrammaticalDescription(text) {
+function isBadEntry(text) {
   if (!text) return true;
+  const t = text.trim();
+  if (!t) return true;
 
-  const lowerText = text.toLowerCase();
+  // Placeholder patterns
+  if (t.startsWith('[TRANSLATE') || t.startsWith('[NEED')) return true;
 
-  // Patterns that indicate grammatical metadata or explanations
-  const grammaticalPatterns = [
-    // Case markers
-    /\b(nominative|accusative|dative|genitive)\b/i,
+  // Too long
+  if (t.length > 80) return true;
 
-    // Verb forms and tenses (with and without hyphens)
-    /\b(first|second|third)[ -]person\b/i,
-    /\b(singular|plural) (of|form)\b/i,
-    /\bpast[ -](tense|participle|of)\b/i,
-    /\bpresent[ -](tense|participle|of)\b/i,
-    /\bfuture[ -](tense|of)\b/i,
-    /\bperfect[ -](tense|of)\b/i,
-    /\bimperative (of|form)\b/i,
-    /\bsubjunctive (of|form)\b/i,
-    /\binfinitive (of|form)\b/i,
-
-    // Grammatical terms
-    /\binflection of\b/i,
-    /\bconjugation of\b/i,
-    /\bdeclension of\b/i,
-    /\bform of\b/i,
-    /\bdisjunctive form\b/i,
-    /\balternative form\b/i,
-    /\bcomparative (of|form)\b/i,
-    /\bsuperlative (of|form)\b/i,
-
-    // Gender and number
-    /\b(masculine|feminine|neuter)\b/i,
-
-    // Question words with explanations
-    /\binterrogative\b/i,
-
-    // Common explanation patterns
-    /\bhow\/\s*interrogative/i,
-    /\bwhat\/\s*interrogative/i,
-    /\bwhen\/\s*interrogative/i,
-    /\bwhere\/\s*interrogative/i,
-    /\bwho\/\s*interrogative/i,
-    /\bwhy\/\s*interrogative/i,
-
-    // Entries that are definitions not translations (has colon explanation)
-    /:\s*\w+/,  // "word: explanation"
-
-    // "plural of", "singular of" patterns
-    /\bplural of\b/i,
-    /\bsingular of\b/i,
-
-    // "X form" patterns
-    /\b\w+ form$/i,
-
-    // Starts with grammatical article + description
-    /^(the|a|an) .+ (of|form)/i,
-
-    // Common grammatical metadata phrases
-    /\bcalled\b.*\bwritten in\b/i,
-    /\bletter of the\b.*\balphabet\b/i,
-  ];
-
-  // Check if text matches any grammatical pattern
-  for (const pattern of grammaticalPatterns) {
-    if (pattern.test(text)) {
-      return true;
-    }
+  // Check description patterns
+  for (const pattern of DESCRIPTION_PATTERNS) {
+    if (pattern.test(t)) return true;
   }
 
-  // Skip very long descriptions (likely definitions not translations)
-  if (text.length > 80) {  // Reduced from 100 to be stricter
-    return true;
-  }
+  // More than 2 slashes
+  if ((t.match(/\//g) || []).length > 2) return true;
 
-  // Skip entries with multiple slashes (often grammatical alternatives)
-  const slashCount = (text.match(/\//g) || []).length;
-  if (slashCount > 2) {
-    return true;
-  }
-
-  // Skip entries with parenthetical grammatical explanations
-  if (/\([^)]*\b(pronoun|verb|noun|adjective|adverb|preposition|conjunction|personal|cardinal|ordinal|co-?ordinating)\b[^)]*\)/i.test(text)) {
-    return true;
-  }
-
-  // Skip abbreviations and acronyms
-  if (/\b(initialism|abbreviation|acronym)\b/i.test(text)) {
-    return true;
-  }
-
-  // Skip if contains common definition phrases
-  if (/\b(refers to|used to|indicates|denotes)\b/i.test(text)) {
-    return true;
-  }
+  // Orphaned closing paren
+  if (t.endsWith(')') && !t.includes('(')) return true;
 
   return false;
 }
+
 async function seedWords() {
   const client = await pool.connect();
 
@@ -158,11 +127,11 @@ async function seedWords() {
       const filePath = path.join(DATA_DIR, fileName);
 
       if (!fs.existsSync(filePath)) {
-        console.log(`⚠️  Skipping ${fileName} (file not found)`);
+        console.log(`  Skipping ${fileName} (file not found)`);
         continue;
       }
 
-      console.log(`📥 Loading ${fileName}...`);
+      console.log(`Loading ${fileName}...`);
       const words = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       console.log(`   ${words.length.toLocaleString()} words found`);
 
@@ -173,25 +142,19 @@ async function seedWords() {
       for (let i = 0; i < words.length; i += BATCH_SIZE) {
         const batch = words.slice(i, i + BATCH_SIZE);
 
-        // Build a multi-row INSERT with parameterised values
         const values = [];
         const params = [];
         let paramIndex = 1;
 
         for (const w of batch) {
-          if (!w.source_word || w.source_word.trim() === '' || w.source_word.startsWith('[TRANSLATE')) {
+          // Skip invalid entries
+          if (!w.source_word || w.source_word.trim() === '') {
             fileSkipped++;
             continue;
           }
-          
-          // Skip grammatical descriptions in translation
-          if (isGrammaticalDescription(w.source_word)) {
-            fileGrammatical++;
-            continue;
-          }
-          
-          // Skip grammatical descriptions in target word
-          if (isGrammaticalDescription(w.target_word)) {
+
+          // Defense-in-depth: re-check both fields
+          if (isBadEntry(w.source_word) || isBadEntry(w.target_word)) {
             fileGrammatical++;
             continue;
           }
@@ -223,13 +186,12 @@ async function seedWords() {
           fileImported += result.rowCount;
         }
 
-        // Progress log every 2000 words
         if ((i + BATCH_SIZE) % 2000 === 0) {
           console.log(`   ${Math.min(i + BATCH_SIZE, words.length).toLocaleString()} / ${words.length.toLocaleString()}...`);
         }
       }
 
-      console.log(`   ✅ Imported ${fileImported.toLocaleString()}, skipped ${fileSkipped}, grammatical ${fileGrammatical}`);
+      console.log(`   Imported ${fileImported.toLocaleString()}, skipped ${fileSkipped}, grammatical ${fileGrammatical}`);
       totalImported += fileImported;
       totalSkipped += fileSkipped;
       totalGrammatical += fileGrammatical;
@@ -237,13 +199,13 @@ async function seedWords() {
 
     // Final count
     const countResult = await client.query('SELECT COUNT(*) as count FROM words');
-    console.log(`\n✅ Seed complete.`);
+    console.log(`\nSeed complete.`);
     console.log(`   Imported: ${totalImported.toLocaleString()}`);
     console.log(`   Skipped (empty/invalid): ${totalSkipped}`);
     console.log(`   Skipped (grammatical): ${totalGrammatical}`);
     console.log(`   Total words in database: ${parseInt(countResult.rows[0].count).toLocaleString()}`);
   } catch (error) {
-    console.error('❌ Seed failed:', error);
+    console.error('Seed failed:', error);
     process.exit(1);
   } finally {
     client.release();
