@@ -48,6 +48,7 @@ const normalizeAnswer = (text) => {
 
 export default function TypeTranslationScreen({ route, navigation }) {
   const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
+  const category = route.params?.category || null;
   const [loading, setLoading] = useState(true);
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -85,10 +86,10 @@ export default function TypeTranslationScreen({ route, navigation }) {
 
       await achievementService.startSession(newSessionId);
 
-      let reviewWords = await getWordsDueForReview(wordsPerSession);
+      let reviewWords = await getWordsDueForReview(wordsPerSession, category);
 
       if (reviewWords.length < wordsPerSession) {
-        const newWords = await getNewWords(wordsPerSession - reviewWords.length);
+        const newWords = await getNewWords(wordsPerSession - reviewWords.length, category);
         reviewWords = [...reviewWords, ...newWords];
       }
 

@@ -27,6 +27,7 @@ const DEFAULT_WORDS_PER_SESSION = 20;
 
 export default function LearningScreen({ route, navigation }) {
   const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
+  const category = route.params?.category || null;
   const [loading, setLoading] = useState(true);
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -64,12 +65,12 @@ export default function LearningScreen({ route, navigation }) {
       // Start achievement tracking
       await achievementService.startSession(newSessionId);
       
-      // Get words for review
-      let reviewWords = await getWordsDueForReview(wordsPerSession);
+      // Get words for review (filtered by category when selected)
+      let reviewWords = await getWordsDueForReview(wordsPerSession, category);
       
       // Add new words if needed
       if (reviewWords.length < wordsPerSession) {
-        const newWords = await getNewWords(wordsPerSession - reviewWords.length);
+        const newWords = await getNewWords(wordsPerSession - reviewWords.length, category);
         reviewWords = [...reviewWords, ...newWords];
       }
       

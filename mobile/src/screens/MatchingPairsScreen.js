@@ -45,6 +45,7 @@ const shuffleArray = (arr) => {
 
 export default function MatchingPairsScreen({ route, navigation }) {
   const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
+  const category = route.params?.category || null;
   const [loading, setLoading] = useState(true);
   const [allWords, setAllWords] = useState([]);
   const [roundWords, setRoundWords] = useState([]);
@@ -91,15 +92,15 @@ export default function MatchingPairsScreen({ route, navigation }) {
       setSessionId(newSessionId);
       await achievementService.startSession(newSessionId);
 
-      let reviewWords = await getWordsDueForReview(wordsPerSession);
+      let reviewWords = await getWordsDueForReview(wordsPerSession, category);
       if (reviewWords.length < wordsPerSession) {
-        const newWords = await getNewWords(wordsPerSession - reviewWords.length);
+        const newWords = await getNewWords(wordsPerSession - reviewWords.length, category);
         reviewWords = [...reviewWords, ...newWords];
       }
 
       // Ensure we have at least PAIRS_PER_ROUND words
       if (reviewWords.length < PAIRS_PER_ROUND) {
-        const extraWords = await getNewWords(PAIRS_PER_ROUND - reviewWords.length);
+        const extraWords = await getNewWords(PAIRS_PER_ROUND - reviewWords.length, category);
         reviewWords = [...reviewWords, ...extraWords];
       }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,35 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getAllCategories } from '../services/database';
 
 const WORD_COUNT_OPTIONS = [20, 50, 100];
 
 export default function ModeSelectionScreen({ navigation }) {
   const [wordsPerSession, setWordsPerSession] = useState(20);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const cats = await getAllCategories();
+      setCategories(cats);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const navParams = { wordsPerSession, category: selectedCategory };
+
+  const selectedCategoryObj = categories.find((c) => c.id === selectedCategory);
+  const categoryLabel =
+    selectedCategory === 'all'
+      ? 'All Categories'
+      : selectedCategoryObj?.name || selectedCategory;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -52,10 +76,59 @@ export default function ModeSelectionScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Category selector */}
+        <View style={styles.categorySection}>
+          <Text style={styles.wordCountLabel}>Category</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryRow}
+          >
+            <TouchableOpacity
+              style={[
+                styles.categoryPill,
+                selectedCategory === 'all' && styles.categoryPillActive,
+              ]}
+              onPress={() => setSelectedCategory('all')}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.categoryPillText,
+                  selectedCategory === 'all' && styles.categoryPillTextActive,
+                ]}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat.id}
+                style={[
+                  styles.categoryPill,
+                  selectedCategory === cat.id && styles.categoryPillActive,
+                  selectedCategory === cat.id && { borderColor: cat.color, backgroundColor: cat.color },
+                ]}
+                onPress={() => setSelectedCategory(cat.id)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.categoryPillText,
+                    selectedCategory === cat.id && styles.categoryPillTextActive,
+                  ]}
+                >
+                  {cat.icon} {cat.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Multiple Choice */}
         <TouchableOpacity
           style={styles.modeCard}
-          onPress={() => navigation.navigate('Learning', { wordsPerSession })}
+          onPress={() => navigation.navigate('Learning', navParams)}
           activeOpacity={0.8}
         >
           <View style={styles.modeIconContainer}>
@@ -72,7 +145,7 @@ export default function ModeSelectionScreen({ navigation }) {
         {/* Matching Pairs */}
         <TouchableOpacity
           style={styles.modeCard}
-          onPress={() => navigation.navigate('MatchingPairs', { wordsPerSession })}
+          onPress={() => navigation.navigate('MatchingPairs', navParams)}
           activeOpacity={0.8}
         >
           <View style={[styles.modeIconContainer, styles.modeIconMatching]}>
@@ -89,7 +162,7 @@ export default function ModeSelectionScreen({ navigation }) {
         {/* Type Translation */}
         <TouchableOpacity
           style={styles.modeCard}
-          onPress={() => navigation.navigate('TypeTranslation', { wordsPerSession })}
+          onPress={() => navigation.navigate('TypeTranslation', navParams)}
           activeOpacity={0.8}
         >
           <View style={[styles.modeIconContainer, styles.modeIconTyping]}>
@@ -106,7 +179,7 @@ export default function ModeSelectionScreen({ navigation }) {
         {/* Fill in the Blank */}
         <TouchableOpacity
           style={styles.modeCard}
-          onPress={() => navigation.navigate('FillInBlank', { wordsPerSession })}
+          onPress={() => navigation.navigate('FillInBlank', navParams)}
           activeOpacity={0.8}
         >
           <View style={[styles.modeIconContainer, styles.modeIconGrammar]}>
@@ -170,6 +243,33 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
   },
   wordCountPillTextActive: {
+    color: 'white',
+  },
+  categorySection: {
+    marginBottom: 18,
+  },
+  categoryRow: {
+    paddingHorizontal: 2,
+  },
+  categoryPill: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    backgroundColor: 'white',
+    marginRight: 8,
+    borderWidth: 2,
+    borderColor: '#E0E6ED',
+  },
+  categoryPillActive: {
+    backgroundColor: '#3498DB',
+    borderColor: '#3498DB',
+  },
+  categoryPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#7F8C8D',
+  },
+  categoryPillTextActive: {
     color: 'white',
   },
   title: {

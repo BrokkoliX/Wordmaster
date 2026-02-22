@@ -6,7 +6,7 @@
 
 echo "Cleaning up any running processes..."
 
-pkill -f "WordMasterApp" 2>/dev/null
+pkill -f "mobile" 2>/dev/null
 pkill -f "expo start" 2>/dev/null
 pkill -f "jest-worker.*WordMaster" 2>/dev/null
 
@@ -19,9 +19,9 @@ fi
 
 echo "All clean!"
 echo ""
-echo "Starting WordMaster..."
+echo "Starting WordMaster mobile app..."
 echo ""
 
-cd /Users/robbie/Tab/Projects/Wordmaster/WordMasterApp
+cd /Users/robbie/Tab/Projects/Wordmaster/mobile
 
 npx expo start --ios

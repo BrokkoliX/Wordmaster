@@ -154,7 +154,7 @@ const getAllowedCefrLevels = (level) => {
 };
 
 // Get words due for review
-export const getWordsDueForReview = async (limit = 20) => {
+export const getWordsDueForReview = async (limit = 20, category = null) => {
   try {
     const today = new Date().toISOString().split('T')[0];
     
@@ -166,6 +166,21 @@ export const getWordsDueForReview = async (limit = 20) => {
     const allowedLevels = getAllowedCefrLevels(cefrLevel);
     const levelPlaceholders = allowedLevels.map(() => '?').join(',');
     
+    // Build optional category filter
+    const useCategory = category && category !== 'all';
+    const categoryClause = useCategory ? 'AND w.category = ?' : '';
+    
+    const params = [
+      ...allowedLevels,
+      knownLanguage,
+      learningLanguage,
+      ...(useCategory ? [category] : []),
+      today,
+      today,
+      cefrLevel,
+      limit,
+    ];
+    
     const words = await db.getAllAsync(`
       SELECT w.*, p.id as progress_id, p.status, p.confidence_level,
              p.consecutive_correct, p.ease_factor, p.interval_days,
@@ -175,6 +190,7 @@ export const getWordsDueForReview = async (limit = 20) => {
       WHERE w.cefr_level IN (${levelPlaceholders})
         AND w.source_lang = ?
         AND w.target_lang = ?
+        ${categoryClause}
         AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
         AND w.translation NOT LIKE '%nominative%'
@@ -198,7 +214,7 @@ export const getWordsDueForReview = async (limit = 20) => {
         p.next_review_date ASC,
         w.frequency_rank ASC
       LIMIT ?
-    `, [...allowedLevels, knownLanguage, learningLanguage, today, today, cefrLevel, limit]);
+    `, params);
     
     if (words.length === 0) {
       console.log(`⚠️  No words available for ${knownLanguage} → ${learningLanguage} at ${cefrLevel} level`);
@@ -219,7 +235,7 @@ export const getWordsDueForReview = async (limit = 20) => {
 };
 
 // Get random new words
-export const getNewWords = async (limit = 5) => {
+export const getNewWords = async (limit = 5, category = null) => {
   try {
     // Get user's preferences
     const cefrLevel = await AsyncStorage.getItem('cefrLevel') || 'A1';
@@ -229,6 +245,19 @@ export const getNewWords = async (limit = 5) => {
     const allowedLevels = getAllowedCefrLevels(cefrLevel);
     const levelPlaceholders = allowedLevels.map(() => '?').join(',');
     
+    // Build optional category filter
+    const useCategory = category && category !== 'all';
+    const categoryClause = useCategory ? 'AND w.category = ?' : '';
+    
+    const params = [
+      ...allowedLevels,
+      knownLanguage,
+      learningLanguage,
+      ...(useCategory ? [category] : []),
+      cefrLevel,
+      limit,
+    ];
+    
     const words = await db.getAllAsync(`
       SELECT w.*
       FROM words w
@@ -237,6 +266,7 @@ export const getNewWords = async (limit = 5) => {
         AND w.cefr_level IN (${levelPlaceholders})
         AND w.source_lang = ?
         AND w.target_lang = ?
+        ${categoryClause}
         AND w.word NOT LIKE '[%'
         AND w.translation NOT LIKE '[%'
         AND w.translation NOT LIKE '%nominative%'
@@ -254,7 +284,7 @@ export const getNewWords = async (limit = 5) => {
         w.frequency_rank ASC,
         RANDOM()
       LIMIT ?
-    `, [...allowedLevels, knownLanguage, learningLanguage, cefrLevel, limit]);
+    `, params);
     
     return words;
   } catch (error) {

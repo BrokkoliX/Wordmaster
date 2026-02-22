@@ -5,12 +5,24 @@ A vocabulary learning app with spaced repetition, CEFR levels, and multi-languag
 ## Quick Start
 
 ```bash
-cd WordMasterApp
+# Mobile app
+cd mobile
 npm install
 npx expo start --ios
+
+# Backend (local development)
+cd backend
+npm install
+cp .env.example .env
+node src/server.js
+
+# Admin panel (optional)
+cd admin
+npm install
+npm run dev
 ```
 
-The backend runs on AWS (see `AWS_DEPLOYMENT_GUIDE.md` for deployment details).
+The production backend runs on AWS (see `docs/AWS_DEPLOYMENT_GUIDE.md` for deployment details).
 
 ## Tech Stack
 
@@ -31,43 +43,77 @@ The achievement system awards 32 badges across 7 categories. Daily streak tracki
 ## Project Structure
 
 ```
-WordMasterApp/
-  src/
-    screens/         HomeScreen, LearningScreen, ProfileScreen, SettingsScreen, etc.
-    services/        api, authService, followService, database, TTSService, etc.
-    contexts/        AuthContext
-    navigation/      MainTabs (bottom tab navigator)
-    components/      ErrorBoundary
-    utils/           distractorGenerator
-
-backend/
-  src/
-    controllers/     auth, user, follow, progress, words
-    models/          user, follow, progress
-    routes/          auth, user, follow, progress, words
-    middleware/      auth (JWT)
-    config/          database (pg pool)
-    scripts/         SQL migrations
+Wordmaster/
+├── backend/              Express API server (PostgreSQL)
+│   ├── src/
+│   │   ├── controllers/  auth, user, admin, follow, progress, words
+│   │   ├── models/       user, follow, progress
+│   │   ├── routes/       auth, user, admin, follow, progress, words
+│   │   ├── middleware/   auth (JWT), isAdmin
+│   │   ├── config/       database (pg pool)
+│   │   └── scripts/      SQL migrations
+│   └── package.json
+│
+├── mobile/               React Native app (formerly WordMasterApp)
+│   ├── src/
+│   │   ├── screens/      HomeScreen, LearningScreen, ProfileScreen, etc.
+│   │   ├── services/     api, authService, database, TTSService, etc.
+│   │   ├── contexts/     AuthContext
+│   │   ├── navigation/   MainTabs (bottom tab navigator)
+│   │   ├── components/   ErrorBoundary
+│   │   └── utils/        distractorGenerator
+│   └── package.json
+│
+├── admin/                Admin web panel (NEW)
+│   ├── src/              React Admin or AdminJS setup
+│   ├── package.json
+│   └── README.md
+│
+├── data/                 Frequency word lists (formerly FrequencyWords)
+│   ├── spanish/
+│   ├── french/
+│   ├── german/
+│   └── hungarian/
+│
+├── shared/               Common code used across apps
+│   ├── constants/        CEFR levels, language codes, etc.
+│   ├── types/            TypeScript definitions
+│   └── utils/            Shared utilities
+│
+├── docs/                 All documentation
+│   ├── ADMIN_SETUP.md
+│   ├── AWS_DEPLOYMENT_GUIDE.md
+│   ├── AWS_VOCABULARY_SETUP.md
+│   └── VOCABULARY_QUICK_START.md
+│
+└── README.md             This file
 ```
 
 ## Development
 
 ```bash
-# Frontend
-cd WordMasterApp
+# Mobile app
+cd mobile
 npm install
 npx expo start --ios
 
-# Backend (local)
+# Backend API
 cd backend
 npm install
 cp .env.example .env   # configure DB credentials and JWT secrets
 node src/server.js
+
+# Admin panel
+cd admin
+npm install
+npm run dev
 ```
+
+See individual README files in each folder for more details.
 
 ## Deployment
 
-The backend is deployed on AWS EC2 with an RDS PostgreSQL database behind Nginx. See `AWS_DEPLOYMENT_GUIDE.md` for the full step-by-step process. The typical update flow is:
+The backend is deployed on AWS EC2 with an RDS PostgreSQL database behind Nginx. See `docs/AWS_DEPLOYMENT_GUIDE.md` for the full step-by-step process. The typical update flow is:
 
 ```bash
 ssh -i wordmaster-key.pem ubuntu@<EC2_IP>

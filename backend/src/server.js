@@ -29,6 +29,7 @@ app.use('/api/progress', require('./routes/progress.routes'));
 app.use('/api/words', require('./routes/words.routes'));
 app.use('/api/sentences', require('./routes/sentences.routes'));
 app.use('/api/follow', require('./routes/follow.routes'));
+app.use('/api/admin', require('./routes/admin.routes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
