@@ -5,10 +5,8 @@ node_modules/
 dist/
 build/
 
-# Environment variables
-.env
+# Environment variables (local overrides only — .env and .env.production are tracked)
 .env.local
-.env.production
 
 # Logs
 npm-debug.log*

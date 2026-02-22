@@ -6,8 +6,7 @@
 
 ## 📋 What You Need to Know
 
-**Project Status:** Just reorganized into monorepo + admin backend ready  
-**Last Commit:** `f9bdacc` - Development status document added  
+**Project Status:** Admin UI built, backend + password reset deployed to AWS  
 **Main Document:** Read `CURRENT_STATUS.md` for full context
 
 ---
@@ -15,62 +14,30 @@
 ## ⚡ Quick Commands
 
 ```bash
+# Start admin panel (connects to AWS backend via proxy)
+cd admin && npm run dev
+# Opens on http://localhost:5173
+
 # Start mobile app
 cd mobile && npx expo start --ios
-# OR use: ./START_APP.sh
-
-# Start backend API
-cd backend && node src/server.js
-
-# Install all dependencies
-npm run install:all
 ```
 
 ---
 
 ## 🎯 Your Next 3 Tasks
 
-### 1️⃣ **Run Database Migration** (5 min)
-Add the `role` column to enable admin access:
-
+### 1️⃣ **Start the Admin Panel** (1 min)
 ```bash
-psql -U postgres -d wordmaster_db -f backend/src/scripts/add_user_roles.sql
-
-# Make yourself admin:
-# UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
+cd admin && npm run dev
+# Open http://localhost:5173
+# Login with your admin email + password
 ```
 
-### 2️⃣ **Test Admin API** (10 min)
-```bash
-# Start backend
-cd backend && node src/server.js
+### 2️⃣ **Deploy Admin UI to EC2** (15 min)
+Follow `docs/ADMIN_DEPLOYMENT.md` to serve it at `https://3.91.69.195/admin`.
 
-# Login and get token
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"your@email.com","password":"yourpass"}'
-
-# Test admin endpoint (use token from login)
-curl http://localhost:3000/api/admin/stats \
-  -H "Authorization: Bearer YOUR_TOKEN"
-```
-
-### 3️⃣ **Build Admin Interface** (2-4 hours)
-
-**Quick Option (30 min):**
-```bash
-cd backend
-npm install adminjs @adminjs/express @adminjs/sql @adminjs/postgresql
-# Then follow: docs/ADMIN_SETUP.md
-```
-
-**Better Option (2-4 hours):**
-```bash
-cd admin
-npm install
-npm run dev
-# Build UI with React Admin
-```
+### 3️⃣ **Import Language Data** (30 min)
+Use the "Import Words" page in the admin panel to bulk-import vocabulary from JSON files.
 
 ---
 
@@ -110,26 +77,27 @@ docs/       ← All documentation
 
 ✅ **Working:**
 - Mobile app (full features)
-- Backend API (all endpoints)
-- Admin API endpoints (backend)
-- User authentication
+- Backend API (all endpoints, deployed on AWS)
+- Admin API endpoints + password reset
+- Admin web UI (dashboard, users, languages, word import)
+- User authentication with role-based access
+- Database migration applied on AWS RDS
 
 ⏳ **Needs Work:**
-- Admin web UI (not built yet)
-- Database migration (not run yet)
-- Admin user setup (not done yet)
+- Admin UI deployment to EC2 nginx
+- Rate limiting on admin endpoints
+- Audit logging for admin actions
 
 ---
 
 ## 💡 Recommended Workflow for Today
 
 1. **Pull latest code:** `git pull origin main`
-2. **Read:** `CURRENT_STATUS.md` (10 min)
-3. **Run:** Database migration (5 min)
-4. **Test:** Admin API with curl (10 min)
-5. **Choose:** AdminJS (quick) or React Admin (better)
-6. **Build:** Admin interface (2-4 hours)
-7. **Commit:** Your changes
+2. **Read:** `CURRENT_STATUS.md` (5 min)
+3. **Start admin:** `cd admin && npm run dev`
+4. **Deploy:** Admin UI to EC2 (see `docs/ADMIN_DEPLOYMENT.md`)
+5. **Import:** Language data via admin panel
+6. **Commit:** Your changes
 
 ---
 
@@ -165,13 +133,10 @@ Health Check:        /api/admin/database/health
 
 ---
 
-**🎯 Goal for Today:** Get admin system working (migration → test API → build UI)
+**🎯 Goal for Today:** Deploy admin UI to EC2 and import language data.
 
-**⏱️ Estimated Time:** 3-5 hours total
-
-**📍 Start Here:** `CURRENT_STATUS.md` → Section "Next Steps"
+**📍 Start Here:** `cd admin && npm run dev` → `http://localhost:5173`
 
 ---
 
-_Last Updated: February 22, 2024_  
-_Commit: f9bdacc_
+_Last Updated: February 23, 2025_

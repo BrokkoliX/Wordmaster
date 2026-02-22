@@ -74,4 +74,38 @@ router.post('/refresh-token', authController.refreshToken);
  */
 router.post('/logout', authController.logout);
 
+/**
+ * @route   POST /api/auth/request-reset
+ * @desc    Request a password reset token
+ * @access  Public
+ */
+router.post(
+  '/request-reset',
+  [
+    body('email')
+      .isEmail()
+      .normalizeEmail()
+      .withMessage('Valid email is required'),
+  ],
+  authController.requestPasswordReset
+);
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Reset password using token
+ * @access  Public
+ */
+router.post(
+  '/reset-password',
+  [
+    body('token')
+      .notEmpty()
+      .withMessage('Reset token is required'),
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters'),
+  ],
+  authController.resetPassword
+);
+
 module.exports = router;

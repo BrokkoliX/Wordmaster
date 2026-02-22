@@ -1,19 +1,19 @@
 # WordMaster - Current Development Status
 
-**Last Updated:** February 22, 2024  
-**Current Version:** 2.0 (Post-Reorganization)  
-**Git Commit:** `4f67799` - Reorganize project into monorepo structure with admin system
+**Last Updated:** February 23, 2025  
+**Current Version:** 2.1 (Admin UI + Password Reset)  
+**Previous Commit:** `3a5df8a` - Monorepo reorganization with admin backend
 
 ---
 
 ## 📋 Quick Summary
 
-WordMaster is a language learning app with vocabulary and grammar exercises using spaced repetition. The project was just reorganized from a scattered structure into a professional monorepo with a new admin system for managing users, languages, and content.
+WordMaster is a language learning app with vocabulary and grammar exercises using spaced repetition. The project uses a monorepo structure with a mobile app, backend API, and admin web panel.
 
 **Tech Stack:**
 - **Mobile:** React Native + Expo (iOS/Android)
 - **Backend:** Node.js + Express + PostgreSQL
-- **Admin:** React Admin (ready to build)
+- **Admin:** React Admin + Vite + MUI (built and functional)
 - **Database:** PostgreSQL (AWS RDS in production)
 
 ---
@@ -49,18 +49,36 @@ WordMaster is a language learning app with vocabulary and grammar exercises usin
 
 ---
 
-## 🆕 What Was Just Added (Not Yet Built)
+## 🆕 What Was Added This Session
 
-### Admin System (Backend Complete, Frontend Pending)
+### Admin System - ✅ COMPLETE (Backend + Frontend)
 
 **Backend (`backend/src/`) - ✅ COMPLETE**
 - ✅ Admin routes: `/api/admin/*`
 - ✅ Admin controller: `controllers/admin.controller.js`
 - ✅ Admin middleware: `middleware/isAdmin.middleware.js`
-- ✅ Database migration: `scripts/add_user_roles.sql`
+- ✅ Database migration: `scripts/add_user_roles.sql` (run on AWS RDS)
+- ✅ Password reset: `POST /api/auth/request-reset` and `POST /api/auth/reset-password`
+- ✅ Admin users promoted in production database
 
-**Admin API Endpoints Available:**
+**Admin Frontend (`admin/`) - ✅ COMPLETE**
+- ✅ React Admin + Vite + MUI application
+- ✅ Custom data provider (adapts backend API format to react-admin)
+- ✅ Custom auth provider (JWT login via `/api/auth/login`)
+- ✅ Custom login page with password reset flow
+- ✅ Dashboard with platform stats, word counts, DB health
+- ✅ User management (list with search/filters, show, edit roles)
+- ✅ Language pairs list with word counts and CEFR levels
+- ✅ Bulk word import page (JSON file upload or paste)
+- ✅ Vite dev proxy to AWS backend (`3.91.69.195`)
+- ✅ Production build configured with `/admin/` base path
+
+**Admin API Endpoints:**
 ```
+Authentication:
+  POST   /api/auth/request-reset       # Request password reset token
+  POST   /api/auth/reset-password      # Reset password with token
+
 User Management:
   GET    /api/admin/users              # List all users
   GET    /api/admin/users/:id          # User details
@@ -89,12 +107,6 @@ Platform Stats:
   GET    /api/admin/database/health    # DB health check
 ```
 
-**Admin Frontend (`admin/`) - ⏳ NOT YET BUILT**
-- ⏳ Structure ready (package.json configured)
-- ⏳ React Admin dependencies specified
-- ⏳ README with setup instructions
-- ⏳ Needs UI implementation
-
 ---
 
 ## 📁 Current Project Structure
@@ -119,11 +131,20 @@ Wordmaster/
 │   │   └── scripts/      migrations, import scripts
 │   └── package.json
 │
-├── admin/                Admin web panel (READY TO BUILD)
-│   ├── package.json      React Admin configured
-│   └── README.md         Setup instructions
+├── admin/                Admin web panel (React Admin + Vite)
+│   ├── src/
+│   │   ├── components/   Dashboard, WordImport, LoginPage
+│   │   ├── resources/    users, languages (react-admin views)
+│   │   ├── layout/       AdminLayout (sidebar navigation)
+│   │   ├── App.jsx       Main app wiring
+│   │   ├── authProvider.js   JWT auth for react-admin
+│   │   └── dataProvider.js   Custom API adapter
+│   ├── .env              Dev config (Vite proxy to AWS)
+│   ├── .env.production   Production config (direct AWS URLs)
+│   ├── vite.config.js    Vite + proxy + base path
+│   └── package.json
 │
-├── data/                 Word frequency lists (was FrequencyWords)
+├── data/                 Word frequency lists
 │   ├── spanish/
 │   ├── french/
 │   ├── german/
@@ -135,119 +156,52 @@ Wordmaster/
 │
 ├── docs/                 All documentation
 │   ├── ADMIN_SETUP.md
+│   ├── ADMIN_DEPLOYMENT.md
 │   ├── AWS_DEPLOYMENT_GUIDE.md
-│   └── REORGANIZATION.md
+│   └── INDEX.md
 │
 └── package.json          Root workspace config
 ```
 
 ---
 
+## ✅ Completed This Session
+
+- [x] Database migration run on AWS RDS (role column added)
+- [x] Admin users promoted (`robi_az@yahoo.com`, `szekelyrobi@gmail.com`)
+- [x] Admin web UI built with React Admin (dashboard, users, languages, word import)
+- [x] Password reset endpoints added (`/api/auth/request-reset`, `/api/auth/reset-password`)
+- [x] Custom login page with password reset flow
+- [x] Backend deployed to AWS EC2 with new admin routes + password reset
+- [x] Fixed `csv-parser` crash on EC2 (unused import removed)
+- [x] EC2 security group updated for SSH access
+
 ## 🎯 Next Steps (Priority Order)
 
-### 1. Set Up Admin System Database (15 minutes)
+### 1. Deploy Admin UI to EC2 (15 min)
 
-**Run the migration to add user roles:**
+Follow `docs/ADMIN_DEPLOYMENT.md` to serve the built admin panel via nginx on `https://3.91.69.195/admin`.
 
-```bash
-# Connect to your PostgreSQL database
-psql -U postgres -d wordmaster_db -f backend/src/scripts/add_user_roles.sql
+### 2. Import More Language Data
 
-# Or manually:
-psql -U postgres -d wordmaster_db
+Use the admin panel's "Import Words" page or the CLI scripts:
 
-# Then run:
-ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-UPDATE users SET role = 'user' WHERE role IS NULL;
-
-# Make yourself an admin (replace with your email):
-UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
-```
-
-**Verify it worked:**
-```sql
-SELECT id, email, username, role FROM users LIMIT 5;
-```
-
-### 2. Test Admin API Endpoints (15 minutes)
-
-```bash
-# Start backend
-cd backend
-node src/server.js
-
-# In another terminal, test with curl:
-
-# 1. Login as admin to get token
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"your-admin-email@example.com","password":"yourpassword"}'
-
-# Save the token, then test admin endpoints:
-
-# 2. Get all users
-curl http://localhost:3000/api/admin/users \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-
-# 3. Get platform stats
-curl http://localhost:3000/api/admin/stats \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-
-# 4. Get word statistics
-curl http://localhost:3000/api/admin/words/stats \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-```
-
-### 3. Choose and Build Admin Interface (2-4 hours)
-
-**Option A: AdminJS (Quickest - 30 minutes)**
 ```bash
 cd backend
-npm install adminjs @adminjs/express @adminjs/sql @adminjs/postgresql
-
-# Then add to backend/src/server.js (see docs/ADMIN_SETUP.md)
+node src/scripts/categorizeWords.js
 ```
 
-**Option B: React Admin (Recommended - 2-4 hours)**
-```bash
-cd admin
-npm install
+### 3. Add Rate Limiting to Admin Endpoints
 
-# Build out the admin UI using React Admin
-# - Create data provider
-# - Create auth provider
-# - Add resource components
-# - Customize as needed
-```
+The admin API has no rate limiting. Add `express-rate-limit` for production security.
 
-**Option C: Custom Dashboard (Most work - days)**
-Build your own from scratch using the API endpoints.
+### 4. Add Audit Logging
 
-**Recommendation:** Start with **AdminJS** to get something working quickly, then migrate to **React Admin** later for more customization.
+Admin actions (user edits, deletions, word imports) should be logged for accountability.
 
-### 4. Import More Language Data (Optional)
+### 5. Set Up Email Service for Password Reset
 
-You have word frequency lists in `data/` folder ready to import:
-```bash
-cd backend
-node src/scripts/categorizeWords.js  # Categorize words
-# Then use admin panel to bulk import
-```
-
-### 5. Deploy Admin Panel (After building)
-
-```bash
-# Build admin panel
-cd admin
-npm run build
-
-# Deploy options:
-# - Netlify (easiest)
-# - Vercel
-# - AWS S3 + CloudFront
-# - Serve from Express (add static middleware)
-```
+Password reset currently returns the token in the API response. Connect an email service (SES, SendGrid) to deliver tokens via email instead.
 
 ---
 
@@ -269,21 +223,18 @@ cd ../admin && npm install
 
 ### Daily Development
 
+The backend runs on AWS EC2 (`3.91.69.195`), not locally.
+
 ```bash
-# Terminal 1 - Backend
-cd backend
-node src/server.js
-# Runs on http://localhost:3000
+# Terminal 1 - Admin Panel (Vite proxies API calls to AWS)
+cd admin
+npm run dev
+# Opens on http://localhost:5173
 
 # Terminal 2 - Mobile App
 cd mobile
 npx expo start --ios
 # Or use: ./START_APP.sh
-
-# Terminal 3 - Admin Panel (when ready)
-cd admin
-npm run dev
-# Runs on http://localhost:5173
 ```
 
 ---
@@ -323,12 +274,11 @@ VITE_API_URL=http://localhost:3000/api/admin
 
 ## 🐛 Known Issues / Tech Debt
 
-1. **Admin UI not built yet** - Backend ready, frontend pending
-2. **User roles not in production DB yet** - Need to run migration on AWS
-3. **No admin user yet** - Need to promote first admin
-4. **Import scripts need testing** - Word import via admin API untested
-5. **No rate limiting on admin endpoints** - Should add for production
-6. **No audit logging** - Admin actions should be logged
+1. **No rate limiting on admin endpoints** - Should add `express-rate-limit` for production
+2. **No audit logging** - Admin actions should be logged for accountability
+3. **Password reset returns token in response** - Should send via email (needs SES/SendGrid)
+4. **Admin UI not yet deployed to EC2** - Built locally, needs nginx setup (see `docs/ADMIN_DEPLOYMENT.md`)
+5. **Import scripts need testing** - Word import via admin panel untested with large datasets
 
 ---
 
@@ -338,10 +288,11 @@ VITE_API_URL=http://localhost:3000/api/admin
 |------|---------|
 | `README.md` | Project overview |
 | `CURRENT_STATUS.md` | **THIS FILE** - Development status |
-| `REORGANIZATION_SUMMARY.md` | Reorganization guide |
-| `PROJECT_STRUCTURE.md` | Visual structure diagrams |
+| `QUICK_START.md` | Quick start for new sessions |
 | `docs/ADMIN_SETUP.md` | Admin system setup guide |
-| `docs/AWS_DEPLOYMENT_GUIDE.md` | AWS deployment instructions |
+| `docs/ADMIN_DEPLOYMENT.md` | Deploying admin UI to AWS EC2 |
+| `docs/AWS_DEPLOYMENT_GUIDE.md` | AWS infrastructure setup |
+| `docs/INDEX.md` | Documentation index |
 | `backend/README.md` | Backend API documentation |
 | `admin/README.md` | Admin panel documentation |
 
@@ -384,7 +335,7 @@ git push origin main
 2. **Role-Based Access** - Admin, moderator, user roles for security
 3. **API-First** - Backend serves mobile, web, and admin
 4. **Offline-First Mobile** - SQLite for local storage, sync optional
-5. **React Admin** - Chosen for admin UI (not built yet)
+5. **React Admin** - Chosen and built for admin UI with custom data/auth providers
 6. **PostgreSQL** - Chosen over MongoDB for data integrity
 7. **JWT Tokens** - Stateless authentication
 
@@ -395,29 +346,22 @@ git push origin main
 ### ✅ Checklist for Next Session
 
 - [ ] Pull latest code: `git pull origin main`
-- [ ] Install dependencies: `npm run install:all`
+- [ ] Install dependencies: `cd admin && npm install`
 - [ ] Review this document
-- [ ] Check `docs/ADMIN_SETUP.md` for admin setup
-- [ ] Verify backend runs: `cd backend && node src/server.js`
-- [ ] Verify mobile runs: `cd mobile && npx expo start`
-- [ ] Run database migration if not done yet
-- [ ] Choose admin interface approach (AdminJS vs React Admin)
+- [ ] Start admin panel: `cd admin && npm run dev`
+- [ ] Open `http://localhost:5173` and log in
 
 ### 🎯 Immediate Tasks
 
-**Must Do:**
-1. Run database migration to add role column
-2. Promote yourself to admin in database
-3. Test admin API endpoints
-
 **Should Do:**
-4. Choose admin interface (AdminJS recommended to start)
-5. Build basic admin UI
+1. Deploy admin UI to EC2 (see `docs/ADMIN_DEPLOYMENT.md`)
+2. Import more language data via admin panel
+3. Add rate limiting to admin endpoints
 
 **Nice to Have:**
-6. Add rate limiting to admin endpoints
-7. Add audit logging for admin actions
-8. Test word import functionality
+4. Add audit logging for admin actions
+5. Set up email service for password reset
+6. Test word import with large datasets
 
 ---
 
@@ -443,9 +387,9 @@ git push origin main
 
 ## 🎯 Vision & Roadmap
 
-**Current State:** Mobile app + Backend API working, Admin system backend ready
+**Current State:** Mobile app + Backend API + Admin panel all functional. Backend and DB on AWS.
 
-**Next Milestone:** Admin panel built and deployed
+**Next Milestone:** Admin UI deployed to EC2, language data imported, production hardening.
 
 **Future Plans:**
 - Web app for desktop users (same backend)
@@ -459,22 +403,16 @@ git push origin main
 
 ## 📈 Metrics to Track
 
-Once admin is built, monitor:
-- Total users
-- Active users (daily/weekly/monthly)
-- Words learned
-- Learning sessions
-- Average accuracy
-- Popular languages
-- User retention
-- Daily streaks
+Available via admin dashboard at `http://localhost:5173`:
+- Total users and active users (30-day)
+- Words in database by language pair and CEFR level
+- Learning sessions and average accuracy
+- Database health and table sizes
 
 ---
 
-**Good luck with your next development session! 🚀**
-
-**Start here:** Run the database migration, test the admin API, then choose your admin interface approach.
+**Start here:** `cd admin && npm run dev`, then open `http://localhost:5173`.
 
 ---
 
-_This document is your context for the next session. Update it as the project evolves._
+_Last Updated: February 23, 2025_

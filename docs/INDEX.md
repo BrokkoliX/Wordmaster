@@ -21,8 +21,6 @@
 | `README.md` | Project overview | First time, or for general info |
 | `QUICK_START.md` | Fast setup & next steps | Starting a new session |
 | `CURRENT_STATUS.md` | **Development status** | **Every session - READ THIS FIRST** |
-| `REORGANIZATION_SUMMARY.md` | Reorganization guide | Understanding the new structure |
-| `PROJECT_STRUCTURE.md` | Visual diagrams | Understanding folder organization |
 | `package.json` | Root workspace config | Setting up workspace |
 | `START_APP.sh` | Quick start script | Running mobile app |
 
@@ -31,9 +29,9 @@
 | File | Purpose | Read When |
 |------|---------|-----------|
 | `ADMIN_SETUP.md` | **Admin system setup** | **Setting up admin panel** |
+| `ADMIN_DEPLOYMENT.md` | **Admin UI deployment** | **Deploying admin to EC2** |
 | `AWS_DEPLOYMENT_GUIDE.md` | AWS deployment | Deploying to production |
 | `AWS_VOCABULARY_SETUP.md` | Vocabulary import on AWS | Importing words to production |
-| `REORGANIZATION.md` | Detailed reorganization | Understanding changes made |
 | `VOCABULARY_FILTERING.md` | Word filtering logic | Working with vocabulary |
 | `VOCABULARY_QUICK_START.md` | Quick vocabulary guide | Importing words |
 | `INDEX.md` | This file | Finding documentation |
@@ -62,9 +60,8 @@
 
 ### **Understanding the Project**
 1. `README.md` - Overview
-2. `PROJECT_STRUCTURE.md` - Structure diagrams
-3. `CURRENT_STATUS.md` - Current state
-4. Component READMEs
+2. `CURRENT_STATUS.md` - Current state (includes project structure)
+3. Component READMEs
 
 ### **Deploying to Production**
 1. `docs/AWS_DEPLOYMENT_GUIDE.md` - Deployment steps
@@ -75,11 +72,6 @@
 1. `docs/VOCABULARY_QUICK_START.md` - Quick guide
 2. `docs/VOCABULARY_FILTERING.md` - Filtering logic
 3. `docs/AWS_VOCABULARY_SETUP.md` - AWS import
-
-### **Understanding Recent Changes**
-1. `REORGANIZATION_SUMMARY.md` - What changed
-2. `docs/REORGANIZATION.md` - Detailed changes
-3. `PROJECT_STRUCTURE.md` - New structure
 
 ---
 
@@ -93,7 +85,6 @@
 
 ### **Mobile App**
 - **Overview:** `README.md` → "Features"
-- **Structure:** `PROJECT_STRUCTURE.md` → "mobile/"
 - **Code:** `mobile/src/`
 
 ### **Backend API**
@@ -108,9 +99,7 @@
 - **Setup:** `docs/ADMIN_SETUP.md` → "Database Setup"
 
 ### **Project Structure**
-- **Overview:** `PROJECT_STRUCTURE.md`
-- **Reorganization:** `REORGANIZATION_SUMMARY.md`
-- **Details:** `docs/REORGANIZATION.md`
+- **Overview:** `CURRENT_STATUS.md` → "Current Project Structure"
 
 ---
 
@@ -123,7 +112,7 @@ START HERE
 │  └─ QUICK_START.md → CURRENT_STATUS.md
 │
 ├─ UNDERSTANDING PROJECT?
-│  └─ README.md → PROJECT_STRUCTURE.md
+│  └─ README.md → CURRENT_STATUS.md
 │
 ├─ BUILDING ADMIN?
 │  └─ CURRENT_STATUS.md → docs/ADMIN_SETUP.md → admin/README.md
@@ -192,8 +181,6 @@ When you make significant changes:
 **Important (Read When Relevant):**
 - 📌 `docs/ADMIN_SETUP.md` - Admin system guide
 - 📌 `README.md` - Project overview
-- 📌 `PROJECT_STRUCTURE.md` - Structure reference
-
 **Reference (As Needed):**
 - 📋 Component READMEs
 - 📋 AWS deployment guides
@@ -208,7 +195,7 @@ When you make significant changes:
 - ✅ Project overview (README.md)
 - ✅ Development status (CURRENT_STATUS.md)
 - ✅ Admin setup guide (docs/ADMIN_SETUP.md)
-- ✅ Structure diagrams (PROJECT_STRUCTURE.md)
+- ✅ Admin deployment guide (docs/ADMIN_DEPLOYMENT.md)
 - ✅ Quick start guide (QUICK_START.md)
 
 **Future Documentation Needs:**
@@ -233,5 +220,5 @@ When you make significant changes:
 
 ---
 
-_Last Updated: February 22, 2024_  
-_Documentation Version: 2.0_
+_Last Updated: February 23, 2025_  
+_Documentation Version: 2.1_
