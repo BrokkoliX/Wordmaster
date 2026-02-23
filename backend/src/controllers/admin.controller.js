@@ -864,6 +864,131 @@ const checkDatabaseHealth = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/admin/database/query
+ * Execute a read-only SQL query against the database.
+ * Only SELECT statements are allowed. Results are capped at 500 rows.
+ */
+const MAX_QUERY_ROWS = 500;
+
+const BLOCKED_PATTERNS = [
+  /\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|GRANT|REVOKE)\b/i,
+  /\b(COPY|EXECUTE|CALL|DO)\b/i,
+  /\bpg_sleep\b/i,
+  /\bpg_terminate_backend\b/i,
+  /\bpg_cancel_backend\b/i,
+  /\bset\s+(role|session)/i,
+  /;\s*\S/,                           // disallow multi-statement queries
+];
+
+const executeQuery = async (req, res) => {
+  try {
+    const { sql } = req.body;
+
+    if (!sql || typeof sql !== 'string' || !sql.trim()) {
+      return res.status(400).json({
+        error: { message: 'A non-empty "sql" string is required' },
+      });
+    }
+
+    const trimmed = sql.trim().replace(/;+\s*$/, ''); // strip trailing semicolons
+
+    // Must start with SELECT or WITH (CTEs)
+    if (!/^\s*(SELECT|WITH)\b/i.test(trimmed)) {
+      return res.status(400).json({
+        error: { message: 'Only SELECT queries are allowed' },
+      });
+    }
+
+    // Check for blocked patterns
+    for (const pattern of BLOCKED_PATTERNS) {
+      if (pattern.test(trimmed)) {
+        return res.status(400).json({
+          error: { message: `Query contains a disallowed statement or pattern` },
+        });
+      }
+    }
+
+    // Use a single-use client so SET LOCAL is scoped to this transaction
+    const { pool } = require('../config/database');
+    const client = await pool.connect();
+
+    let result;
+    try {
+      await client.query('BEGIN READ ONLY');
+      await client.query("SET LOCAL statement_timeout = '10s'");
+      result = await client.query(trimmed);
+      await client.query('ROLLBACK'); // always rollback; nothing to commit
+    } finally {
+      client.release();
+    }
+
+    const rows = result.rows.slice(0, MAX_QUERY_ROWS);
+    const columns = result.fields
+      ? result.fields.map((f) => f.name)
+      : rows.length > 0
+        ? Object.keys(rows[0])
+        : [];
+
+    res.json({
+      columns,
+      rows,
+      rowCount: rows.length,
+      truncated: result.rows.length > MAX_QUERY_ROWS,
+    });
+  } catch (error) {
+    console.error('Execute query error:', error);
+    res.status(400).json({
+      error: { message: error.message || 'Query execution failed' },
+    });
+  }
+};
+
+/**
+ * GET /api/admin/database/schema
+ * Return the public schema's tables and their columns for autocomplete.
+ */
+const getSchema = async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT
+         t.table_name,
+         c.column_name,
+         c.data_type,
+         c.is_nullable,
+         c.column_default
+       FROM information_schema.tables t
+       JOIN information_schema.columns c
+         ON c.table_schema = t.table_schema
+        AND c.table_name   = t.table_name
+       WHERE t.table_schema = 'public'
+         AND t.table_type   = 'BASE TABLE'
+       ORDER BY t.table_name, c.ordinal_position`
+    );
+
+    // Group by table
+    const schema = {};
+    for (const row of result.rows) {
+      if (!schema[row.table_name]) {
+        schema[row.table_name] = [];
+      }
+      schema[row.table_name].push({
+        column: row.column_name,
+        type: row.data_type,
+        nullable: row.is_nullable === 'YES',
+        default: row.column_default,
+      });
+    }
+
+    res.json({ schema });
+  } catch (error) {
+    console.error('Get schema error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to fetch database schema' },
+    });
+  }
+};
+
 module.exports = {
   // User management
   getAllUsers,
@@ -890,4 +1015,6 @@ module.exports = {
   // Database
   createBackup,
   checkDatabaseHealth,
+  executeQuery,
+  getSchema,
 };

@@ -4,6 +4,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import TranslateIcon from '@mui/icons-material/Translate';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import StorageIcon from '@mui/icons-material/Storage';
 
 const AdminMenu = () => (
   <Menu>
@@ -14,6 +15,11 @@ const AdminMenu = () => (
       to="/word-import"
       primaryText="Import Words"
       leftIcon={<UploadFileIcon />}
+    />
+    <Menu.Item
+      to="/database-query"
+      primaryText="Database Query"
+      leftIcon={<StorageIcon />}
     />
   </Menu>
 );

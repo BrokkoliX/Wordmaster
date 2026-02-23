@@ -4,7 +4,7 @@ This document covers deploying the admin web UI to the same EC2 instance that al
 
 ## Prerequisites
 
-The EC2 instance must already be running with nginx and PM2 as described in `AWS_DEPLOYMENT_GUIDE.md`. The backend is reachable at `https://3.91.69.195`.
+The EC2 instance must already be running with nginx and PM2 as described in `AWS_DEPLOYMENT_GUIDE.md`. The backend is reachable at `https://3.211.219.221`.
 
 ## 1. Build the Admin Panel Locally
 
@@ -17,8 +17,8 @@ npm run build
 Vite reads `admin/.env.production` during `npm run build`, which sets:
 
 ```
-VITE_API_URL=https://3.91.69.195/api/admin
-VITE_AUTH_URL=https://3.91.69.195/api/auth
+VITE_API_URL=https://3.211.219.221/api/admin
+VITE_AUTH_URL=https://3.211.219.221/api/auth
 ```
 
 The output goes into `admin/dist/`.
@@ -27,13 +27,13 @@ The output goes into `admin/dist/`.
 
 ```bash
 scp -i wordmaster-key.pem -r admin/dist/* \
-  ubuntu@3.91.69.195:/home/ubuntu/Wordmaster/admin/dist/
+  ubuntu@3.211.219.221:/home/ubuntu/Wordmaster/admin/dist/
 ```
 
 Alternatively, push to the repo and pull from EC2:
 
 ```bash
-ssh -i wordmaster-key.pem ubuntu@3.91.69.195
+ssh -i wordmaster-key.pem ubuntu@3.211.219.221
 cd ~/Wordmaster
 git pull origin main
 cd admin && npm install && npm run build
@@ -82,7 +82,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-The admin panel will be available at `https://3.91.69.195/admin`.
+The admin panel will be available at `https://3.211.219.221/admin`.
 
 ## 4. Set the Vite Base Path
 
@@ -110,7 +110,7 @@ UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 
 ## 6. Verify
 
-Open `https://3.91.69.195/admin` in a browser, log in with your admin credentials, and confirm the dashboard loads with stats from the production database.
+Open `https://3.211.219.221/admin` in a browser, log in with your admin credentials, and confirm the dashboard loads with stats from the production database.
 
 ## Updating the Admin Panel
 
@@ -120,7 +120,7 @@ After making changes locally:
 cd admin
 npm run build
 scp -i wordmaster-key.pem -r admin/dist/* \
-  ubuntu@3.91.69.195:/home/ubuntu/Wordmaster/admin/dist/
+  ubuntu@3.211.219.221:/home/ubuntu/Wordmaster/admin/dist/
 ```
 
 No backend restart is needed — nginx serves the new static files immediately.

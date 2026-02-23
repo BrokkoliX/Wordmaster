@@ -70,7 +70,7 @@ WordMaster is a language learning app with vocabulary and grammar exercises usin
 - ✅ User management (list with search/filters, show, edit roles)
 - ✅ Language pairs list with word counts and CEFR levels
 - ✅ Bulk word import page (JSON file upload or paste)
-- ✅ Vite dev proxy to AWS backend (`3.91.69.195`)
+- ✅ Vite dev proxy to AWS backend (`3.211.219.221`)
 - ✅ Production build configured with `/admin/` base path
 
 **Admin API Endpoints:**
@@ -180,7 +180,7 @@ Wordmaster/
 
 ### 1. Deploy Admin UI to EC2 (15 min)
 
-Follow `docs/ADMIN_DEPLOYMENT.md` to serve the built admin panel via nginx on `https://3.91.69.195/admin`.
+Follow `docs/ADMIN_DEPLOYMENT.md` to serve the built admin panel via nginx on `https://3.211.219.221/admin`.
 
 ### 2. Import More Language Data
 
@@ -223,7 +223,7 @@ cd ../admin && npm install
 
 ### Daily Development
 
-The backend runs on AWS EC2 (`3.91.69.195`), not locally.
+The backend runs on AWS EC2 (`3.211.219.221`), not locally.
 
 ```bash
 # Terminal 1 - Admin Panel (Vite proxies API calls to AWS)

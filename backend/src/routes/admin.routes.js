@@ -73,4 +73,10 @@ router.post('/database/backup', adminController.createBackup);
 // GET /api/admin/database/health - Check database health
 router.get('/database/health', adminController.checkDatabaseHealth);
 
+// POST /api/admin/database/query - Execute a read-only SQL query
+router.post('/database/query', adminController.executeQuery);
+
+// GET /api/admin/database/schema - Get database schema metadata
+router.get('/database/schema', adminController.getSchema);
+
 module.exports = router;

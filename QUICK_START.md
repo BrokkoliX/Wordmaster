@@ -34,7 +34,7 @@ cd admin && npm run dev
 ```
 
 ### 2️⃣ **Deploy Admin UI to EC2** (15 min)
-Follow `docs/ADMIN_DEPLOYMENT.md` to serve it at `https://3.91.69.195/admin`.
+Follow `docs/ADMIN_DEPLOYMENT.md` to serve it at `https://3.211.219.221/admin`.
 
 ### 3️⃣ **Import Language Data** (30 min)
 Use the "Import Words" page in the admin panel to bulk-import vocabulary from JSON files.

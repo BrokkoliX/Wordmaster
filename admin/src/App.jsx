@@ -8,6 +8,7 @@ import dataProvider from './dataProvider';
 import authProvider from './authProvider';
 import Dashboard from './components/Dashboard';
 import WordImport from './components/WordImport';
+import DatabaseQuery from './components/DatabaseQuery';
 import LoginPage from './components/LoginPage';
 import { UserList, UserShow, UserEdit } from './resources/users';
 import { LanguageList } from './resources/languages';
@@ -39,6 +40,7 @@ const App = () => (
     />
     <CustomRoutes>
       <Route path="/word-import" element={<WordImport />} />
+      <Route path="/database-query" element={<DatabaseQuery />} />
     </CustomRoutes>
   </Admin>
 );

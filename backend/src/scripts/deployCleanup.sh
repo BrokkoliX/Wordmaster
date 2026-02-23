@@ -21,7 +21,7 @@
 
 set -e
 
-EC2_IP="3.91.69.195"
+EC2_IP="3.211.219.221"
 SSH_KEY="wordmaster-key.pem"
 SSH_USER="ubuntu"
 REMOTE_DIR="Wordmaster"
