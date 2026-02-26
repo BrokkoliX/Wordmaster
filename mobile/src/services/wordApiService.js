@@ -22,6 +22,10 @@ import wordsEsToEn from '../data/words_spanish_to_english.json';
 import wordsFrToEn from '../data/words_french_to_english.json';
 import wordsDeToEn from '../data/words_german_to_english.json';
 import wordsHuToEn from '../data/words_hungarian_to_english.json';
+import wordsEnToPt from '../data/words_portuguese.json';
+import wordsPtToEn from '../data/words_portuguese_to_english.json';
+import wordsEnToRu from '../data/words_russian.json';
+import wordsRuToEn from '../data/words_russian_to_english.json';
 
 const PAGE_SIZE = 500;
 const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -69,6 +73,10 @@ const getLocalDataForPair = (sourceLang, targetLang) => {
     fr_en: wordsFrToEn,
     de_en: wordsDeToEn,
     hu_en: wordsHuToEn,
+    en_pt: wordsEnToPt,
+    pt_en: wordsPtToEn,
+    en_ru: wordsEnToRu,
+    ru_en: wordsRuToEn,
   };
   return map[key] || null;
 };

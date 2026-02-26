@@ -43,12 +43,14 @@ current.forEach(row => {
 console.log('\n🎯 Creating Reverse Pairs (Target → English)...\n');
 
 // Create reverse pairs for each language
-const languages = ['es', 'fr', 'de', 'hu'];
+const languages = ['es', 'fr', 'de', 'hu', 'pt', 'ru'];
 const languageNames = {
   es: 'Spanish',
   fr: 'French',
   de: 'German',
   hu: 'Hungarian',
+  pt: 'Portuguese',
+  ru: 'Russian',
   en: 'English'
 };
 

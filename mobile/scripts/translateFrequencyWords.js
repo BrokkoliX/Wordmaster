@@ -50,6 +50,18 @@ const LANGUAGES = {
     code: 'HU',
     flag: '🇭🇺',
     frequencyFile: '../../../FrequencyWords/content/2018/hu/hu_50k.txt'
+  },
+  pt: { 
+    name: 'Portuguese', 
+    code: 'PT',
+    flag: '🇵🇹',
+    frequencyFile: '../../../FrequencyWords/content/2018/pt/pt_50k.txt'
+  },
+  ru: { 
+    name: 'Russian', 
+    code: 'RU',
+    flag: '🇷🇺',
+    frequencyFile: '../../../FrequencyWords/content/2018/ru/ru_50k.txt'
   }
 };
 
@@ -110,7 +122,13 @@ async function translateWithDeepL(words, sourceLang, targetLang = 'EN') {
   const url = 'https://api-free.deepl.com/v2/translate';
   
   try {
-    const text = words.map(w => w.word).join('\n');
+    // Send each word as a separate `text` param so DeepL translates them individually
+    const params = new URLSearchParams();
+    words.forEach(w => params.append('text', w.word));
+    params.append('source_lang', sourceLang);
+    params.append('target_lang', targetLang);
+    params.append('split_sentences', '0');
+    params.append('preserve_formatting', '1');
     
     const response = await fetch(url, {
       method: 'POST',
@@ -118,13 +136,7 @@ async function translateWithDeepL(words, sourceLang, targetLang = 'EN') {
         'Authorization': `DeepL-Auth-Key ${API_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        text: text,
-        source_lang: sourceLang,
-        target_lang: targetLang,
-        split_sentences: '0',
-        preserve_formatting: '1'
-      })
+      body: params
     });
     
     if (!response.ok) {
@@ -133,7 +145,7 @@ async function translateWithDeepL(words, sourceLang, targetLang = 'EN') {
     }
     
     const data = await response.json();
-    const translations = data.translations[0].text.split('\n');
+    const translations = data.translations.map(t => t.text);
     
     return translations;
   } catch (error) {
@@ -205,7 +217,7 @@ ${wordsText}`;
 async function translateLanguage(langCode, apiType = 'deepl') {
   const lang = LANGUAGES[langCode];
   if (!lang) {
-    throw new Error(`Unknown language: ${langCode}. Available: fr, de, hu`);
+    throw new Error(`Unknown language: ${langCode}. Available: fr, de, hu, pt, ru`);
   }
   
   console.log(`\n${'='.repeat(60)}`);

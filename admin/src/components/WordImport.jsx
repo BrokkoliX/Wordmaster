@@ -25,6 +25,8 @@ const LANGUAGES = [
   { code: 'fr', name: 'French' },
   { code: 'de', name: 'German' },
   { code: 'hu', name: 'Hungarian' },
+  { code: 'pt', name: 'Portuguese' },
+  { code: 'ru', name: 'Russian' },
 ];
 
 const SAMPLE_JSON = `[

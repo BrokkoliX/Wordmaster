@@ -31,6 +31,8 @@ const LANGUAGES = [
   { code: 'fr', name: 'French', flag: '🇫🇷' },     // ✅ 73.8% (22,147/30k from Wiktionary)
   { code: 'de', name: 'German', flag: '🇩🇪' },     // ✅ 63.5% (19,044/30k from Wiktionary)
   { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },  // ✅ 39.1% (11,718/30k from Wiktionary)
+  { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
+  { code: 'ru', name: 'Russian', flag: '🇷🇺' },
 ];
 
 export default function SettingsScreen({ navigation }) {

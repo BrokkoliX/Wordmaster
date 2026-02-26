@@ -19,6 +19,10 @@ const LANGUAGE_PAIRS = [
   { source: 'fr', target: 'en', name: 'French→English', file: 'words_french_to_english.json' },
   { source: 'de', target: 'en', name: 'German→English', file: 'words_german_to_english.json' },
   { source: 'hu', target: 'en', name: 'Hungarian→English', file: 'words_hungarian_to_english.json' },
+  { source: 'en', target: 'pt', name: 'Portuguese', file: 'words_portuguese.json' },
+  { source: 'pt', target: 'en', name: 'Portuguese→English', file: 'words_portuguese_to_english.json' },
+  { source: 'en', target: 'ru', name: 'Russian', file: 'words_russian.json' },
+  { source: 'ru', target: 'en', name: 'Russian→English', file: 'words_russian_to_english.json' },
 ];
 
 function exportLanguagePair(db, sourceLang, targetLang, outputFile) {

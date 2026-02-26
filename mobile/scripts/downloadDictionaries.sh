@@ -9,9 +9,20 @@ mkdir -p "$DICT_DIR"
 echo "🌍 Downloading Kaikki.org Wiktionary Dictionaries"
 echo "=================================================="
 echo ""
-echo "This will download ~1.5GB of dictionary data (compressed)"
+echo "This will download ~2GB of dictionary data (compressed)"
 echo "Estimated time: 10-20 minutes depending on connection"
 echo ""
+
+# Spanish
+echo "📥 Downloading Spanish dictionary (~800MB)..."
+if [ ! -f "$DICT_DIR/spanish.jsonl" ]; then
+    curl -L "https://kaikki.org/dictionary/Spanish/kaikki.org-dictionary-Spanish.jsonl" \
+        -o "$DICT_DIR/spanish.jsonl" \
+        --progress-bar
+    echo "✅ Spanish downloaded"
+else
+    echo "✓ Spanish already exists"
+fi
 
 # French
 echo "📥 Downloading French dictionary (484MB)..."
@@ -48,6 +59,30 @@ else
     echo "✓ Hungarian already exists"
 fi
 
+# Portuguese
+echo ""
+echo "📥 Downloading Portuguese dictionary (~500MB)..."
+if [ ! -f "$DICT_DIR/portuguese.jsonl" ]; then
+    curl -L "https://kaikki.org/dictionary/Portuguese/kaikki.org-dictionary-Portuguese.jsonl" \
+        -o "$DICT_DIR/portuguese.jsonl" \
+        --progress-bar
+    echo "✅ Portuguese downloaded"
+else
+    echo "✓ Portuguese already exists"
+fi
+
+# Russian
+echo ""
+echo "📥 Downloading Russian dictionary (~450MB)..."
+if [ ! -f "$DICT_DIR/russian.jsonl" ]; then
+    curl -L "https://kaikki.org/dictionary/Russian/kaikki.org-dictionary-Russian.jsonl" \
+        -o "$DICT_DIR/russian.jsonl" \
+        --progress-bar
+    echo "✅ Russian downloaded"
+else
+    echo "✓ Russian already exists"
+fi
+
 echo ""
 echo "============================================================"
 echo "✅ ALL DICTIONARIES DOWNLOADED"
@@ -59,3 +94,5 @@ echo "🎯 Next step: Run the parser to generate translation files"
 echo "   node scripts/parseKaikkiDictionary.js --lang=fr"
 echo "   node scripts/parseKaikkiDictionary.js --lang=de"
 echo "   node scripts/parseKaikkiDictionary.js --lang=hu"
+echo "   node scripts/parseKaikkiDictionary.js --lang=pt"
+echo "   node scripts/parseKaikkiDictionary.js --lang=ru"

@@ -17,7 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const { pool } = require('../config/database');
 
-const DATA_DIR = path.resolve(__dirname, '../../../WordMasterApp/src/data');
+const DATA_DIR = path.resolve(__dirname, '../../../mobile/src/data');
 
 const LANGUAGE_FILES = [
   'words_translated.json',
@@ -28,6 +28,10 @@ const LANGUAGE_FILES = [
   'words_french_to_english.json',
   'words_german_to_english.json',
   'words_hungarian_to_english.json',
+  'words_portuguese.json',
+  'words_portuguese_to_english.json',
+  'words_russian.json',
+  'words_russian_to_english.json',
 ];
 
 const BATCH_SIZE = 500;

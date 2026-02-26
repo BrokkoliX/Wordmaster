@@ -21,6 +21,14 @@ const CEFR_LEVELS = {
 
 // Language configurations
 const LANGUAGES = {
+  es: {
+    name: 'Spanish',
+    flag: '🇪🇸',
+    frequencyFile: '../../../FrequencyWords/content/2018/es/es_50k.txt',
+    kaikkiFile: '../../dictionaries/spanish.jsonl',
+    outputFile: 'words_translated.json',
+    reverseFile: 'words_spanish_to_english.json'
+  },
   fr: {
     name: 'French',
     flag: '🇫🇷',
@@ -44,6 +52,22 @@ const LANGUAGES = {
     kaikkiFile: '../../dictionaries/hungarian.jsonl',
     outputFile: 'words_hungarian.json',
     reverseFile: 'words_hungarian_to_english.json'
+  },
+  pt: {
+    name: 'Portuguese',
+    flag: '🇵🇹',
+    frequencyFile: '../../../FrequencyWords/content/2018/pt/pt_50k.txt',
+    kaikkiFile: '../../dictionaries/portuguese.jsonl',
+    outputFile: 'words_portuguese.json',
+    reverseFile: 'words_portuguese_to_english.json'
+  },
+  ru: {
+    name: 'Russian',
+    flag: '🇷🇺',
+    frequencyFile: '../../../FrequencyWords/content/2018/ru/ru_50k.txt',
+    kaikkiFile: '../../dictionaries/russian.jsonl',
+    outputFile: 'words_russian.json',
+    reverseFile: 'words_russian_to_english.json'
   }
 };
 
