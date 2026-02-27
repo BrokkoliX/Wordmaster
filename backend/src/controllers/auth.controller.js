@@ -9,7 +9,7 @@ const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { userId: user.id, email: user.email },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
   );
 
   const refreshToken = jwt.sign(
@@ -194,7 +194,7 @@ exports.refreshToken = async (req, res) => {
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
 
     res.json({
