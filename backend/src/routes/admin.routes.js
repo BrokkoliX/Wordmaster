@@ -28,8 +28,14 @@ router.get('/users/:id/progress', adminController.getUserProgress);
 // GET /api/admin/languages - Get all available languages with stats
 router.get('/languages', adminController.getLanguages);
 
+// GET /api/admin/languages/:id - Get details for a single language pair (id = "en-fr")
+router.get('/languages/:id', adminController.getLanguageDetails);
+
 // POST /api/admin/languages - Add new language pair
 router.post('/languages', adminController.addLanguage);
+
+// DELETE /api/admin/languages/:id - Delete all words for a language pair
+router.delete('/languages/:id', adminController.deleteLanguagePair);
 
 // GET /api/admin/words/stats - Get word database statistics
 router.get('/words/stats', adminController.getWordStats);

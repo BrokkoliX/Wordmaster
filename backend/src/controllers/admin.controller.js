@@ -283,10 +283,13 @@ const getUserProgress = async (req, res) => {
 
 /**
  * GET /api/admin/languages
- * Get all available language pairs with statistics
+ * Get all available language pairs with statistics.
+ * Includes per-CEFR-level counts and data_source breakdown when the
+ * column exists.
  */
 const getLanguages = async (req, res) => {
   try {
+    // Base stats per pair
     const result = await query(
       `SELECT 
         source_lang,
@@ -300,9 +303,54 @@ const getLanguages = async (req, res) => {
       ORDER BY source_lang, target_lang`
     );
 
-    res.json({
-      languages: result.rows,
+    // CEFR breakdown per pair
+    const cefrResult = await query(
+      `SELECT source_lang, target_lang, cefr_level, COUNT(*) as count
+       FROM words
+       GROUP BY source_lang, target_lang, cefr_level
+       ORDER BY source_lang, target_lang, cefr_level`
+    );
+
+    // Build a lookup of CEFR counts per pair
+    const cefrMap = {};
+    for (const row of cefrResult.rows) {
+      const key = `${row.source_lang}-${row.target_lang}`;
+      if (!cefrMap[key]) cefrMap[key] = {};
+      cefrMap[key][row.cefr_level] = parseInt(row.count);
+    }
+
+    // Try data_source breakdown (column may not exist yet)
+    let sourceMap = {};
+    try {
+      const sourceResult = await query(
+        `SELECT source_lang, target_lang, data_source, COUNT(*) as count
+         FROM words
+         WHERE data_source IS NOT NULL
+         GROUP BY source_lang, target_lang, data_source
+         ORDER BY source_lang, target_lang, data_source`
+      );
+      for (const row of sourceResult.rows) {
+        const key = `${row.source_lang}-${row.target_lang}`;
+        if (!sourceMap[key]) sourceMap[key] = {};
+        sourceMap[key][row.data_source] = parseInt(row.count);
+      }
+    } catch {
+      // data_source column doesn't exist yet -- that's fine
+    }
+
+    // Enrich each pair
+    const languages = result.rows.map((row) => {
+      const key = `${row.source_lang}-${row.target_lang}`;
+      return {
+        ...row,
+        word_count: parseInt(row.word_count),
+        levels_available: parseInt(row.levels_available),
+        cefr_breakdown: cefrMap[key] || {},
+        data_sources: sourceMap[key] || {},
+      };
     });
+
+    res.json({ languages });
   } catch (error) {
     console.error('Get languages error:', error);
     res.status(500).json({
@@ -312,8 +360,92 @@ const getLanguages = async (req, res) => {
 };
 
 /**
+ * GET /api/admin/languages/:id
+ * Get detailed information about a single language pair.
+ * The :id is expected as "source-target" (e.g. "en-fr").
+ */
+const getLanguageDetails = async (req, res) => {
+  try {
+    const [source_lang, target_lang] = req.params.id.split('-');
+
+    if (!source_lang || !target_lang) {
+      return res.status(400).json({
+        error: { message: 'Invalid pair id. Expected format: "en-fr"' },
+      });
+    }
+
+    // Counts
+    const countResult = await query(
+      `SELECT COUNT(*) as word_count FROM words
+       WHERE source_lang = $1 AND target_lang = $2`,
+      [source_lang, target_lang]
+    );
+
+    if (parseInt(countResult.rows[0].word_count) === 0) {
+      return res.status(404).json({
+        error: { message: 'Language pair not found' },
+      });
+    }
+
+    // CEFR breakdown
+    const cefrResult = await query(
+      `SELECT cefr_level, COUNT(*) as count FROM words
+       WHERE source_lang = $1 AND target_lang = $2
+       GROUP BY cefr_level ORDER BY cefr_level`,
+      [source_lang, target_lang]
+    );
+
+    // Sample words per level
+    const sampleResult = await query(
+      `SELECT id, word, translation, cefr_level, frequency_rank, category
+       FROM words
+       WHERE source_lang = $1 AND target_lang = $2
+       ORDER BY frequency_rank
+       LIMIT 20`,
+      [source_lang, target_lang]
+    );
+
+    // Data source breakdown (if column exists)
+    let dataSources = {};
+    try {
+      const dsResult = await query(
+        `SELECT data_source, COUNT(*) as count FROM words
+         WHERE source_lang = $1 AND target_lang = $2 AND data_source IS NOT NULL
+         GROUP BY data_source`,
+        [source_lang, target_lang]
+      );
+      for (const row of dsResult.rows) {
+        dataSources[row.data_source] = parseInt(row.count);
+      }
+    } catch {
+      // column doesn't exist yet
+    }
+
+    res.json({
+      language: {
+        id: `${source_lang}-${target_lang}`,
+        source_lang,
+        target_lang,
+        word_count: parseInt(countResult.rows[0].word_count),
+        cefr_breakdown: Object.fromEntries(
+          cefrResult.rows.map((r) => [r.cefr_level, parseInt(r.count)])
+        ),
+        data_sources: dataSources,
+        sample_words: sampleResult.rows,
+      },
+    });
+  } catch (error) {
+    console.error('Get language details error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to fetch language details' },
+    });
+  }
+};
+
+/**
  * POST /api/admin/languages
- * Add a new language pair (just marks it as available)
+ * Placeholder for adding a language pair.
+ * Actual activation happens when words are imported.
  */
 const addLanguage = async (req, res) => {
   try {
@@ -325,8 +457,6 @@ const addLanguage = async (req, res) => {
       });
     }
 
-    // You might want to create a separate languages table
-    // For now, we'll just return success as languages are implicit from words table
     res.json({
       message: 'Language pair registered. Import words to activate.',
       language: { source_lang, target_lang, name },
@@ -335,6 +465,38 @@ const addLanguage = async (req, res) => {
     console.error('Add language error:', error);
     res.status(500).json({
       error: { message: 'Failed to add language' },
+    });
+  }
+};
+
+/**
+ * DELETE /api/admin/languages/:id
+ * Delete all words for a language pair.
+ * The :id is "source-target" (e.g. "fr-de").
+ */
+const deleteLanguagePair = async (req, res) => {
+  try {
+    const [source_lang, target_lang] = req.params.id.split('-');
+
+    if (!source_lang || !target_lang) {
+      return res.status(400).json({
+        error: { message: 'Invalid pair id. Expected format: "en-fr"' },
+      });
+    }
+
+    const result = await query(
+      `DELETE FROM words WHERE source_lang = $1 AND target_lang = $2`,
+      [source_lang, target_lang]
+    );
+
+    res.json({
+      message: `Deleted ${result.rowCount} words for ${source_lang}-${target_lang}`,
+      deleted: result.rowCount,
+    });
+  } catch (error) {
+    console.error('Delete language pair error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to delete language pair' },
     });
   }
 };
@@ -998,7 +1160,9 @@ module.exports = {
   getUserProgress,
   // Language & vocabulary
   getLanguages,
+  getLanguageDetails,
   addLanguage,
+  deleteLanguagePair,
   getWordStats,
   importWords,
   deleteWord,

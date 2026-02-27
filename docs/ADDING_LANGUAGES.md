@@ -170,6 +170,12 @@ Language pairs are implicit from the data in the `words` table rather than store
 
 CEFR levels (A1 through C2) are assigned based on frequency rank during the translation step. The mapping is defined in the `CEFR_LEVELS` object in `translateFrequencyWords.js`. Words ranked 1--500 get A1, 501--1500 get A2, and so on up to C2 at ranks 12001--30000.
 
-## Future Improvement
+## Shared Language Config (implemented)
 
-The language list is currently duplicated in six files. A shared `languages.js` config (perhaps in the `shared/` directory) consumed by all layers would eliminate the need to update multiple files when adding a language.
+A shared language config now exists at `shared/constants/languages.js`. It defines all supported languages, hub designations (en, fr, de, pt), and helper functions for building pairs and formatting display names.
+
+The pipeline config at `mobile/scripts/config/pairs.json` defines all 18 hub pairs with their data strategies (kaikki, deepl, bridge). Pipeline scripts in `mobile/scripts/pipeline/` can process all pairs from this single config.
+
+The admin panel includes a "Language Manager" page at `/language-manager` that shows the hub model overview, pair completion status, and CEFR coverage per hub. Individual language pairs can be inspected and deleted via the "Language Pairs" list view.
+
+See `docs/LANGUAGE_DATA_STRATEGY.md` for the full research and architecture behind the hub-language model.

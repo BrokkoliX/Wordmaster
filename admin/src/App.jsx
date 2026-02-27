@@ -9,9 +9,10 @@ import authProvider from './authProvider';
 import Dashboard from './components/Dashboard';
 import WordImport from './components/WordImport';
 import DatabaseQuery from './components/DatabaseQuery';
+import LanguageManager from './components/LanguageManager';
 import LoginPage from './components/LoginPage';
 import { UserList, UserShow, UserEdit } from './resources/users';
-import { LanguageList } from './resources/languages';
+import { LanguageList, LanguageShow } from './resources/languages';
 import { AdminLayout } from './layout/AdminLayout';
 
 const App = () => (
@@ -35,11 +36,13 @@ const App = () => (
     <Resource
       name="languages"
       list={LanguageList}
+      show={LanguageShow}
       icon={TranslateIcon}
       options={{ label: 'Languages' }}
     />
     <CustomRoutes>
       <Route path="/word-import" element={<WordImport />} />
+      <Route path="/language-manager" element={<LanguageManager />} />
       <Route path="/database-query" element={<DatabaseQuery />} />
     </CustomRoutes>
   </Admin>

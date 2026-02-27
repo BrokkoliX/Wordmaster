@@ -1,0 +1,41 @@
+{
+  "hubs": ["en", "fr", "de", "pt"],
+  "languages": {
+    "en": { "name": "English",    "flag": "GB", "kaikkiSlug": null,        "frequencyFile": null },
+    "es": { "name": "Spanish",    "flag": "ES", "kaikkiSlug": "Spanish",   "frequencyFile": "es/es_50k.txt" },
+    "fr": { "name": "French",     "flag": "FR", "kaikkiSlug": "French",    "frequencyFile": "fr/fr_50k.txt" },
+    "de": { "name": "German",     "flag": "DE", "kaikkiSlug": "German",    "frequencyFile": "de/de_50k.txt" },
+    "hu": { "name": "Hungarian",  "flag": "HU", "kaikkiSlug": "Hungarian", "frequencyFile": "hu/hu_50k.txt" },
+    "pt": { "name": "Portuguese", "flag": "PT", "kaikkiSlug": "Portuguese","frequencyFile": "pt/pt_50k.txt" },
+    "ru": { "name": "Russian",    "flag": "RU", "kaikkiSlug": "Russian",   "frequencyFile": "ru/ru_50k.txt" }
+  },
+  "pairs": [
+    { "source": "en", "target": "es", "tier": 0, "strategies": ["kaikki-en", "deepl"] },
+    { "source": "en", "target": "fr", "tier": 0, "strategies": ["kaikki-en", "deepl"] },
+    { "source": "en", "target": "de", "tier": 0, "strategies": ["kaikki-en", "deepl"] },
+    { "source": "en", "target": "hu", "tier": 0, "strategies": ["kaikki-en", "deepl"] },
+    { "source": "en", "target": "pt", "tier": 0, "strategies": ["kaikki-en", "deepl"] },
+    { "source": "en", "target": "ru", "tier": 0, "strategies": ["kaikki-en", "deepl"] },
+
+    { "source": "fr", "target": "es", "tier": 1, "strategies": ["kaikki-cross", "deepl", "bridge"] },
+    { "source": "fr", "target": "de", "tier": 1, "strategies": ["kaikki-cross", "deepl", "bridge"] },
+    { "source": "fr", "target": "pt", "tier": 1, "strategies": ["kaikki-cross", "deepl", "bridge"] },
+    { "source": "de", "target": "es", "tier": 1, "strategies": ["kaikki-cross", "deepl", "bridge"] },
+    { "source": "pt", "target": "es", "tier": 1, "strategies": ["kaikki-cross", "deepl", "bridge"] },
+
+    { "source": "fr", "target": "hu", "tier": 2, "strategies": ["deepl", "bridge"] },
+    { "source": "fr", "target": "ru", "tier": 2, "strategies": ["deepl", "bridge"] },
+    { "source": "de", "target": "pt", "tier": 2, "strategies": ["deepl", "bridge"] },
+    { "source": "de", "target": "hu", "tier": 2, "strategies": ["deepl", "bridge"] },
+    { "source": "de", "target": "ru", "tier": 2, "strategies": ["deepl", "bridge"] },
+    { "source": "pt", "target": "hu", "tier": 2, "strategies": ["deepl", "bridge"] },
+    { "source": "pt", "target": "ru", "tier": 2, "strategies": ["deepl", "bridge"] }
+  ],
+  "defaults": {
+    "wordLimit": 10000,
+    "cefrLevels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+    "frequencyBase": "../../../FrequencyWords/content/2018",
+    "kaikkiBase": "https://kaikki.org/dictionary",
+    "dictionaryDir": "../../dictionaries"
+  }
+}
