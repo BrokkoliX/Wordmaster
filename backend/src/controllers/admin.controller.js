@@ -556,7 +556,7 @@ const getWordStats = async (req, res) => {
  */
 const importWords = async (req, res) => {
   try {
-    const { words, source_lang, target_lang } = req.body;
+    const { words, source_lang, target_lang, replace } = req.body;
 
     if (!words || !Array.isArray(words) || words.length === 0) {
       return res.status(400).json({
@@ -564,50 +564,101 @@ const importWords = async (req, res) => {
       });
     }
 
-    let imported = 0;
+    // Normalize records: accept both legacy (word/translation) and
+    // pipeline (source_word/target_word) field names.
+    const normalized = [];
     let skipped = 0;
-    let errors = [];
+    const errors = [];
 
-    for (const wordData of words) {
-      try {
-        const id = `${wordData.source_lang || source_lang}-${
-          wordData.target_lang || target_lang
-        }-${wordData.word}`.toLowerCase();
+    for (const entry of words) {
+      const word = entry.word || entry.target_word;
+      const translation = entry.translation || entry.source_word;
+      const srcLang = entry.source_lang || source_lang;
+      const tgtLang = entry.target_lang || target_lang;
 
-        await query(
-          `INSERT INTO words (
-            id, word, translation, difficulty, category, 
-            frequency_rank, cefr_level, source_lang, target_lang
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-          ON CONFLICT (id) DO NOTHING`,
-          [
-            id,
-            wordData.word,
-            wordData.translation,
-            wordData.difficulty || 1,
-            wordData.category || null,
-            wordData.frequency_rank || null,
-            wordData.cefr_level || 'A1',
-            wordData.source_lang || source_lang,
-            wordData.target_lang || target_lang,
-          ]
+      if (!word || !translation || !srcLang || !tgtLang) {
+        skipped++;
+        errors.push({ word: word || '(unknown)', error: 'Missing required fields' });
+        continue;
+      }
+
+      normalized.push({
+        id: entry.id || `${srcLang}-${tgtLang}-${word}`.toLowerCase(),
+        word,
+        translation,
+        difficulty: entry.difficulty || 1,
+        category: entry.category || null,
+        frequency_rank: entry.frequency_rank || null,
+        cefr_level: entry.cefr_level || 'A1',
+        source_lang: srcLang,
+        target_lang: tgtLang,
+      });
+    }
+
+    // Batch insert (500 per statement) inside a transaction
+    const BATCH_SIZE = 500;
+    const COLUMNS = ['id', 'word', 'translation', 'difficulty', 'category',
+      'frequency_rank', 'cefr_level', 'source_lang', 'target_lang'];
+    let imported = 0;
+
+    const client = await require('../config/database').pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Optionally delete existing data for the pair before inserting
+      if (replace && source_lang && target_lang) {
+        await client.query(
+          'DELETE FROM words WHERE source_lang = $1 AND target_lang = $2',
+          [source_lang, target_lang]
+        );
+      }
+
+      for (let i = 0; i < normalized.length; i += BATCH_SIZE) {
+        const batch = normalized.slice(i, i + BATCH_SIZE);
+        const values = [];
+        const params = [];
+        let paramIdx = 1;
+
+        for (const rec of batch) {
+          const placeholders = COLUMNS.map(() => `$${paramIdx++}`);
+          values.push(`(${placeholders.join(', ')})`);
+          params.push(
+            rec.id, rec.word, rec.translation, rec.difficulty, rec.category,
+            rec.frequency_rank, rec.cefr_level, rec.source_lang, rec.target_lang
+          );
+        }
+
+        await client.query(
+          `INSERT INTO words (${COLUMNS.join(', ')})
+           VALUES ${values.join(',\n')}
+           ON CONFLICT (id) DO UPDATE SET
+             word = EXCLUDED.word,
+             translation = EXCLUDED.translation,
+             difficulty = EXCLUDED.difficulty,
+             category = EXCLUDED.category,
+             frequency_rank = EXCLUDED.frequency_rank,
+             cefr_level = EXCLUDED.cefr_level,
+             source_lang = EXCLUDED.source_lang,
+             target_lang = EXCLUDED.target_lang`,
+          params
         );
 
-        imported++;
-      } catch (err) {
-        skipped++;
-        errors.push({
-          word: wordData.word,
-          error: err.message,
-        });
+        imported += batch.length;
       }
+
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
     }
 
     res.json({
       message: 'Import completed',
       imported,
       skipped,
-      errors: errors.slice(0, 10), // Only return first 10 errors
+      errors: errors.slice(0, 10),
     });
   } catch (error) {
     console.error('Import words error:', error);
