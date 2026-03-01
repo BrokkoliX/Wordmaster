@@ -7,7 +7,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-  Switch
+  Switch,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -47,6 +48,8 @@ export default function SettingsScreen({ navigation }) {
   const [exportingBackup, setExportingBackup] = useState(false);
   const [importingBackup, setImportingBackup] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
 
   useEffect(() => {
     loadSettings();
@@ -121,11 +124,14 @@ export default function SettingsScreen({ navigation }) {
         return;
       }
 
-      // Sync words from backend (falls back to bundled data if API is unreachable)
-      Alert.alert('Syncing Words', 'Loading vocabulary for your selection...');
+      // Show loading overlay while syncing words
+      const langName = LANGUAGES.find(l => l.code === learningLanguage)?.name;
+      setSyncMessage(`Downloading ${langName} vocabulary at ${cefrLevel} level...`);
+      setSyncing(true);
+
       try {
         const count = await syncWordsFromApi();
-        const langName = LANGUAGES.find(l => l.code === learningLanguage)?.name;
+        setSyncing(false);
         Alert.alert(
           'Settings Saved!',
           count > 0
@@ -140,6 +146,7 @@ export default function SettingsScreen({ navigation }) {
         );
       } catch (syncError) {
         console.error('Word sync failed:', syncError);
+        setSyncing(false);
         Alert.alert(
           'Settings Saved',
           'Settings saved but word loading failed. The app will retry on next launch.',
@@ -153,6 +160,7 @@ export default function SettingsScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error saving settings:', error);
+      setSyncing(false);
       Alert.alert('Error', 'Could not save settings');
     }
   };
@@ -536,6 +544,23 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Loading overlay shown while downloading word data */}
+      <Modal
+        visible={syncing}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+      >
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingCard}>
+            <ActivityIndicator size="large" color="#3498DB" />
+            <Text style={styles.loadingTitle}>Loading Vocabulary</Text>
+            <Text style={styles.loadingMessage}>{syncMessage}</Text>
+            <Text style={styles.loadingHint}>This may take a moment. Please wait...</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -875,5 +900,45 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#7F8C8D',
     lineHeight: 18,
+  },
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+  },
+  loadingCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 30,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 320,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  loadingTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  loadingMessage: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  loadingHint: {
+    fontSize: 12,
+    color: '#95A5A6',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
