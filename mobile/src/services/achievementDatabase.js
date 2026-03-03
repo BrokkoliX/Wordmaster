@@ -793,18 +793,4 @@ export const updateSessionMetadata = async (sessionId, completedAt, durationSeco
   }
 };
 
-export default {
-  initAchievementTables,
-  getAllAchievements,
-  getUserAchievements,
-  updateAchievementProgress,
-  unlockAchievement,
-  getPendingAchievements,
-  markAchievementNotificationShown,
-  getTotalAchievementPoints,
-  getAchievementStats,
-  logCategoryPractice,
-  getUniqueCategoriesPracticed,
-  logSessionMetadata,
-  updateSessionMetadata
-};
+

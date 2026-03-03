@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://3.211.219.221',
+        target: 'https://word-master.org',
         changeOrigin: true,
       },
     },

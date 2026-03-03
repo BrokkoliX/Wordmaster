@@ -15,8 +15,9 @@ import sentencesFr from '../data/sentences_fr.json';
 import sentencesEs from '../data/sentences_es.json';
 import sentencesHu from '../data/sentences_hu.json';
 
+import { getLevelsUpTo } from '../constants/cefrLevels';
+
 const PAGE_SIZE = 200;
-const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 const getLocalSentences = (language) => {
   const map = { de: sentencesDe, fr: sentencesFr, es: sentencesEs, hu: sentencesHu };
@@ -55,10 +56,9 @@ const importFromLocalData = async (language, cefrLevel) => {
     return 0;
   }
 
-  const levelIndex = CEFR_ORDER.indexOf(cefrLevel);
-  const allowedLevels = new Set(CEFR_ORDER.slice(0, levelIndex + 1));
+  const allowedLevels = new Set(getLevelsUpTo(cefrLevel));
 
-  await db.execAsync(`DELETE FROM sentence_templates WHERE language = '${language}'`);
+  await db.runAsync('DELETE FROM sentence_templates WHERE language = ?', [language]);
 
   let imported = 0;
   await db.execAsync('BEGIN TRANSACTION');
@@ -119,8 +119,9 @@ export const syncSentencesFromApi = async () => {
       console.log('⚠️  No sentences on API, falling back to bundled data...');
       imported = await importFromLocalData(learningLanguage, cefrLevel);
     } else {
-      await db.execAsync(
-        `DELETE FROM sentence_templates WHERE language = '${learningLanguage}'`
+      await db.runAsync(
+        'DELETE FROM sentence_templates WHERE language = ?',
+        [learningLanguage]
       );
 
       for (let offset = 0; offset < total; offset += PAGE_SIZE) {
@@ -227,12 +228,4 @@ export const getAvailableTopics = async () => {
      ORDER BY count DESC`,
     [learningLanguage]
   );
-};
-
-export default {
-  syncSentencesFromApi,
-  isSentenceSyncNeeded,
-  getLocalSentenceTemplates,
-  getAvailableTopics,
-  initSentenceTable,
 };

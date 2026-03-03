@@ -1,35 +1,6 @@
 import db from '../services/db';
-
-/**
- * SQL clause to filter out grammatical descriptions
- * Prevents entries like "nominative/accusative form of X" from being used
- */
-const GRAMMATICAL_FILTER = `
-  AND word NOT LIKE '[%'
-  AND translation NOT LIKE '[%'
-  AND translation NOT LIKE '%nominative%'
-  AND translation NOT LIKE '%accusative%'
-  AND translation NOT LIKE '%dative%'
-  AND translation NOT LIKE '%genitive%'
-  AND translation NOT LIKE '%inflection of%'
-  AND translation NOT LIKE '%conjugation of%'
-  AND translation NOT LIKE '%declension of%'
-  AND translation NOT LIKE '%form of%'
-  AND translation NOT LIKE '%singular of%'
-  AND translation NOT LIKE '%plural of%'
-  AND translation NOT LIKE '%masculine%'
-  AND translation NOT LIKE '%feminine%'
-  AND translation NOT LIKE '%neuter%'
-  AND translation NOT LIKE '%past tense%'
-  AND translation NOT LIKE '%present tense%'
-  AND translation NOT LIKE '%comparative of%'
-  AND translation NOT LIKE '%superlative of%'
-  AND word NOT LIKE '%nominative%'
-  AND word NOT LIKE '%accusative%'
-  AND word NOT LIKE '%dative%'
-  AND word NOT LIKE '%genitive%'
-  AND LENGTH(translation) < 100
-`;
+import { LANGUAGE_NAMES } from '../constants/languages';
+import { GRAMMATICAL_FILTER } from '../constants/sqlFilters';
 
 /**
  * Generate distractor options (wrong answers) for a word
@@ -155,17 +126,8 @@ export const createMultipleChoiceQuestion = async (correctWord, reverseDirection
   // Shuffle options
   const shuffledOptions = options.sort(() => Math.random() - 0.5);
   
-  // Create dynamic language labels
-  const languageNames = {
-    'en': 'English',
-    'es': 'Spanish',
-    'fr': 'French',
-    'de': 'German',
-    'hu': 'Hungarian'
-  };
-  
-  const targetLangName = languageNames[correctWord.target_lang] || correctWord.target_lang;
-  const sourceLangName = languageNames[correctWord.source_lang] || correctWord.source_lang;
+  const targetLangName = LANGUAGE_NAMES[correctWord.target_lang] || correctWord.target_lang;
+  const sourceLangName = LANGUAGE_NAMES[correctWord.source_lang] || correctWord.source_lang;
   
   return {
     question: reverseDirection ? correctWord.translation : correctWord.word,

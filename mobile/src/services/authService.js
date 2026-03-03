@@ -128,9 +128,10 @@ class AuthService {
    */
   async logout() {
     try {
-      // Best-effort server-side logout (invalidate refresh token, etc.)
+      // Best-effort server-side logout (invalidate refresh token)
       try {
-        await api.post('/auth/logout');
+        const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+        await api.post('/auth/logout', { refreshToken });
       } catch {
         // Ignore network errors during logout
       }
@@ -294,17 +295,24 @@ class AuthService {
   }
 
   /**
-   * Request a password reset email (placeholder -- backend endpoint
-   * does not send emails yet).
+   * Request a password reset.
+   *
+   * The backend generates a reset token.  Email delivery is not yet
+   * configured, so the user will see a generic confirmation message.
    */
   async resetPassword(email) {
     try {
+      const { data } = await api.post('/auth/request-reset', { email });
       return {
         error: null,
-        message: 'Password reset email sent (feature coming soon)',
+        message: data.message || 'If that email exists, a reset link has been sent.',
       };
     } catch (error) {
-      return { error: error.message };
+      const message =
+        error.response?.data?.error?.message ||
+        error.message ||
+        'Password reset request failed';
+      return { error: message };
     }
   }
 
@@ -348,15 +356,15 @@ class AuthService {
       isGuest: false,
       createdAt: backendUser.createdAt || backendUser.created_at,
       lastLoginAt: backendUser.lastLoginAt || backendUser.last_login_at,
-      subscriptionTier: 'free',
-      nativeLanguage: 'en',
-      learningLanguages: [],
-      currentCefrLevel: 'A1',
-      totalWordsLearned: 0,
-      totalSessions: 0,
-      currentStreak: 0,
-      longestStreak: 0,
-      totalAchievements: 0,
+      subscriptionTier: backendUser.subscriptionTier || backendUser.subscription_tier || 'free',
+      nativeLanguage: backendUser.nativeLanguage || backendUser.native_language || 'en',
+      learningLanguages: backendUser.learningLanguages || backendUser.learning_languages || [],
+      currentCefrLevel: backendUser.currentCefrLevel || backendUser.current_cefr_level || 'A1',
+      totalWordsLearned: backendUser.totalWordsLearned || backendUser.total_words_learned || 0,
+      totalSessions: backendUser.totalSessions || backendUser.total_sessions || 0,
+      currentStreak: backendUser.currentStreak || backendUser.current_streak || 0,
+      longestStreak: backendUser.longestStreak || backendUser.longest_streak || 0,
+      totalAchievements: backendUser.totalAchievements || backendUser.total_achievements || 0,
     };
   }
 }

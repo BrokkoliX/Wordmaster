@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { syncWordsFromApi, isSyncNeeded } from './wordApiService';
 import { syncSentencesFromApi, isSentenceSyncNeeded, initSentenceTable } from './sentenceApiService';
 import { initAchievementTables } from './achievementDatabase';
+import { GRAMMATICAL_FILTER_W } from '../constants/sqlFilters';
+import { getLevelsUpTo } from '../constants/cefrLevels';
 import db from './db';
 
 // Initialize database with schema
@@ -144,14 +146,8 @@ export const initDatabase = async () => {
   }
 };
 
-// CEFR level ordering used to include all levels at or below the selected one
-const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-
-const getAllowedCefrLevels = (level) => {
-  const idx = CEFR_ORDER.indexOf(level);
-  if (idx === -1) return ['A1'];
-  return CEFR_ORDER.slice(0, idx + 1);
-};
+// Wrapper for backward-compat: returns allowed CEFR levels up to the given one.
+const getAllowedCefrLevels = (level) => getLevelsUpTo(level);
 
 // Get words due for review
 export const getWordsDueForReview = async (limit = 20, category = null) => {
@@ -191,18 +187,7 @@ export const getWordsDueForReview = async (limit = 20, category = null) => {
         AND w.source_lang = ?
         AND w.target_lang = ?
         ${categoryClause}
-        AND w.word NOT LIKE '[%'
-        AND w.translation NOT LIKE '[%'
-        AND w.translation NOT LIKE '%nominative%'
-        AND w.translation NOT LIKE '%accusative%'
-        AND w.translation NOT LIKE '%dative%'
-        AND w.translation NOT LIKE '%genitive%'
-        AND w.translation NOT LIKE '%inflection of%'
-        AND w.translation NOT LIKE '%conjugation of%'
-        AND w.translation NOT LIKE '%form of%'
-        AND w.translation NOT LIKE '%singular of%'
-        AND w.translation NOT LIKE '%plural of%'
-        AND LENGTH(w.translation) < 100
+        ${GRAMMATICAL_FILTER_W}
         AND (p.next_review_date IS NULL OR p.next_review_date <= ?)
       ORDER BY 
         CASE 
@@ -267,18 +252,7 @@ export const getNewWords = async (limit = 5, category = null) => {
         AND w.source_lang = ?
         AND w.target_lang = ?
         ${categoryClause}
-        AND w.word NOT LIKE '[%'
-        AND w.translation NOT LIKE '[%'
-        AND w.translation NOT LIKE '%nominative%'
-        AND w.translation NOT LIKE '%accusative%'
-        AND w.translation NOT LIKE '%dative%'
-        AND w.translation NOT LIKE '%genitive%'
-        AND w.translation NOT LIKE '%inflection of%'
-        AND w.translation NOT LIKE '%conjugation of%'
-        AND w.translation NOT LIKE '%form of%'
-        AND w.translation NOT LIKE '%singular of%'
-        AND w.translation NOT LIKE '%plural of%'
-        AND LENGTH(w.translation) < 100
+        ${GRAMMATICAL_FILTER_W}
       ORDER BY
         CASE WHEN w.cefr_level = ? THEN 0 ELSE 1 END,
         w.frequency_rank ASC,
@@ -572,147 +546,7 @@ export const getAllCategories = async () => {
   }
 };
 
-// Get category by ID
-export const getCategoryById = async (categoryId) => {
-  try {
-    const category = await db.getFirstAsync(
-      'SELECT * FROM categories WHERE id = ?',
-      [categoryId]
-    );
-    return category;
-  } catch (error) {
-    console.error('Error getting category:', error);
-    throw error;
-  }
-};
-
-// Get words by category
-export const getWordsByCategory = async (categoryId, limit = 100) => {
-  try {
-    const words = await db.getAllAsync(`
-      SELECT w.*, p.status, p.confidence_level, p.times_shown
-      FROM words w
-      LEFT JOIN user_word_progress p ON w.id = p.word_id
-      WHERE w.category = ?
-      ORDER BY w.difficulty ASC, w.word ASC
-      LIMIT ?
-    `, [categoryId, limit]);
-    
-    return words;
-  } catch (error) {
-    console.error('Error getting words by category:', error);
-    throw error;
-  }
-};
-
-// Get words by difficulty range
-export const getWordsByDifficulty = async (minDiff = 1, maxDiff = 10, limit = 100) => {
-  try {
-    const words = await db.getAllAsync(`
-      SELECT w.*, p.status, p.confidence_level
-      FROM words w
-      LEFT JOIN user_word_progress p ON w.id = p.word_id
-      WHERE w.difficulty BETWEEN ? AND ?
-      ORDER BY w.difficulty ASC, w.word ASC
-      LIMIT ?
-    `, [minDiff, maxDiff, limit]);
-    
-    return words;
-  } catch (error) {
-    console.error('Error getting words by difficulty:', error);
-    throw error;
-  }
-};
-
-// Search words
-export const searchWords = async (searchTerm) => {
-  try {
-    const term = `%${searchTerm}%`;
-    const words = await db.getAllAsync(`
-      SELECT w.*, p.status, p.confidence_level
-      FROM words w
-      LEFT JOIN user_word_progress p ON w.id = p.word_id
-      WHERE w.word LIKE ? OR w.translation LIKE ?
-      ORDER BY w.word ASC
-      LIMIT 50
-    `, [term, term]);
-    
-    return words;
-  } catch (error) {
-    console.error('Error searching words:', error);
-    throw error;
-  }
-};
-
-// Get category statistics
-export const getCategoryStats = async () => {
-  try {
-    const stats = await db.getAllAsync(`
-      SELECT 
-        w.category,
-        c.name as category_name,
-        c.icon as category_icon,
-        c.color as category_color,
-        COUNT(w.id) as total_words,
-        COUNT(CASE WHEN p.status = 'mastered' OR p.status = 'retired' THEN 1 END) as mastered_words,
-        COUNT(CASE WHEN p.status IS NOT NULL THEN 1 END) as started_words
-      FROM words w
-      LEFT JOIN categories c ON w.category = c.id
-      LEFT JOIN user_word_progress p ON w.id = p.word_id
-      GROUP BY w.category, c.name, c.icon, c.color
-      ORDER BY c.name ASC
-    `);
-    
-    return stats;
-  } catch (error) {
-    console.error('Error getting category stats:', error);
-    throw error;
-  }
-};
-
-// Get mastered words count in a category
-export const getMasteredWordsInCategory = async (categoryId) => {
-  try {
-    const result = await db.getFirstAsync(`
-      SELECT COUNT(*) as count
-      FROM words w
-      INNER JOIN user_word_progress p ON w.id = p.word_id
-      WHERE w.category = ?
-        AND (p.status = 'mastered' OR p.status = 'retired')
-    `, [categoryId]);
-    
-    return result?.count || 0;
-  } catch (error) {
-    console.error('Error getting mastered words in category:', error);
-    throw error;
-  }
-};
-
-// Get total word count
-export const getTotalWordCount = async () => {
-  try {
-    const result = await db.getFirstAsync('SELECT COUNT(*) as count FROM words');
-    return result?.count || 0;
-  } catch (error) {
-    console.error('Error getting total word count:', error);
-    throw error;
-  }
-};
-
-export default {
-  initDatabase,
-  getWordsDueForReview,
-  getNewWords,
-  updateWordProgress,
-  getUserStatistics,
-  createSession,
-  completeSession,
-  getAllCategories,
-  getCategoryById,
-  getWordsByCategory,
-  getWordsByDifficulty,
-  searchWords,
-  getCategoryStats,
-  getMasteredWordsInCategory,
-  getTotalWordCount
-};
+// NOTE: getCategoryById, getWordsByCategory, getWordsByDifficulty, searchWords,
+// getCategoryStats, getMasteredWordsInCategory, and getTotalWordCount were
+// removed as dead code — they were exported but never imported anywhere.
+// Re-add them here if a future feature needs them.

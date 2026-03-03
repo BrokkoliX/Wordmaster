@@ -4,7 +4,7 @@ This document covers deploying the admin web UI to the same EC2 instance that al
 
 ## Prerequisites
 
-The EC2 instance must already be running with nginx and PM2 as described in `AWS_DEPLOYMENT_GUIDE.md`. The backend is reachable at `https://3.211.219.221`.
+The EC2 instance must already be running with nginx and PM2 as described in `AWS_DEPLOYMENT_GUIDE.md`. The backend is reachable at `https://word-master.org` (EC2 IP: `3.211.219.221`, DNS via Route 53 — see `DOMAIN_SETUP.md`).
 
 ## 1. Build the Admin Panel Locally
 
@@ -17,9 +17,11 @@ npm run build
 Vite reads `admin/.env.production` during `npm run build`, which sets:
 
 ```
-VITE_API_URL=https://3.211.219.221/api/admin
-VITE_AUTH_URL=https://3.211.219.221/api/auth
+VITE_API_URL=/api/admin
+VITE_AUTH_URL=/api/auth
 ```
+
+These are relative paths because the admin UI and API share the same origin (`https://word-master.org`).
 
 The output goes into `admin/dist/`.
 
@@ -52,7 +54,7 @@ Replace the contents with:
 ```nginx
 server {
     listen 80;
-    server_name _;
+    server_name word-master.org www.word-master.org;
 
     # --- Admin panel (static files) ---
     location /admin {
@@ -82,7 +84,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-The admin panel will be available at `https://3.211.219.221/admin`.
+The admin panel will be available at `https://word-master.org/admin`.
 
 ## 4. Set the Vite Base Path
 
@@ -110,7 +112,7 @@ UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 
 ## 6. Verify
 
-Open `https://3.211.219.221/admin` in a browser, log in with your admin credentials, and confirm the dashboard loads with stats from the production database.
+Open `https://word-master.org/admin` in a browser, log in with your admin credentials, and confirm the dashboard loads with stats from the production database.
 
 ## Updating the Admin Panel
 

@@ -54,7 +54,7 @@ Wordmaster/
 │   │   └── scripts/      SQL migrations
 │   └── package.json
 │
-├── mobile/               React Native app (formerly WordMasterApp)
+├── mobile/               React Native app
 │   ├── src/
 │   │   ├── screens/      HomeScreen, LearningScreen, ProfileScreen, etc.
 │   │   ├── services/     api, authService, database, TTSService, etc.

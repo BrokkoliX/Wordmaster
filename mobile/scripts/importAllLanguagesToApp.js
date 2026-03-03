@@ -2,7 +2,7 @@
  * Import All Languages to App Database
  * 
  * This imports all 252,000 words directly into the app's database
- * Run this from WordMasterApp directory
+ * Run this from the mobile directory
  */
 
 const sqlite3 = require('better-sqlite3');

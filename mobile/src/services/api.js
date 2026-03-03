@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'https://3.211.219.221/api';
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'https://word-master.org/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

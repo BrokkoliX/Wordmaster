@@ -27,8 +27,9 @@ import wordsPtToEn from '../data/words_portuguese_to_english.json';
 import wordsEnToRu from '../data/words_russian.json';
 import wordsRuToEn from '../data/words_russian_to_english.json';
 
+import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
+
 const PAGE_SIZE = 500;
-const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 /**
  * Defense-in-depth: reject entries that look like grammatical descriptions.
@@ -92,12 +93,12 @@ const importFromLocalData = async (sourceLang, targetLang, cefrLevel) => {
     return 0;
   }
 
-  const levelIndex = CEFR_ORDER.indexOf(cefrLevel);
-  const allowedLevels = new Set(CEFR_ORDER.slice(0, levelIndex + 1));
+  const allowedLevels = new Set(getLevelsUpTo(cefrLevel));
 
   // Clear existing words for this language pair
-  await db.execAsync(
-    `DELETE FROM words WHERE source_lang = '${sourceLang}' AND target_lang = '${targetLang}'`
+  await db.runAsync(
+    'DELETE FROM words WHERE source_lang = ? AND target_lang = ?',
+    [sourceLang, targetLang]
   );
 
   let imported = 0;
@@ -170,8 +171,9 @@ export const syncWordsFromApi = async () => {
       imported = await importFromLocalData(knownLanguage, learningLanguage, cefrLevel);
     } else {
       // Clear existing words for this language pair (keep other pairs if any)
-      await db.execAsync(
-        `DELETE FROM words WHERE source_lang = '${knownLanguage}' AND target_lang = '${learningLanguage}'`
+      await db.runAsync(
+        'DELETE FROM words WHERE source_lang = ? AND target_lang = ?',
+        [knownLanguage, learningLanguage]
       );
 
       // Fetch in pages
@@ -256,5 +258,3 @@ export const getLocalWordCount = async (sourceLang, targetLang) => {
   );
   return result?.count || 0;
 };
-
-export default { syncWordsFromApi, isSyncNeeded, getLocalWordCount };

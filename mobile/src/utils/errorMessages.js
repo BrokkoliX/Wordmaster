@@ -224,9 +224,4 @@ export function showErrorAlert(error, onAction = null) {
   );
 }
 
-export default {
-  ErrorMessages,
-  getUserFriendlyError,
-  parseError,
-  showErrorAlert
-};
+

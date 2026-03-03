@@ -85,5 +85,5 @@ REMOTE_COMMANDS
 
 echo ""
 echo "Deployment finished. Test the API:"
-echo "  curl https://$EC2_IP/api/words/count?source_lang=en&target_lang=de&cefr_level=A1"
+echo "  curl https://word-master.org/api/words/count?source_lang=en&target_lang=de&cefr_level=A1"
 echo ""

@@ -564,7 +564,7 @@ curl http://YOUR_SERVER_IP/health
 **On your LOCAL computer**:
 
 ```bash
-cd WordMasterApp/src/services
+cd mobile/src/services
 nano api.js
 ```
 
@@ -588,7 +588,7 @@ const API_BASE_URL = __DEV__
 
 ```bash
 # Restart Expo
-cd WordMasterApp
+cd mobile
 npx expo start
 
 # Test on your phone:

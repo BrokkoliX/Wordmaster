@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const { pool } = require('../config/database');
 
-const DATA_DIR = path.resolve(__dirname, '../../../WordMasterApp/src/data');
+const DATA_DIR = path.resolve(__dirname, '../../../mobile/src/data');
 
 const SENTENCE_FILES = [
   'sentences_de.json',

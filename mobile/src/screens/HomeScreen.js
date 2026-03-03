@@ -6,14 +6,7 @@ import { getUserStatistics } from '../services/database';
 import { getStreakEmoji, getStreakMessage, formatStreakDisplay } from '../services/streakService';
 import achievementService from '../services/AchievementService';
 import { showErrorAlert } from '../utils/errorMessages';
-
-const LANGUAGE_NAMES = {
-  en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  hu: 'Hungarian',
-};
+import { LANGUAGE_NAMES } from '../constants/languages';
 
 export default function HomeScreen({ navigation }) {
   const [stats, setStats] = useState({

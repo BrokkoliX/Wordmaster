@@ -98,20 +98,6 @@ class TTSService {
   }
 
   /**
-   * Speak a word in Spanish (learning language)
-   */
-  async speakSpanish(text, options = {}) {
-    return this.speak(text, 'es-ES', options);
-  }
-
-  /**
-   * Speak a word in English (known language)
-   */
-  async speakEnglish(text, options = {}) {
-    return this.speak(text, 'en-US', options);
-  }
-
-  /**
    * Stop current speech
    */
   async stop() {
@@ -226,20 +212,17 @@ class TTSService {
    * @returns {string} - Full language code (e.g., 'es-ES', 'en-US')
    */
   getLanguageCode(language) {
+    // Maps short ISO 639-1 codes to BCP 47 locale tags for TTS.
+    // Only includes languages supported by shared/constants/languages.js.
+    // Add new entries here when a language is added to the shared config.
     const languageCodes = {
-      'es': 'es-ES',  // Spanish (Spain)
-      'en': 'en-US',  // English (US)
-      'fr': 'fr-FR',  // French (France)
-      'de': 'de-DE',  // German (Germany)
-      'hu': 'hu-HU',  // Hungarian (Hungary) - ADDED
-      'it': 'it-IT',  // Italian (Italy)
-      'pt': 'pt-BR',  // Portuguese (Brazil)
-      'ru': 'ru-RU',  // Russian
-      'ja': 'ja-JP',  // Japanese
-      'zh': 'zh-CN',  // Chinese (Simplified)
-      'ko': 'ko-KR',  // Korean
-      'ar': 'ar-SA',  // Arabic (Saudi Arabia)
-      'hi': 'hi-IN',  // Hindi (India)
+      'en': 'en-US',
+      'es': 'es-ES',
+      'fr': 'fr-FR',
+      'de': 'de-DE',
+      'hu': 'hu-HU',
+      'pt': 'pt-BR',
+      'ru': 'ru-RU',
     };
 
     return languageCodes[language] || language;

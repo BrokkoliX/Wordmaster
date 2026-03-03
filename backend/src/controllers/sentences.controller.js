@@ -1,6 +1,6 @@
 const db = require('../config/database');
 
-const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const { CEFR_LEVELS: CEFR_ORDER } = require('../../../shared/constants/cefr-levels');
 
 /**
  * GET /api/sentences

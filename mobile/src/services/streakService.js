@@ -209,14 +209,3 @@ export function checkMilestoneReached(oldStreak, newStreak) {
   
   return null;
 }
-
-export default {
-  calculateStreak,
-  getStreakLevel,
-  getStreakEmoji,
-  getStreakMessage,
-  completedToday,
-  getStreakTimeRemaining,
-  formatStreakDisplay,
-  checkMilestoneReached
-};

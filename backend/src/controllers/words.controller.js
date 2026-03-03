@@ -13,7 +13,7 @@ const db = require('../config/database');
  *   limit        - optional, default 500
  *   offset       - optional, default 0
  */
-const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const { CEFR_LEVELS: CEFR_ORDER, getLevelsUpTo } = require('../../../shared/constants/cefr-levels');
 
 // Defense-in-depth: SQL conditions that exclude any remaining grammatical entries
 const CLEAN_WORD_CONDITIONS = `

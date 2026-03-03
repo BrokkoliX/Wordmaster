@@ -62,7 +62,7 @@ SELECT COUNT(*) FROM words WHERE translation ILIKE '%nominative%';
 
 ```bash
 # On your local machine
-cd WordMasterApp/scripts
+cd mobile/scripts
 
 # Create new database with filters
 node createCorrectDatabase.js
@@ -71,7 +71,7 @@ node createCorrectDatabase.js
 ### Or Clean Existing Database
 
 ```bash
-cd WordMasterApp/scripts
+cd mobile/scripts
 node cleanGrammaticalEntries.js
 ```
 
@@ -123,7 +123,7 @@ psql -h YOUR_RDS_ENDPOINT -U postgres -d wordmaster -c \
 
 ### Mobile SQLite
 ```bash
-sqlite3 WordMasterApp/wordmaster.db \
+sqlite3 mobile/wordmaster.db \
   "SELECT word, translation FROM words WHERE translation LIKE '%form of%' LIMIT 5;"
 ```
 **Should return**: 0 rows
@@ -137,10 +137,10 @@ sqlite3 WordMasterApp/wordmaster.db \
 - ✅ `backend/src/scripts/cleanGrammaticalEntries.js` - Cleanup script
 
 ### Mobile App
-- ✅ `WordMasterApp/scripts/createCorrectDatabase.js` - Filters during import
-- ✅ `WordMasterApp/scripts/cleanGrammaticalEntries.js` - Cleanup script
-- ✅ `WordMasterApp/src/utils/distractorGenerator.js` - Filters during runtime
-- ✅ `WordMasterApp/src/services/database.js` - Filters during queries
+- ✅ `mobile/scripts/createCorrectDatabase.js` - Filters during import
+- ✅ `mobile/scripts/cleanGrammaticalEntries.js` - Cleanup script
+- ✅ `mobile/src/utils/distractorGenerator.js` - Filters during runtime
+- ✅ `mobile/src/services/database.js` - Filters during queries
 
 ---
 

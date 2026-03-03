@@ -19,17 +19,10 @@ import {
 import achievementService from '../services/AchievementService';
 import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import hapticService from '../services/HapticService';
+import { LANGUAGE_NAMES } from '../constants/languages';
 
 const PAIRS_PER_ROUND = 5;
 const DEFAULT_WORDS_PER_SESSION = 20;
-
-const LANGUAGE_NAMES = {
-  en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  hu: 'Hungarian',
-};
 
 /**
  * Shuffle an array using Fisher-Yates algorithm.

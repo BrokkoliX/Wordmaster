@@ -69,20 +69,20 @@ DB_PASSWORD=your-password
 
 ### 1b. Mobile App Import-Time Filtering (Local SQLite)
 
-**File**: `WordMasterApp/scripts/createCorrectDatabase.js`
+**File**: `mobile/scripts/createCorrectDatabase.js`
 
 The same filtering logic for the mobile app's local database.
 
 **Usage**:
 
 ```bash
-cd WordMasterApp/scripts
+cd mobile/scripts
 node createCorrectDatabase.js
 ```
 
 ### 2. Runtime Filtering (Distractor Generation)
 
-**File**: `WordMasterApp/src/utils/distractorGenerator.js`
+**File**: `mobile/src/utils/distractorGenerator.js`
 
 Added `GRAMMATICAL_FILTER` constant applied to all SQL queries:
 
@@ -106,7 +106,7 @@ This ensures that even if a grammatical entry exists in the database, it will ne
 
 ### 3. Query-Level Filtering
 
-**File**: `WordMasterApp/src/services/database.js`
+**File**: `mobile/src/services/database.js`
 
 Updated `getWordsDueForReview()` and `getNewWords()` functions to include the same grammatical filters. This prevents grammatical descriptions from being selected as the main word to learn.
 
@@ -133,12 +133,12 @@ This will:
 
 #### 4b. Mobile App SQLite Cleanup
 
-**File**: `WordMasterApp/scripts/cleanGrammaticalEntries.js`
+**File**: `mobile/scripts/cleanGrammaticalEntries.js`
 
 For the mobile app's local database:
 
 ```bash
-cd WordMasterApp/scripts
+cd mobile/scripts
 node cleanGrammaticalEntries.js
 ```
 
@@ -219,7 +219,7 @@ After implementing the filters, verify they work:
 
 1. **Regenerate mobile database**:
    ```bash
-   cd WordMasterApp/scripts
+   cd mobile/scripts
    node createCorrectDatabase.js
    ```
 
@@ -232,7 +232,7 @@ After implementing the filters, verify they work:
 
 4. **Query mobile database directly** (optional):
    ```bash
-   sqlite3 WordMasterApp/wordmaster.db
+   sqlite3 mobile/wordmaster.db
    SELECT word, translation FROM words WHERE translation LIKE '%nominative%' LIMIT 10;
    ```
    Should return no results.
@@ -265,11 +265,11 @@ When adding new language pairs:
 
 ## Related Files
 
-- `WordMasterApp/scripts/createCorrectDatabase.js` - Import filtering
-- `WordMasterApp/scripts/cleanGrammaticalEntries.js` - Database cleanup
-- `WordMasterApp/src/utils/distractorGenerator.js` - Runtime filtering
-- `WordMasterApp/src/services/database.js` - Query filtering
-- `WordMasterApp/src/data/words_*.json` - Source vocabulary data
+- `mobile/scripts/createCorrectDatabase.js` - Import filtering
+- `mobile/scripts/cleanGrammaticalEntries.js` - Database cleanup
+- `mobile/src/utils/distractorGenerator.js` - Runtime filtering
+- `mobile/src/services/database.js` - Query filtering
+- `mobile/src/data/words_*.json` - Source vocabulary data
 
 ## Contact
 

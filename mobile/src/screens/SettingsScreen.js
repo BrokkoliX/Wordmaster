@@ -16,6 +16,7 @@ import db from '../services/db';
 import exportService from '../services/exportService';
 import { syncWordsFromApi, isSyncNeeded } from '../services/wordApiService';
 import ttsService from '../services/TTSService';
+import { LANGUAGE_LIST as LANGUAGES } from '../constants/languages';
 
 const CEFR_LEVELS = [
   { id: 'A1', name: 'A1 - Beginner', description: '500 most common words', wordCount: 500 },
@@ -24,16 +25,6 @@ const CEFR_LEVELS = [
   { id: 'B2', name: 'B2 - Upper Intermediate', description: 'Complex topics', wordCount: 3000 },
   { id: 'C1', name: 'C1 - Advanced', description: 'Professional fluency', wordCount: 6000 },
   { id: 'C2', name: 'C2 - Mastery', description: 'Near-native level', wordCount: 18000 }
-];
-
-const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-  { code: 'fr', name: 'French', flag: '🇫🇷' },     // ✅ 73.8% (22,147/30k from Wiktionary)
-  { code: 'de', name: 'German', flag: '🇩🇪' },     // ✅ 63.5% (19,044/30k from Wiktionary)
-  { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },  // ✅ 39.1% (11,718/30k from Wiktionary)
-  { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
-  { code: 'ru', name: 'Russian', flag: '🇷🇺' },
 ];
 
 export default function SettingsScreen({ navigation }) {

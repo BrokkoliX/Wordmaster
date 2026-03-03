@@ -23,16 +23,9 @@ import achievementService from '../services/AchievementService';
 import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import ttsService from '../services/TTSService';
 import hapticService from '../services/HapticService';
+import { LANGUAGE_NAMES } from '../constants/languages';
 
 const DEFAULT_WORDS_PER_SESSION = 20;
-
-const LANGUAGE_NAMES = {
-  en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  hu: 'Hungarian',
-};
 
 /**
  * Normalize a string for comparison: lowercase, trim, and strip accents.

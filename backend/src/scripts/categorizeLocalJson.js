@@ -14,7 +14,7 @@ const path = require('path');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
-const DATA_DIR = path.resolve(__dirname, '../../../WordMasterApp/src/data');
+const DATA_DIR = path.resolve(__dirname, '../../../mobile/src/data');
 
 const JSON_FILES = [
   'words_translated.json',

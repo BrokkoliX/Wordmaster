@@ -312,13 +312,13 @@ Error: duplicate key value violates unique constraint
 ### No Words Imported
 
 **Check**:
-1. JSON files exist in `WordMasterApp/src/data/`
+1. JSON files exist in `mobile/src/data/`
 2. File paths in script are correct
 3. JSON files are valid (not corrupted)
 
 ```bash
 # Verify JSON files
-ls -lh ~/Wordmaster/WordMasterApp/src/data/*.json
+ls -lh ~/Wordmaster/mobile/src/data/*.json
 ```
 
 ## Performance Tips

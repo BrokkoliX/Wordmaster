@@ -212,12 +212,26 @@ exports.refreshToken = async (req, res) => {
 };
 
 /**
- * Logout user (optional - can just delete tokens on client)
+ * Logout user — invalidate refresh tokens server-side.
  */
 exports.logout = async (req, res) => {
   try {
-    // In a more complex setup, you would invalidate the refresh token here
-    // For now, client-side token deletion is sufficient
+    const { refreshToken } = req.body;
+
+    if (refreshToken) {
+      try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        // Invalidate all refresh tokens for this user so stolen tokens
+        // cannot be reused after the user explicitly logs out.
+        const { query: dbQuery } = require('../config/database');
+        await dbQuery(
+          `DELETE FROM refresh_tokens WHERE user_id = $1`,
+          [decoded.userId]
+        );
+      } catch {
+        // Token may already be expired/invalid — that's fine during logout.
+      }
+    }
 
     res.json({
       message: 'Logged out successfully',
@@ -271,13 +285,15 @@ exports.requestPasswordReset = async (req, res) => {
       [user.id, token, expiresAt]
     );
 
-    console.log(`[PASSWORD RESET] Token generated for ${email}: ${token}`);
+    // Only log the token in development — never expose it in production logs.
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[PASSWORD RESET][DEV ONLY] Token for ${email}: ${token}`);
+    }
 
+    // TODO: Send the token via email (SES, SendGrid, etc.) instead of
+    // returning it in the response.  Never expose resetToken over HTTP.
     res.json({
-      message: 'If that email exists, a reset token has been generated.',
-      // Returned directly because there is no email service configured.
-      // In production, send this via email instead.
-      resetToken: token,
+      message: 'If that email exists, a reset link has been sent.',
     });
   } catch (error) {
     console.error('Request password reset error:', error);

@@ -30,7 +30,7 @@
       "expo-sqlite"
     ],
     "extra": {
-      "apiBaseUrl": "https://3.211.219.221/api"
+      "apiBaseUrl": "https://word-master.org/api"
     }
   }
 }
