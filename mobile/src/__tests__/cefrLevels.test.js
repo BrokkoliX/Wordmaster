@@ -1,9 +1,9 @@
-const {
+import {
   CEFR_LEVELS,
   CEFR_LEVEL_ORDER,
   getLevelsUpTo,
   compareLevels,
-} = require('../../../shared/constants/cefr-levels');
+} from '../constants/cefrLevels';
 
 describe('CEFR_LEVELS', () => {
   test('contains exactly 6 levels in order', () => {
