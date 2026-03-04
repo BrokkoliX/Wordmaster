@@ -118,6 +118,28 @@ CREATE TABLE IF NOT EXISTS learning_sessions (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Achievement definitions table (master list managed by admin)
+CREATE TABLE IF NOT EXISTS achievement_definitions (
+  id VARCHAR(100) PRIMARY KEY,
+  category VARCHAR(50) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT NOT NULL,
+  icon VARCHAR(20) NOT NULL DEFAULT '🏆',
+  rarity VARCHAR(20) NOT NULL DEFAULT 'common'
+    CHECK(rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary')),
+  points INTEGER NOT NULL DEFAULT 0,
+  unlock_criteria JSONB NOT NULL DEFAULT '{}',
+  hidden BOOLEAN DEFAULT FALSE,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_achievement_defs_category
+  ON achievement_definitions(category);
+CREATE INDEX IF NOT EXISTS idx_achievement_defs_rarity
+  ON achievement_definitions(rarity);
+
 -- User achievements table
 CREATE TABLE IF NOT EXISTS user_achievements (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

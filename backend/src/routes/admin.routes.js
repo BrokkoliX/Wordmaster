@@ -62,6 +62,22 @@ router.put('/sentences/:id', adminController.updateSentence);
 // DELETE /api/admin/sentences/:id - Delete sentence
 router.delete('/sentences/:id', adminController.deleteSentence);
 
+// ========== ACHIEVEMENT MANAGEMENT ==========
+// GET /api/admin/achievements - List all achievement definitions
+router.get('/achievements', adminController.getAchievements);
+
+// GET /api/admin/achievements/:id - Get single achievement details
+router.get('/achievements/:id', adminController.getAchievementById);
+
+// POST /api/admin/achievements - Create new achievement
+router.post('/achievements', adminController.createAchievement);
+
+// PUT /api/admin/achievements/:id - Update achievement
+router.put('/achievements/:id', adminController.updateAchievement);
+
+// DELETE /api/admin/achievements/:id - Delete achievement
+router.delete('/achievements/:id', adminController.deleteAchievement);
+
 // ========== ANALYTICS & STATISTICS ==========
 // GET /api/admin/stats - Overall platform statistics
 router.get('/stats', adminController.getPlatformStats);

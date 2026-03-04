@@ -1202,6 +1202,352 @@ const getSchema = async (req, res) => {
   }
 };
 
+// ========== ACHIEVEMENT MANAGEMENT ==========
+
+/**
+ * GET /api/admin/achievements
+ * List all achievement definitions with pagination, search, and filters
+ */
+const getAchievements = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 50,
+      search = '',
+      category = '',
+      rarity = '',
+      sortBy = 'order_index',
+      sortOrder = 'ASC',
+    } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    let whereConditions = [];
+    let params = [];
+    let paramCount = 1;
+
+    if (search) {
+      whereConditions.push(
+        `(title ILIKE $${paramCount} OR description ILIKE $${paramCount} OR id ILIKE $${paramCount})`
+      );
+      params.push(`%${search}%`);
+      paramCount++;
+    }
+
+    if (category) {
+      whereConditions.push(`category = $${paramCount}`);
+      params.push(category);
+      paramCount++;
+    }
+
+    if (rarity) {
+      whereConditions.push(`rarity = $${paramCount}`);
+      params.push(rarity);
+      paramCount++;
+    }
+
+    const whereClause =
+      whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+    const allowedSortFields = ['order_index', 'title', 'category', 'rarity', 'points', 'created_at'];
+    const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'order_index';
+    const safeSortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+    const countResult = await query(
+      `SELECT COUNT(*) as total FROM achievement_definitions ${whereClause}`,
+      params
+    );
+    const total = parseInt(countResult.rows[0].total);
+
+    params.push(limit, offset);
+    const result = await query(
+      `SELECT
+        ad.*,
+        (SELECT COUNT(*) FROM user_achievements ua WHERE ua.achievement_id = ad.id) as times_unlocked
+      FROM achievement_definitions ad
+      ${whereClause}
+      ORDER BY ${safeSortBy} ${safeSortOrder}
+      LIMIT $${paramCount} OFFSET $${paramCount + 1}`,
+      params
+    );
+
+    res.json({
+      achievements: result.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Get achievements error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to fetch achievements' },
+    });
+  }
+};
+
+/**
+ * GET /api/admin/achievements/:id
+ * Get a single achievement definition with unlock statistics
+ */
+const getAchievementById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await query(
+      `SELECT
+        ad.*,
+        (SELECT COUNT(*) FROM user_achievements ua WHERE ua.achievement_id = ad.id) as times_unlocked,
+        (SELECT COUNT(*) FROM user_achievements ua WHERE ua.achievement_id = ad.id AND ua.progress >= 100) as times_completed
+      FROM achievement_definitions ad
+      WHERE ad.id = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: { message: 'Achievement not found' },
+      });
+    }
+
+    const achievement = result.rows[0];
+
+    // Get recent unlockers
+    const recentUnlockers = await query(
+      `SELECT u.username, u.email, ua.unlocked_at, ua.progress
+       FROM user_achievements ua
+       JOIN users u ON ua.user_id = u.id
+       WHERE ua.achievement_id = $1
+       ORDER BY ua.unlocked_at DESC
+       LIMIT 10`,
+      [id]
+    );
+
+    res.json({
+      achievement,
+      recentUnlockers: recentUnlockers.rows,
+    });
+  } catch (error) {
+    console.error('Get achievement by id error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to fetch achievement' },
+    });
+  }
+};
+
+/**
+ * POST /api/admin/achievements
+ * Create a new achievement definition
+ */
+const createAchievement = async (req, res) => {
+  try {
+    const {
+      id,
+      category,
+      title,
+      description,
+      icon = '🏆',
+      rarity = 'common',
+      points = 0,
+      unlock_criteria = {},
+      hidden = false,
+      order_index = 0,
+    } = req.body;
+
+    if (!id || !category || !title || !description) {
+      return res.status(400).json({
+        error: { message: 'id, category, title, and description are required' },
+      });
+    }
+
+    const validRarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+    if (!validRarities.includes(rarity)) {
+      return res.status(400).json({
+        error: { message: `rarity must be one of: ${validRarities.join(', ')}` },
+      });
+    }
+
+    const result = await query(
+      `INSERT INTO achievement_definitions
+        (id, category, title, description, icon, rarity, points, unlock_criteria, hidden, order_index)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING *`,
+      [
+        id,
+        category,
+        title,
+        description,
+        icon,
+        rarity,
+        points,
+        JSON.stringify(unlock_criteria),
+        hidden,
+        order_index,
+      ]
+    );
+
+    res.status(201).json({
+      message: 'Achievement created successfully',
+      achievement: result.rows[0],
+    });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        error: { message: `Achievement with id "${req.body.id}" already exists` },
+      });
+    }
+    console.error('Create achievement error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to create achievement' },
+    });
+  }
+};
+
+/**
+ * PUT /api/admin/achievements/:id
+ * Update an achievement definition
+ */
+const updateAchievement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, title, description, icon, rarity, points, unlock_criteria, hidden, order_index } = req.body;
+
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (category !== undefined) {
+      updates.push(`category = $${paramCount}`);
+      values.push(category);
+      paramCount++;
+    }
+
+    if (title !== undefined) {
+      updates.push(`title = $${paramCount}`);
+      values.push(title);
+      paramCount++;
+    }
+
+    if (description !== undefined) {
+      updates.push(`description = $${paramCount}`);
+      values.push(description);
+      paramCount++;
+    }
+
+    if (icon !== undefined) {
+      updates.push(`icon = $${paramCount}`);
+      values.push(icon);
+      paramCount++;
+    }
+
+    if (rarity !== undefined) {
+      const validRarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+      if (!validRarities.includes(rarity)) {
+        return res.status(400).json({
+          error: { message: `rarity must be one of: ${validRarities.join(', ')}` },
+        });
+      }
+      updates.push(`rarity = $${paramCount}`);
+      values.push(rarity);
+      paramCount++;
+    }
+
+    if (points !== undefined) {
+      updates.push(`points = $${paramCount}`);
+      values.push(points);
+      paramCount++;
+    }
+
+    if (unlock_criteria !== undefined) {
+      updates.push(`unlock_criteria = $${paramCount}`);
+      values.push(JSON.stringify(unlock_criteria));
+      paramCount++;
+    }
+
+    if (hidden !== undefined) {
+      updates.push(`hidden = $${paramCount}`);
+      values.push(hidden);
+      paramCount++;
+    }
+
+    if (order_index !== undefined) {
+      updates.push(`order_index = $${paramCount}`);
+      values.push(order_index);
+      paramCount++;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({
+        error: { message: 'No valid fields to update' },
+      });
+    }
+
+    values.push(id);
+    const result = await query(
+      `UPDATE achievement_definitions
+       SET ${updates.join(', ')}, updated_at = NOW()
+       WHERE id = $${paramCount}
+       RETURNING *`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: { message: 'Achievement not found' },
+      });
+    }
+
+    res.json({
+      message: 'Achievement updated successfully',
+      achievement: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Update achievement error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to update achievement' },
+    });
+  }
+};
+
+/**
+ * DELETE /api/admin/achievements/:id
+ * Delete an achievement definition
+ */
+const deleteAchievement = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if any users have this achievement
+    const usageCheck = await query(
+      'SELECT COUNT(*) as count FROM user_achievements WHERE achievement_id = $1',
+      [id]
+    );
+
+    const result = await query(
+      'DELETE FROM achievement_definitions WHERE id = $1 RETURNING id',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: { message: 'Achievement not found' },
+      });
+    }
+
+    res.json({
+      message: 'Achievement deleted successfully',
+      usersAffected: parseInt(usageCheck.rows[0].count),
+    });
+  } catch (error) {
+    console.error('Delete achievement error:', error);
+    res.status(500).json({
+      error: { message: 'Failed to delete achievement' },
+    });
+  }
+};
+
 module.exports = {
   // User management
   getAllUsers,
@@ -1232,4 +1578,10 @@ module.exports = {
   checkDatabaseHealth,
   executeQuery,
   getSchema,
+  // Achievements
+  getAchievements,
+  getAchievementById,
+  createAchievement,
+  updateAchievement,
+  deleteAchievement,
 };

@@ -6,12 +6,14 @@ import LanguageIcon from '@mui/icons-material/Language';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StorageIcon from '@mui/icons-material/Storage';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const AdminMenu = () => (
   <Menu>
     <Menu.DashboardItem primaryText="Dashboard" leftIcon={<DashboardIcon />} />
     <Menu.ResourceItem name="users" primaryText="Users" leftIcon={<PeopleIcon />} />
     <Menu.ResourceItem name="languages" primaryText="Language Pairs" leftIcon={<TranslateIcon />} />
+    <Menu.ResourceItem name="achievements" primaryText="Achievements" leftIcon={<EmojiEventsIcon />} />
     <Menu.Item
       to="/language-manager"
       primaryText="Language Manager"
