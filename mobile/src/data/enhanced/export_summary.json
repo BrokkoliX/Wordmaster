@@ -1,0 +1,65 @@
+{
+  "export_date": "2026-03-06T00:15:29.947Z",
+  "total_words_exported": 187286,
+  "vocabulary_targets": {
+    "A1": 2000,
+    "A2": 3000,
+    "B1": 5000,
+    "B2": 4000,
+    "C1": 2000,
+    "C2": 1000
+  },
+  "target_per_direction": 17000,
+  "quality_filters": [
+    "Length: 2-25 characters",
+    "No grammatical forms",
+    "Frequency-prioritized selection",
+    "Balanced CEFR distribution"
+  ],
+  "files_created": [
+    "words_french_enhanced.json",
+    "words_french_to_english_enhanced.json",
+    "words_german_enhanced.json",
+    "words_german_to_english_enhanced.json",
+    "words_hungarian_enhanced.json",
+    "words_hungarian_to_english_enhanced.json",
+    "words_portuguese_enhanced.json",
+    "words_portuguese_to_english_enhanced.json",
+    "words_russian_enhanced.json",
+    "words_russian_to_english_enhanced.json",
+    "words_spanish_enhanced.json",
+    "words_spanish_to_english_enhanced.json"
+  ],
+  "database_statistics": [
+    {
+      "cefr_level": "A1",
+      "total_available": "111782",
+      "with_frequency": "11925"
+    },
+    {
+      "cefr_level": "A2",
+      "total_available": "258606",
+      "with_frequency": "10514"
+    },
+    {
+      "cefr_level": "B1",
+      "total_available": "294440",
+      "with_frequency": "27143"
+    },
+    {
+      "cefr_level": "B2",
+      "total_available": "133902",
+      "with_frequency": "35966"
+    },
+    {
+      "cefr_level": "C1",
+      "total_available": "39604",
+      "with_frequency": "26044"
+    },
+    {
+      "cefr_level": "C2",
+      "total_available": "18020",
+      "with_frequency": "17772"
+    }
+  ]
+}

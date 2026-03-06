@@ -15,6 +15,10 @@ const LANGUAGES = {
   hu: { name: 'Hungarian',  flag: '\u{1F1ED}\u{1F1FA}', code: 'HU', hub: false },
   pt: { name: 'Portuguese', flag: '\u{1F1F5}\u{1F1F9}', code: 'PT', hub: true  },
   ru: { name: 'Russian',    flag: '\u{1F1F7}\u{1F1FA}', code: 'RU', hub: false },
+  it: { name: 'Italian',    flag: '\u{1F1EE}\u{1F1F9}', code: 'IT', hub: true  },
+  nl: { name: 'Dutch',      flag: '\u{1F1F3}\u{1F1F1}', code: 'NL', hub: false },
+  pl: { name: 'Polish',     flag: '\u{1F1F5}\u{1F1F1}', code: 'PL', hub: false },
+  cs: { name: 'Czech',      flag: '\u{1F1E8}\u{1F1FF}', code: 'CS', hub: false },
 };
 
 const HUB_LANGUAGES = Object.entries(LANGUAGES)
