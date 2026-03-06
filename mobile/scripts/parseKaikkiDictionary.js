@@ -15,8 +15,8 @@ const CEFR_LEVELS = {
   A2: { min: 501, max: 1500, difficulty: 2 },
   B1: { min: 1501, max: 3000, difficulty: 3 },
   B2: { min: 3001, max: 6000, difficulty: 5 },
-  C1: { min: 6001, max: 12000, difficulty: 7 },
-  C2: { min: 12001, max: 30000, difficulty: 9 }
+  C1: { min: 6001, max: 15000, difficulty: 7 },
+  C2: { min: 15001, max: 50000, difficulty: 9 }
 };
 
 // Language configurations
@@ -32,7 +32,7 @@ const LANGUAGES = {
   fr: {
     name: 'French',
     flag: '🇫🇷',
-    frequencyFile: '../../FrequencyWords/content/2018/fr/fr_50k.txt',
+    frequencyFile: '../../../FrequencyWords/content/2018/fr/fr_50k.txt',
     kaikkiFile: '../../dictionaries/french.jsonl',
     outputFile: 'words_french.json',
     reverseFile: 'words_french_to_english.json'
@@ -40,7 +40,7 @@ const LANGUAGES = {
   de: {
     name: 'German',
     flag: '🇩🇪',
-    frequencyFile: '../../FrequencyWords/content/2018/de/de_50k.txt',
+    frequencyFile: '../../../FrequencyWords/content/2018/de/de_50k.txt',
     kaikkiFile: '../../dictionaries/german.jsonl',
     outputFile: 'words_german.json',
     reverseFile: 'words_german_to_english.json'
@@ -48,7 +48,7 @@ const LANGUAGES = {
   hu: {
     name: 'Hungarian',
     flag: '🇭🇺',
-    frequencyFile: '../../FrequencyWords/content/2018/hu/hu_50k.txt',
+    frequencyFile: '../../../FrequencyWords/content/2018/hu/hu_50k.txt',
     kaikkiFile: '../../dictionaries/hungarian.jsonl',
     outputFile: 'words_hungarian.json',
     reverseFile: 'words_hungarian_to_english.json'
@@ -83,7 +83,7 @@ function assignCEFR(rank) {
 /**
  * Read frequency words from FrequencyWords file
  */
-function readFrequencyWords(filePath, limit = 30000) {
+function readFrequencyWords(filePath, limit = Infinity) {
   const absolutePath = path.join(__dirname, filePath);
   
   if (!fs.existsSync(absolutePath)) {
@@ -281,19 +281,19 @@ async function generateWordList(langCode) {
   console.log(`${lang.flag} Generating ${lang.name}-English Word List`);
   console.log(`${'='.repeat(60)}\n`);
   
-  // Step 1: Read frequency words
-  const frequencyWords = readFrequencyWords(lang.frequencyFile, 30000);
+  // Step 1: Read ALL frequency words (no cap)
+  const frequencyWords = readFrequencyWords(lang.frequencyFile);
   
   // Step 2: Parse Kaikki dictionary
   const dictionary = await parseKaikkiDictionary(lang.kaikkiFile);
   
-  // Step 3: Match and generate output
+  // Step 3: Match frequency words with Kaikki translations (skip untranslated)
   console.log('🔄 Matching frequency list with translations...\n');
   
   const translatedWords = [];
+  const usedKaikkiWords = new Set();
   let matchCount = 0;
-  let missingCount = 0;
-  const missingWords = [];
+  let skippedCount = 0;
   
   frequencyWords.forEach((freqData, word) => {
     const rank = freqData.rank;
@@ -301,27 +301,43 @@ async function generateWordList(langCode) {
     
     const dictEntry = dictionary.get(word);
     
-    let translation;
     if (dictEntry) {
-      translation = dictEntry.translation;
+      translatedWords.push({
+        id: `${langCode}_${rank}`,
+        source_word: dictEntry.translation,
+        target_word: freqData.word,
+        difficulty,
+        category: 'general',
+        frequency_rank: rank,
+        cefr_level: level,
+        source_lang: 'en',
+        target_lang: langCode
+      });
+      usedKaikkiWords.add(word);
       matchCount++;
     } else {
-      // Mark as needing translation
-      translation = `[NEED:${freqData.word}]`;
-      missingCount++;
-      if (missingWords.length < 100) {
-        missingWords.push(freqData.word);
-      }
+      skippedCount++;
     }
+  });
+  
+  // Step 4: Add Kaikki-only words (not in frequency list) as C2
+  let kaikkiOnlyCount = 0;
+  const maxFreqRank = frequencyWords.size;
+  
+  dictionary.forEach((dictEntry, word) => {
+    if (usedKaikkiWords.has(word)) return;
+    
+    kaikkiOnlyCount++;
+    const syntheticRank = maxFreqRank + kaikkiOnlyCount;
     
     translatedWords.push({
-      id: `${langCode}_${rank}`,
-      source_word: translation,
-      target_word: freqData.word,
-      difficulty,
+      id: `${langCode}_k_${kaikkiOnlyCount}`,
+      source_word: dictEntry.translation,
+      target_word: dictEntry.word,
+      difficulty: 9,
       category: 'general',
-      frequency_rank: rank,
-      cefr_level: level,
+      frequency_rank: syntheticRank,
+      cefr_level: 'C2',
       source_lang: 'en',
       target_lang: langCode
     });
@@ -331,16 +347,12 @@ async function generateWordList(langCode) {
   translatedWords.sort((a, b) => a.frequency_rank - b.frequency_rank);
   
   // Stats
-  console.log('📊 Translation Coverage:');
-  console.log(`   ✅ Matched: ${matchCount.toLocaleString()} (${((matchCount/translatedWords.length)*100).toFixed(1)}%)`);
-  console.log(`   ❌ Missing: ${missingCount.toLocaleString()} (${((missingCount/translatedWords.length)*100).toFixed(1)}%)`);
-  
-  if (missingWords.length > 0) {
-    console.log(`\n⚠️  Sample missing words (first 20):`);
-    missingWords.slice(0, 20).forEach((w, i) => {
-      console.log(`   ${i + 1}. ${w}`);
-    });
-  }
+  const totalWords = translatedWords.length;
+  console.log('📊 Results:');
+  console.log(`   Frequency words matched:  ${matchCount.toLocaleString()}`);
+  console.log(`   Frequency words skipped:  ${skippedCount.toLocaleString()} (no Kaikki translation)`);
+  console.log(`   Kaikki-only words added:  ${kaikkiOnlyCount.toLocaleString()}`);
+  console.log(`   TOTAL usable words:       ${totalWords.toLocaleString()}`);
   
   // CEFR distribution
   const cefrCounts = {};
@@ -389,8 +401,7 @@ async function generateWordList(langCode) {
   return {
     total: translatedWords.length,
     matched: matchCount,
-    missing: missingCount,
-    coverage: (matchCount / translatedWords.length) * 100
+    kaikkiOnly: kaikkiOnlyCount
   };
 }
 
@@ -414,29 +425,20 @@ async function main() {
   
   console.log('Configuration:');
   console.log(`  Language: ${args.lang}`);
-  console.log(`  Source: Kaikki.org Wiktionary data`);
-  console.log(`  Words: 30,000 per language\n`);
+  console.log(`  Source: Kaikki.org Wiktionary + FrequencyWords (all available)\n`);
   
   try {
     const stats = await generateWordList(args.lang);
     
     console.log('\n🎉 Success!');
     console.log(`\n📊 Final Stats:`);
-    console.log(`   Total words: ${stats.total.toLocaleString()}`);
-    console.log(`   Translated: ${stats.matched.toLocaleString()} (${stats.coverage.toFixed(1)}%)`);
-    console.log(`   Missing: ${stats.missing.toLocaleString()}`);
-    
-    if (stats.missing > 0) {
-      console.log(`\n💡 For missing words, you can:`);
-      console.log(`   1. Accept as-is (missing words are often rare/technical)`);
-      console.log(`   2. Run translateFrequencyWords.js with API to fill gaps`);
-      console.log(`   3. Manually add common ones you notice`);
-    }
+    console.log(`   Total usable words: ${stats.total.toLocaleString()}`);
+    console.log(`   From frequency list: ${stats.matched.toLocaleString()}`);
+    console.log(`   From Kaikki only: ${stats.kaikkiOnly.toLocaleString()}`);
     
     console.log(`\n🎯 Next steps:`);
-    console.log(`   1. Review the generated JSON files`);
-    console.log(`   2. Test in app (uncomment language in SettingsScreen.js)`);
-    console.log(`   3. Repeat for other languages (de, hu)`);
+    console.log(`   1. Run seedWords.js on EC2 to push to AWS DB`);
+    console.log(`   2. Repeat for other languages: --lang=es|fr|de|hu|pt|ru`);
     
   } catch (error) {
     console.error('\n❌ Error:', error.message);
