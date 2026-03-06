@@ -197,6 +197,10 @@ export const getWordsDueForReview = async (limit = 20, category = null) => {
           ELSE 3
         END,
         p.next_review_date ASC,
+        CASE w.cefr_level
+          WHEN 'C2' THEN 6 WHEN 'C1' THEN 5 WHEN 'B2' THEN 4
+          WHEN 'B1' THEN 3 WHEN 'A2' THEN 2 WHEN 'A1' THEN 1 ELSE 0
+        END DESC,
         w.frequency_rank ASC
       LIMIT ?
     `, params);
@@ -255,6 +259,10 @@ export const getNewWords = async (limit = 5, category = null) => {
         ${GRAMMATICAL_FILTER_W}
       ORDER BY
         CASE WHEN w.cefr_level = ? THEN 0 ELSE 1 END,
+        CASE w.cefr_level
+          WHEN 'C2' THEN 6 WHEN 'C1' THEN 5 WHEN 'B2' THEN 4
+          WHEN 'B1' THEN 3 WHEN 'A2' THEN 2 WHEN 'A1' THEN 1 ELSE 0
+        END DESC,
         w.frequency_rank ASC,
         RANDOM()
       LIMIT ?
