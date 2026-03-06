@@ -1,6 +1,6 @@
 {
-  "export_date": "2026-03-06T00:15:29.947Z",
-  "total_words_exported": 187286,
+  "export_date": "2026-03-06T00:34:13.922Z",
+  "total_words_exported": 187142,
   "vocabulary_targets": {
     "A1": 2000,
     "A2": 3000,
@@ -33,33 +33,33 @@
   "database_statistics": [
     {
       "cefr_level": "A1",
-      "total_available": "111782",
-      "with_frequency": "11925"
+      "total_available": "111469",
+      "with_frequency": "11987"
     },
     {
       "cefr_level": "A2",
-      "total_available": "258606",
-      "with_frequency": "10514"
+      "total_available": "257735",
+      "with_frequency": "10499"
     },
     {
       "cefr_level": "B1",
-      "total_available": "294440",
-      "with_frequency": "27143"
+      "total_available": "293201",
+      "with_frequency": "26465"
     },
     {
       "cefr_level": "B2",
-      "total_available": "133902",
-      "with_frequency": "35966"
+      "total_available": "132631",
+      "with_frequency": "34878"
     },
     {
       "cefr_level": "C1",
-      "total_available": "39604",
-      "with_frequency": "26044"
+      "total_available": "38461",
+      "with_frequency": "24908"
     },
     {
       "cefr_level": "C2",
-      "total_available": "18020",
-      "with_frequency": "17772"
+      "total_available": "17014",
+      "with_frequency": "16766"
     }
   ]
 }
