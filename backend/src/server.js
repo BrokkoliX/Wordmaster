@@ -7,6 +7,11 @@ require('dotenv').config();
 
 const app = express();
 
+// Trust the first proxy hop (Nginx on localhost).
+// Required so express-rate-limit can read the real client IP from
+// X-Forwarded-For without throwing ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet()); // Security headers
 app.use(cors()); // Enable CORS
