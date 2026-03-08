@@ -36,14 +36,25 @@ function parseArgs() {
   const opts = { pair: null };
   for (const arg of args) {
     const [key, val] = arg.replace('--', '').split('=');
-    if (key === 'pair') opts.pair = val;
+    if (key === 'pair') {
+      if (!/^[a-z]{2,3}-[a-z]{2,3}$/.test(val)) {
+        console.error(`Invalid pair format: "${val}" (expected e.g. "fr-de")`);
+        process.exit(1);
+      }
+      opts.pair = val;
+    }
   }
   return opts;
 }
 
 function validateFile(filePath) {
+  const resolved = path.resolve(filePath);
+  if (!resolved.startsWith(path.resolve(DATA_DIR))) {
+    throw new Error(`Path traversal detected: file must be within data directory`);
+  }
+
   const fileName = path.basename(filePath);
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  const data = JSON.parse(fs.readFileSync(resolved, 'utf-8'));
 
   if (!Array.isArray(data) || data.length === 0) {
     console.log(`  [EMPTY] ${fileName}`);

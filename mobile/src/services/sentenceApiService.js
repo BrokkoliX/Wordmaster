@@ -194,14 +194,18 @@ export const isSentenceSyncNeeded = async () => {
 };
 
 /**
- * Get sentence templates from local SQLite for the current language,
- * optionally filtered by grammar topic. Returns shuffled results.
+ * Get sentence templates from local SQLite for the current language and
+ * CEFR level, optionally filtered by grammar topic. Returns shuffled results.
  */
 export const getLocalSentenceTemplates = async (limit = 20, topic = null) => {
   const learningLanguage = (await AsyncStorage.getItem('learningLanguage')) || 'es';
+  const cefrLevel = (await AsyncStorage.getItem('cefrLevel')) || 'A1';
 
-  let query = `SELECT * FROM sentence_templates WHERE language = ?`;
-  const params = [learningLanguage];
+  const allowedLevels = getLevelsUpTo(cefrLevel);
+  const levelPlaceholders = allowedLevels.map(() => '?').join(',');
+
+  let query = `SELECT * FROM sentence_templates WHERE language = ? AND cefr_level IN (${levelPlaceholders})`;
+  const params = [learningLanguage, ...allowedLevels];
 
   if (topic) {
     query += ` AND grammar_topic = ?`;

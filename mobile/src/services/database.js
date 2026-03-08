@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { syncWordsFromApi, isSyncNeeded } from './wordApiService';
 import { syncSentencesFromApi, isSentenceSyncNeeded, initSentenceTable } from './sentenceApiService';
 import { initAchievementTables } from './achievementDatabase';
+import { syncProgressToServer } from './progressSyncService';
 import { GRAMMATICAL_FILTER_W } from '../constants/sqlFilters';
 import { getLevelsUpTo } from '../constants/cefrLevels';
 import db from './db';
@@ -527,6 +528,10 @@ export const completeSession = async (sessionId, wordsReviewed, correctAnswers) 
     // Check for milestone
     const milestone = checkMilestoneReached(oldStreak, newStreak);
     
+    // Background sync: push changed progress to the backend.
+    // Fire-and-forget so it never blocks the UI or breaks the session.
+    syncProgressToServer().catch(() => {});
+
     return { 
       accuracy, 
       wordsReviewed, 

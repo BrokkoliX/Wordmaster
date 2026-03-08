@@ -40,6 +40,20 @@ const CLEAN_WORD_CONDITIONS = `
   AND translation NOT ILIKE '%feminine%'
   AND translation NOT ILIKE '%neuter%'
   AND translation NOT ILIKE '%letter of the%alphabet%'
+  AND word NOT ILIKE '%/(copulative)%'
+  AND word NOT ILIKE '%/(transitive)%'
+  AND word NOT ILIKE '%/(intransitive)%'
+  AND word NOT ILIKE '%/(reflexive)%'
+  AND word NOT ILIKE '%/(auxiliary)%'
+  AND word NOT ILIKE '%/(modal)%'
+  AND word NOT ILIKE '%/(grammar)%'
+  AND translation NOT ILIKE '%/(copulative)%'
+  AND translation NOT ILIKE '%/(transitive)%'
+  AND translation NOT ILIKE '%/(intransitive)%'
+  AND translation NOT ILIKE '%/(reflexive)%'
+  AND translation NOT ILIKE '%/(auxiliary)%'
+  AND translation NOT ILIKE '%/(modal)%'
+  AND translation NOT ILIKE '%/(grammar)%'
   AND LENGTH(translation) <= 80
   AND LENGTH(word) <= 80
 `;

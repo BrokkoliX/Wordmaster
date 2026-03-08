@@ -18,6 +18,17 @@ const { pool } = require('../config/database');
 const FREEDICT_BASE_URL = 'https://download.freedict.org/dictionaries';
 const BATCH_SIZE = 500;
 
+// Validate lang-pair format to prevent path traversal via CLI arguments
+const LANG_PAIR_RE = /^[a-z]{3}-[a-z]{3}$/;
+
+function safeTempPath(fileName) {
+  const resolved = path.resolve(__dirname, fileName);
+  if (!resolved.startsWith(path.resolve(__dirname))) {
+    throw new Error(`Path traversal detected: ${fileName}`);
+  }
+  return resolved;
+}
+
 // Language code mappings between FreeDict and Wordmaster
 const LANG_CODE_MAP = {
   'eng': 'en',
@@ -291,6 +302,18 @@ async function main() {
   
   const langPair = langPairArg.split('=')[1];
   const format = formatArg.split('=')[1];
+
+  if (!LANG_PAIR_RE.test(langPair)) {
+    console.error(`Invalid lang-pair format: "${langPair}" (expected e.g. "eng-fra")`);
+    process.exit(1);
+  }
+
+  const ALLOWED_FORMATS = ['xdxf', 'tei'];
+  if (!ALLOWED_FORMATS.includes(format)) {
+    console.error(`Unsupported format: "${format}" (allowed: ${ALLOWED_FORMATS.join(', ')})`);
+    process.exit(1);
+  }
+
   const [freeDictSource, freeDictTarget] = langPair.split('-');
   
   const sourceLang = LANG_CODE_MAP[freeDictSource];
@@ -303,10 +326,10 @@ async function main() {
   
   console.log(`Importing ${langPair} dictionary in ${format.toUpperCase()} format...`);
   
-  // Download dictionary file
+  // Download dictionary file (safe path prevents traversal)
   const fileName = `${langPair}.${format}`;
   const downloadUrl = `${FREEDICT_BASE_URL}/${langPair}/${fileName}`;
-  const tempPath = path.join(__dirname, `temp_${fileName}`);
+  const tempPath = safeTempPath(`temp_${fileName}`);
   
   try {
     console.log(`Downloading from ${downloadUrl}...`);

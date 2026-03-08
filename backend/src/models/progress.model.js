@@ -2,56 +2,93 @@ const { query, transaction } = require('../config/database');
 
 class ProgressModel {
   /**
-   * Sync user progress (upsert word progress)
+   * Sync user progress (batch upsert word progress)
+   *
+   * Uses UNNEST to insert/update all records in a single query instead of
+   * looping row-by-row, keeping connection hold time to O(1).
    */
   static async syncWordProgress(userId, progressData) {
-    const results = await transaction(async (client) => {
-      const synced = [];
+    if (!progressData || progressData.length === 0) {
+      return [];
+    }
 
-      for (const item of progressData) {
-        const result = await client.query(
-          `INSERT INTO user_word_progress (
-            user_id, word_id, status, confidence_level, consecutive_correct,
-            ease_factor, interval_days, next_review_date, times_shown,
-            times_correct, times_incorrect, last_reviewed
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-          ON CONFLICT (user_id, word_id) 
-          DO UPDATE SET
-            status = EXCLUDED.status,
-            confidence_level = EXCLUDED.confidence_level,
-            consecutive_correct = EXCLUDED.consecutive_correct,
-            ease_factor = EXCLUDED.ease_factor,
-            interval_days = EXCLUDED.interval_days,
-            next_review_date = EXCLUDED.next_review_date,
-            times_shown = EXCLUDED.times_shown,
-            times_correct = EXCLUDED.times_correct,
-            times_incorrect = EXCLUDED.times_incorrect,
-            last_reviewed = EXCLUDED.last_reviewed,
-            updated_at = NOW()
-          RETURNING *`,
-          [
-            userId,
-            item.wordId,
-            item.status,
-            item.confidenceLevel,
-            item.consecutiveCorrect,
-            item.easeFactor,
-            item.intervalDays,
-            item.nextReviewDate,
-            item.timesShown,
-            item.timesCorrect,
-            item.timesIncorrect,
-            item.lastReviewed,
-          ]
-        );
+    // Build parallel arrays for UNNEST
+    const wordIds = [];
+    const statuses = [];
+    const confidenceLevels = [];
+    const consecutiveCorrects = [];
+    const easeFactors = [];
+    const intervalDays = [];
+    const nextReviewDates = [];
+    const timesShowns = [];
+    const timesCorrects = [];
+    const timesIncorrects = [];
+    const lastRevieweds = [];
 
-        synced.push(result.rows[0]);
-      }
+    for (const item of progressData) {
+      wordIds.push(item.wordId);
+      statuses.push(item.status);
+      confidenceLevels.push(item.confidenceLevel);
+      consecutiveCorrects.push(item.consecutiveCorrect);
+      easeFactors.push(item.easeFactor);
+      intervalDays.push(item.intervalDays);
+      nextReviewDates.push(item.nextReviewDate);
+      timesShowns.push(item.timesShown);
+      timesCorrects.push(item.timesCorrect);
+      timesIncorrects.push(item.timesIncorrect);
+      lastRevieweds.push(item.lastReviewed);
+    }
 
-      return synced;
-    });
+    const result = await query(
+      `INSERT INTO user_word_progress (
+        user_id, word_id, status, confidence_level, consecutive_correct,
+        ease_factor, interval_days, next_review_date, times_shown,
+        times_correct, times_incorrect, last_reviewed
+      )
+      SELECT
+        $1,
+        unnest($2::text[]),
+        unnest($3::text[]),
+        unnest($4::int[]),
+        unnest($5::int[]),
+        unnest($6::real[]),
+        unnest($7::int[]),
+        unnest($8::text[]),
+        unnest($9::int[]),
+        unnest($10::int[]),
+        unnest($11::int[]),
+        unnest($12::text[])
+      ON CONFLICT (user_id, word_id)
+      DO UPDATE SET
+        status = EXCLUDED.status,
+        confidence_level = EXCLUDED.confidence_level,
+        consecutive_correct = EXCLUDED.consecutive_correct,
+        ease_factor = EXCLUDED.ease_factor,
+        interval_days = EXCLUDED.interval_days,
+        next_review_date = EXCLUDED.next_review_date,
+        times_shown = EXCLUDED.times_shown,
+        times_correct = EXCLUDED.times_correct,
+        times_incorrect = EXCLUDED.times_incorrect,
+        last_reviewed = EXCLUDED.last_reviewed,
+        updated_at = NOW()
+      RETURNING *`,
+      [
+        userId,
+        wordIds,
+        statuses,
+        confidenceLevels,
+        consecutiveCorrects,
+        easeFactors,
+        intervalDays,
+        nextReviewDates,
+        timesShowns,
+        timesCorrects,
+        timesIncorrects,
+        lastRevieweds,
+      ]
+    );
 
-    return results;
+    return result.rows;
   }
 
   /**

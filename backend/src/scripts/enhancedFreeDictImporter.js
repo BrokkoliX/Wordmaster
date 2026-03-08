@@ -17,6 +17,17 @@ const path = require('path');
 const xml2js = require('xml2js');
 const { pool } = require('../config/database');
 
+// Validate lang-pair format to prevent path traversal via CLI arguments
+const LANG_PAIR_RE = /^[a-z]{3}-[a-z]{3}$/;
+
+function safeTempPath(fileName) {
+  const resolved = path.resolve(__dirname, fileName);
+  if (!resolved.startsWith(path.resolve(__dirname))) {
+    throw new Error(`Path traversal detected: ${fileName}`);
+  }
+  return resolved;
+}
+
 // Load frequency data from existing project files
 async function loadFrequencyData(language) {
   const frequencyFiles = {
@@ -305,6 +316,10 @@ async function downloadFile(url, outputPath) {
   });
 }
 async function enhancedImport(langPair, options = {}) {
+  if (!LANG_PAIR_RE.test(langPair)) {
+    throw new Error(`Invalid lang-pair format: "${langPair}" (expected e.g. "eng-fra")`);
+  }
+
   console.log(`Starting enhanced import for ${langPair}...`);
   
   const [sourceLang, targetLang] = langPair.split('-').map(code => {
@@ -320,8 +335,8 @@ async function enhancedImport(langPair, options = {}) {
   
   console.log(`Frequency data loaded: ${frequencyData.get(sourceLang).size} ${sourceLang} words, ${frequencyData.get(targetLang).size} ${targetLang} words`);
   
-  // Download FreeDict file
-  const tempPath = path.join(__dirname, `temp_${langPair}.xdxf`);
+  // Download FreeDict file (safe path prevents traversal)
+  const tempPath = safeTempPath(`temp_${langPair}.xdxf`);
   const downloadUrl = `https://download.freedict.org/dictionaries/${langPair}/${langPair}.xdxf`;
   
   console.log(`Downloading ${langPair} dictionary...`);

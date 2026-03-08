@@ -36,6 +36,20 @@ export const grammaticalFilter = (prefix = '') => `
   AND ${prefix}word NOT LIKE '%accusative%'
   AND ${prefix}word NOT LIKE '%dative%'
   AND ${prefix}word NOT LIKE '%genitive%'
+  AND ${prefix}word NOT LIKE '%/(copulative)%'
+  AND ${prefix}word NOT LIKE '%/(transitive)%'
+  AND ${prefix}word NOT LIKE '%/(intransitive)%'
+  AND ${prefix}word NOT LIKE '%/(reflexive)%'
+  AND ${prefix}word NOT LIKE '%/(auxiliary)%'
+  AND ${prefix}word NOT LIKE '%/(modal)%'
+  AND ${prefix}word NOT LIKE '%/(grammar)%'
+  AND ${prefix}translation NOT LIKE '%/(copulative)%'
+  AND ${prefix}translation NOT LIKE '%/(transitive)%'
+  AND ${prefix}translation NOT LIKE '%/(intransitive)%'
+  AND ${prefix}translation NOT LIKE '%/(reflexive)%'
+  AND ${prefix}translation NOT LIKE '%/(auxiliary)%'
+  AND ${prefix}translation NOT LIKE '%/(modal)%'
+  AND ${prefix}translation NOT LIKE '%/(grammar)%'
   AND LENGTH(${prefix}translation) < 100
 `;
 

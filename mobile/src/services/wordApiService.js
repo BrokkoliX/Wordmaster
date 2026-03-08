@@ -29,6 +29,12 @@ import wordsRuToEn from '../data/words_russian_to_english.json';
 
 import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
 
+/**
+ * Bump this version string whenever the bundled word data or its filtering
+ * logic changes in a way that requires a forced re-sync of the local cache.
+ */
+const WORD_DATA_VERSION = '2';
+
 const PAGE_SIZE = 500;
 
 /**
@@ -57,6 +63,27 @@ const isBadEntry = (text) => {
     if (p.test(t)) return true;
   }
   return false;
+};
+
+/**
+ * Strip parenthetical grammatical annotations from bundled word entries.
+ *
+ * Some data files (notably Hungarian) include entries of the form:
+ *   "to be/(copulative) to be"
+ *   "to hold/(transitive) to hold (to keep in one's hands)"
+ *
+ * These encode the same word twice — once clean and once with a grammar
+ * label. We keep only the first, clean segment before the '/' that
+ * introduces a parenthetical label.
+ */
+const GRAMMAR_SLASH_RE = /\/\s*\([^)]+\)/;
+const cleanSourceWord = (text) => {
+  if (!text) return text;
+  // Only strip when the '/' is followed by a parenthetical grammar marker
+  if (GRAMMAR_SLASH_RE.test(text)) {
+    return text.split('/')[0].trim();
+  }
+  return text;
 };
 
 /**
@@ -109,7 +136,9 @@ const importFromLocalData = async (sourceLang, targetLang, cefrLevel) => {
     await db.execAsync('BEGIN TRANSACTION');
 
     for (const w of batch) {
-      if (isBadEntry(w.source_word) || isBadEntry(w.target_word)) {
+      const cleanedSource = cleanSourceWord(w.source_word);
+      const cleanedTarget = cleanSourceWord(w.target_word);
+      if (isBadEntry(cleanedSource) || isBadEntry(cleanedTarget)) {
         continue;
       }
       if (!allowedLevels.has(w.cefr_level)) {
@@ -121,8 +150,8 @@ const importFromLocalData = async (sourceLang, targetLang, cefrLevel) => {
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             w.id,
-            w.target_word,
-            w.source_word,
+            cleanedTarget,
+            cleanedSource,
             w.difficulty,
             w.category,
             w.frequency_rank,
@@ -217,7 +246,7 @@ export const syncWordsFromApi = async () => {
   // Save what we synced so we can skip re-syncing if nothing changed
   await AsyncStorage.setItem(
     'lastWordSync',
-    JSON.stringify({ knownLanguage, learningLanguage, cefrLevel, count: imported, syncedAt: new Date().toISOString() })
+    JSON.stringify({ knownLanguage, learningLanguage, cefrLevel, dataVersion: WORD_DATA_VERSION, count: imported, syncedAt: new Date().toISOString() })
   );
 
   console.log(`✅ Synced ${imported.toLocaleString()} words to local database`);
@@ -241,7 +270,8 @@ export const isSyncNeeded = async () => {
     return (
       parsed.knownLanguage !== knownLanguage ||
       parsed.learningLanguage !== learningLanguage ||
-      parsed.cefrLevel !== cefrLevel
+      parsed.cefrLevel !== cefrLevel ||
+      parsed.dataVersion !== WORD_DATA_VERSION
     );
   } catch {
     return true;

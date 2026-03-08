@@ -129,7 +129,12 @@ async function main() {
       const codes = langArg.split('=')[1].split(',');
       langPairs = [];
       for (const code of codes) {
-        langPairs.push(`eng-${code.trim()}`, `${code.trim()}-eng`);
+        const trimmed = code.trim();
+        if (!/^[a-z]{2,3}$/.test(trimmed)) {
+          console.error(`Invalid language code: "${trimmed}" (expected 2-3 lowercase letters)`);
+          process.exit(1);
+        }
+        langPairs.push(`eng-${trimmed}`, `${trimmed}-eng`);
       }
     } else {
       console.error('Usage options:');

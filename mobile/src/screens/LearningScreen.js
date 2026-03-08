@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,12 @@ import ttsService from '../services/TTSService';
 import hapticService from '../services/HapticService';
 
 const DEFAULT_WORDS_PER_SESSION = 20;
+// Words answered incorrectly are re-queued until the user gets them right
+// this many times within the same session.
+const REQUIRED_CORRECT_TO_PASS = 2;
+// At most 70% of a session is review words; the rest is guaranteed new words
+// (as long as unseen words remain in the pool).
+const REVIEW_RATIO = 0.7;
 
 export default function LearningScreen({ route, navigation }) {
   const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
@@ -43,6 +49,13 @@ export default function LearningScreen({ route, navigation }) {
   const [achievementModalVisible, setAchievementModalVisible] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState(null);
   const [achievementQueue, setAchievementQueue] = useState([]);
+
+  // Tracks how many times each word was answered correctly within this session.
+  // Words must reach REQUIRED_CORRECT_TO_PASS to stop being re-queued.
+  const retryTracker = useRef({});
+  // Remember original session size so progress bar and stats stay accurate
+  // even after retry words are appended to the list.
+  const originalWordCount = useRef(0);
 
   useEffect(() => {
     initializeSession();
@@ -65,16 +78,24 @@ export default function LearningScreen({ route, navigation }) {
       // Start achievement tracking
       await achievementService.startSession(newSessionId);
       
-      // Get words for review (filtered by category when selected)
-      let reviewWords = await getWordsDueForReview(wordsPerSession, category);
+      // Enforce a review/new word ratio so new vocabulary always gets exposure.
+      // Reserve at least (1 - REVIEW_RATIO) of the session for unseen words.
+      const maxReviewSlots = Math.ceil(wordsPerSession * REVIEW_RATIO);
+      const minNewSlots = wordsPerSession - maxReviewSlots;
+
+      let reviewWords = await getWordsDueForReview(maxReviewSlots, category);
+
+      // Fill remaining slots with new words (guaranteed minimum + any leftover)
+      const newSlotsNeeded = Math.max(minNewSlots, wordsPerSession - reviewWords.length);
+      const newWords = await getNewWords(newSlotsNeeded, category);
+
+      const sessionWords = [...reviewWords, ...newWords];
       
-      // Add new words if needed
-      if (reviewWords.length < wordsPerSession) {
-        const newWords = await getNewWords(wordsPerSession - reviewWords.length, category);
-        reviewWords = [...reviewWords, ...newWords];
-      }
-      
-      setWords(reviewWords);
+      // Reset retry tracker for the new session
+      retryTracker.current = {};
+      originalWordCount.current = sessionWords.length;
+
+      setWords(sessionWords);
       setLoading(false);
     } catch (error) {
       console.error('Error initializing session:', error);
@@ -160,6 +181,23 @@ export default function LearningScreen({ route, navigation }) {
       
       if (isCorrect) {
         setCorrectCount(prev => prev + 1);
+
+        // Track how many times this word was answered correctly in this session
+        const wordId = question.word.id;
+        retryTracker.current[wordId] = (retryTracker.current[wordId] || 0) + 1;
+      } else {
+        // Wrong answer: reset the session-correct count and re-queue
+        // the word so it appears again later in this session.
+        const wordId = question.word.id;
+        retryTracker.current[wordId] = 0;
+
+        const alreadyQueued = words
+          .slice(currentIndex + 1)
+          .some(w => w.id === wordId);
+
+        if (!alreadyQueued) {
+          setWords(prev => [...prev, question.word]);
+        }
       }
       
       // Track achievement progress
@@ -181,14 +219,28 @@ export default function LearningScreen({ route, navigation }) {
   };
 
   const handleNext = async () => {
-    if (currentIndex < words.length - 1) {
+    // Find the next word that still needs practice.
+    // Skip any re-queued words the user already passed.
+    let nextIndex = currentIndex + 1;
+    while (nextIndex < words.length) {
+      const nextWord = words[nextIndex];
+      const sessionCorrect = retryTracker.current[nextWord.id] || 0;
+      if (sessionCorrect >= REQUIRED_CORRECT_TO_PASS && nextIndex >= originalWordCount.current) {
+        // This is a re-queued word the user already mastered -- skip it
+        nextIndex++;
+      } else {
+        break;
+      }
+    }
+
+    if (nextIndex < words.length) {
       // Fade out animation
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 200,
         useNativeDriver: true,
       }).start(() => {
-        setCurrentIndex(prev => prev + 1);
+        setCurrentIndex(nextIndex);
       });
     } else {
       // Session complete
@@ -251,9 +303,10 @@ export default function LearningScreen({ route, navigation }) {
       }, 300);
     } else {
       // All achievements shown, navigate to summary
+      const sessionSize = originalWordCount.current || words.length;
       navigation.navigate('Summary', {
-        accuracy: (correctCount / words.length) * 100,
-        wordsReviewed: words.length,
+        accuracy: (correctCount / sessionSize) * 100,
+        wordsReviewed: sessionSize,
         correctAnswers: correctCount,
         streak: null // Will be fetched in Summary screen
       });
@@ -312,12 +365,13 @@ export default function LearningScreen({ route, navigation }) {
             <View
               style={[
                 styles.progressFill,
-                { width: `${((currentIndex + 1) / words.length) * 100}%` }
+                { width: `${Math.min(100, ((currentIndex + 1) / originalWordCount.current) * 100)}%` }
               ]}
             />
           </View>
           <Text style={styles.progressText}>
-            {currentIndex + 1} / {words.length}
+            {Math.min(currentIndex + 1, originalWordCount.current)} / {originalWordCount.current}
+            {words.length > originalWordCount.current ? ' (+ retry)' : ''}
           </Text>
         </View>
 

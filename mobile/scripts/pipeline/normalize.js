@@ -217,7 +217,14 @@ async function parseKaikkiFile(langCode) {
 // ---------------------------------------------------------------------------
 
 async function normalizeLanguage(langCode) {
+  if (!/^[a-z]{2,3}$/.test(langCode)) {
+    throw new Error(`Invalid language code: "${langCode}"`);
+  }
+
   const meta = config.languages[langCode];
+  if (!meta) {
+    throw new Error(`Unknown language code: "${langCode}"`);
+  }
   console.log(`\n--- Normalizing ${meta.name} (${langCode}) ---\n`);
 
   // 1. Read frequency words
@@ -286,8 +293,11 @@ async function normalizeLanguage(langCode) {
   console.log(`  With English glosses: ${withGlosses.toLocaleString()}`);
   console.log(`  With cross-translations: ${withCross.toLocaleString()}`);
 
-  // Write output
-  const outPath = path.join(OUT_DIR, `${langCode}.json`);
+  // Write output (verify path stays within output directory)
+  const outPath = path.resolve(OUT_DIR, `${langCode}.json`);
+  if (!outPath.startsWith(path.resolve(OUT_DIR))) {
+    throw new Error(`Path traversal detected: ${outPath}`);
+  }
   fs.writeFileSync(outPath, JSON.stringify({ lang: langCode, generated: new Date().toISOString(), entries: limited }, null, 2));
   console.log(`  Saved: ${outPath}`);
 

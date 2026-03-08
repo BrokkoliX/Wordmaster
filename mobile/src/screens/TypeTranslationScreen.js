@@ -26,6 +26,7 @@ import hapticService from '../services/HapticService';
 import { LANGUAGE_NAMES } from '../constants/languages';
 
 const DEFAULT_WORDS_PER_SESSION = 20;
+const REVIEW_RATIO = 0.7;
 
 /**
  * Normalize a string for comparison: lowercase, trim, and strip accents.
@@ -79,14 +80,22 @@ export default function TypeTranslationScreen({ route, navigation }) {
 
       await achievementService.startSession(newSessionId);
 
-      let reviewWords = await getWordsDueForReview(wordsPerSession, category);
+      // Enforce a review/new word ratio so new vocabulary always gets exposure.
+      const maxReviewSlots = Math.ceil(wordsPerSession * REVIEW_RATIO);
+      const minNewSlots = wordsPerSession - maxReviewSlots;
 
-      if (reviewWords.length < wordsPerSession) {
-        const newWords = await getNewWords(wordsPerSession - reviewWords.length, category);
-        reviewWords = [...reviewWords, ...newWords];
+      const reviewWords = await getWordsDueForReview(maxReviewSlots, category);
+      const newSlotsNeeded = Math.max(minNewSlots, wordsPerSession - reviewWords.length);
+      const newWords = await getNewWords(newSlotsNeeded, category);
+
+      // Shuffle so word order varies each session
+      const combined = [...reviewWords, ...newWords];
+      for (let i = combined.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [combined[i], combined[j]] = [combined[j], combined[i]];
       }
 
-      setWords(reviewWords);
+      setWords(combined);
       setLoading(false);
     } catch (error) {
       console.error('Error initializing session:', error);

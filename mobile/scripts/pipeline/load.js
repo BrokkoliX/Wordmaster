@@ -82,7 +82,13 @@ function parseArgs() {
     if (arg === '--replace') { opts.replace = true; continue; }
     if (arg === '--dry-run') { opts.dryRun = true; continue; }
     const [key, val] = arg.replace('--', '').split('=');
-    if (key === 'pair') opts.pair = val;
+    if (key === 'pair') {
+      if (!/^[a-z]{2,3}-[a-z]{2,3}$/.test(val)) {
+        console.error(`Invalid pair format: "${val}" (expected e.g. "en-fr")`);
+        process.exit(1);
+      }
+      opts.pair = val;
+    }
     if (key === 'file') opts.file = val;
   }
 
@@ -316,6 +322,11 @@ async function main() {
 
   if (opts.file) {
     const resolved = path.resolve(opts.file);
+    const projectRoot = path.resolve(__dirname, '..', '..', '..');
+    if (!resolved.startsWith(projectRoot)) {
+      console.error(`Path traversal detected: file must be within project root`);
+      process.exit(1);
+    }
     if (!fs.existsSync(resolved)) {
       console.error(`File not found: ${resolved}`);
       process.exit(1);
