@@ -92,7 +92,7 @@ class ProgressModel {
   }
 
   /**
-   * Create learning session
+   * Create a single learning session
    */
   static async createSession(userId, sessionData) {
     const result = await query(
@@ -116,7 +116,52 @@ class ProgressModel {
   }
 
   /**
-   * Unlock achievement
+   * Batch-insert multiple learning sessions in a single query.
+   *
+   * Replaces the row-by-row loop in the sync controller, keeping the
+   * connection hold time O(1) regardless of how many sessions are synced.
+   */
+  static async batchCreateSessions(userId, sessionsData) {
+    if (!sessionsData || sessionsData.length === 0) return [];
+
+    const startTimes = [];
+    const endTimes = [];
+    const wordsRevieweds = [];
+    const correctAnswersList = [];
+    const accuracies = [];
+    const sessionDatas = [];
+
+    for (const s of sessionsData) {
+      startTimes.push(s.startTime);
+      endTimes.push(s.endTime);
+      wordsRevieweds.push(s.wordsReviewed);
+      correctAnswersList.push(s.correctAnswers);
+      accuracies.push(s.accuracy);
+      sessionDatas.push(JSON.stringify(s.data || {}));
+    }
+
+    const result = await query(
+      `INSERT INTO learning_sessions (
+        user_id, start_time, end_time, words_reviewed,
+        correct_answers, accuracy, session_data
+      )
+      SELECT
+        $1,
+        unnest($2::timestamptz[]),
+        unnest($3::timestamptz[]),
+        unnest($4::int[]),
+        unnest($5::int[]),
+        unnest($6::real[]),
+        unnest($7::text[])
+      RETURNING *`,
+      [userId, startTimes, endTimes, wordsRevieweds, correctAnswersList, accuracies, sessionDatas]
+    );
+
+    return result.rows;
+  }
+
+  /**
+   * Unlock a single achievement
    */
   static async unlockAchievement(userId, achievementId, progress = 100) {
     const result = await query(
@@ -129,6 +174,29 @@ class ProgressModel {
     );
 
     return result.rows[0];
+  }
+
+  /**
+   * Batch-upsert multiple achievements in a single query.
+   *
+   * Replaces the row-by-row loop in the sync controller.
+   */
+  static async batchUnlockAchievements(userId, achievementsData) {
+    if (!achievementsData || achievementsData.length === 0) return [];
+
+    const achievementIds = achievementsData.map((a) => a.achievementId);
+    const progresses = achievementsData.map((a) => a.progress ?? 100);
+
+    const result = await query(
+      `INSERT INTO user_achievements (user_id, achievement_id, progress)
+       SELECT $1, unnest($2::text[]), unnest($3::int[])
+       ON CONFLICT (user_id, achievement_id)
+       DO UPDATE SET progress = EXCLUDED.progress, unlocked_at = NOW()
+       RETURNING *`,
+      [userId, achievementIds, progresses]
+    );
+
+    return result.rows;
   }
 
   /**

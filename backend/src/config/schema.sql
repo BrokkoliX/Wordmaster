@@ -179,6 +179,13 @@ CREATE INDEX IF NOT EXISTS idx_achievements_user_id ON user_achievements(user_id
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 
+-- Streak and session-stats queries order by start_time DESC per user
+CREATE INDEX IF NOT EXISTS idx_sessions_user_start ON learning_sessions(user_id, start_time DESC);
+
+-- Words due for review: the most frequent query pattern in the learning flow
+CREATE INDEX IF NOT EXISTS idx_progress_due ON user_word_progress(user_id, next_review_date)
+  WHERE next_review_date IS NOT NULL;
+
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

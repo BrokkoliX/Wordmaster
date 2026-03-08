@@ -17,26 +17,14 @@ exports.syncProgress = async (req, res) => {
       );
     }
 
-    // Sync sessions
+    // Sync sessions — batch insert in a single query
     if (sessions && Array.isArray(sessions)) {
-      results.sessionsSynced = [];
-      for (const session of sessions) {
-        const created = await ProgressModel.createSession(req.user.id, session);
-        results.sessionsSynced.push(created);
-      }
+      results.sessionsSynced = await ProgressModel.batchCreateSessions(req.user.id, sessions);
     }
 
-    // Sync achievements
+    // Sync achievements — batch upsert in a single query
     if (achievements && Array.isArray(achievements)) {
-      results.achievementsSynced = [];
-      for (const achievement of achievements) {
-        const unlocked = await ProgressModel.unlockAchievement(
-          req.user.id,
-          achievement.achievementId,
-          achievement.progress
-        );
-        results.achievementsSynced.push(unlocked);
-      }
+      results.achievementsSynced = await ProgressModel.batchUnlockAchievements(req.user.id, achievements);
     }
 
     // Sync settings
