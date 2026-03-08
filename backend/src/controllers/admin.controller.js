@@ -148,10 +148,12 @@ const getUserDetails = async (req, res) => {
  * PUT /api/admin/users/:id
  * Update user information (role, email verification, etc.)
  */
+const VALID_TIERS = ['free', 'plus', 'super'];
+
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { role, email_verified, username, email } = req.body;
+    const { role, email_verified, username, email, subscription_tier } = req.body;
 
     const updates = [];
     const values = [];
@@ -181,6 +183,17 @@ const updateUser = async (req, res) => {
       paramCount++;
     }
 
+    if (subscription_tier !== undefined) {
+      if (!VALID_TIERS.includes(subscription_tier)) {
+        return res.status(400).json({
+          error: { message: `subscription_tier must be one of: ${VALID_TIERS.join(', ')}` },
+        });
+      }
+      updates.push(`subscription_tier = $${paramCount}`);
+      values.push(subscription_tier);
+      paramCount++;
+    }
+
     if (updates.length === 0) {
       return res.status(400).json({
         error: { message: 'No valid fields to update' },
@@ -189,10 +202,10 @@ const updateUser = async (req, res) => {
 
     values.push(id);
     const result = await query(
-      `UPDATE users 
+      `UPDATE users
       SET ${updates.join(', ')}, updated_at = NOW()
       WHERE id = $${paramCount}
-      RETURNING id, email, username, role, email_verified, updated_at`,
+      RETURNING id, email, username, role, email_verified, subscription_tier, updated_at`,
       values
     );
 
@@ -200,6 +213,16 @@ const updateUser = async (req, res) => {
       return res.status(404).json({
         error: { message: 'User not found' },
       });
+    }
+
+    // Keep user_subscriptions in sync with the denormalized tier column.
+    if (subscription_tier !== undefined) {
+      await query(
+        `UPDATE user_subscriptions
+         SET plan_id = $1, status = 'active', updated_at = NOW()
+         WHERE user_id = $2 AND status = 'active'`,
+        [subscription_tier, id]
+      );
     }
 
     res.json({
@@ -861,8 +884,22 @@ const updateSentence = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    // Build dynamic update query
-    const fields = Object.keys(updates);
+    // Only allow updates to known sentence_templates columns
+    const ALLOWED_FIELDS = [
+      'language', 'cefr_level', 'sentence', 'answer',
+      'answer_word_id', 'distractors', 'hint',
+      'grammar_topic', 'difficulty',
+    ];
+
+    // Build dynamic update query using allowlisted fields only
+    const fields = Object.keys(updates).filter(f => ALLOWED_FIELDS.includes(f));
+
+    if (fields.length === 0) {
+      return res.status(400).json({
+        error: { message: 'No valid fields to update' },
+      });
+    }
+
     const values = fields.map((field, idx) => `${field} = $${idx + 1}`);
     const params = fields.map((field) => updates[field]);
     params.push(id);

@@ -22,10 +22,13 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Attach user info to request
+    // Attach user info to request.
+    // subscription_tier is embedded in the JWT at login/refresh time so no
+    // extra DB query is needed here (see docs/SUBSCRIPTION_TIERS_PLAN.md).
     req.user = {
       id: decoded.userId,
       email: decoded.email,
+      subscription_tier: decoded.subscription_tier || 'free',
     };
 
     next();

@@ -7,7 +7,14 @@ const UserModel = require('../models/user.model');
  */
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
-    { userId: user.id, email: user.email },
+    {
+      userId: user.id,
+      email: user.email,
+      // subscription_tier is read by authenticate middleware and set on
+      // req.user so checkFeature middleware never needs a DB lookup.
+      // Takes effect at next login / token refresh (see SUBSCRIPTION_TIERS_PLAN.md).
+      subscription_tier: user.subscription_tier || 'free',
+    },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
   );
@@ -190,9 +197,14 @@ exports.refreshToken = async (req, res) => {
       });
     }
 
-    // Generate new access token
+    // Generate new access token — re-fetch subscription_tier from the DB so
+    // any tier change made by an admin is picked up at the next token refresh.
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email },
+      {
+        userId: user.id,
+        email: user.email,
+        subscription_tier: user.subscription_tier || 'free',
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );

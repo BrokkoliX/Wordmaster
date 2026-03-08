@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth.middleware');
 const { isAdmin } = require('../middleware/isAdmin.middleware');
 const adminController = require('../controllers/admin.controller');
+const subscriptionController = require('../controllers/subscription.controller');
 
 // All admin routes require authentication + admin role
 router.use(authenticate);
@@ -100,5 +101,20 @@ router.post('/database/query', adminController.executeQuery);
 
 // GET /api/admin/database/schema - Get database schema metadata
 router.get('/database/schema', adminController.getSchema);
+
+// ========== SUBSCRIPTION PLAN MANAGEMENT ==========
+// GET /api/admin/subscription-plans/feature-keys - List all valid feature keys
+// NOTE: this route must be declared before /:id to avoid 'feature-keys' being
+// matched as a plan id parameter.
+router.get('/subscription-plans/feature-keys', subscriptionController.getFeatureKeys);
+
+// GET /api/admin/subscription-plans - List all plans
+router.get('/subscription-plans', subscriptionController.getSubscriptionPlans);
+
+// GET /api/admin/subscription-plans/:id - Get single plan
+router.get('/subscription-plans/:id', subscriptionController.getSubscriptionPlanById);
+
+// PUT /api/admin/subscription-plans/:id - Update plan features / metadata
+router.put('/subscription-plans/:id', subscriptionController.updateSubscriptionPlan);
 
 module.exports = router;

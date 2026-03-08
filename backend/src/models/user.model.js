@@ -25,7 +25,7 @@ class UserModel {
    */
   static async findByEmail(email) {
     const result = await query(
-      'SELECT * FROM users WHERE email = $1',
+      'SELECT *, subscription_tier FROM users WHERE email = $1',
       [email]
     );
 
@@ -37,8 +37,8 @@ class UserModel {
    */
   static async findById(id) {
     const result = await query(
-      `SELECT id, email, username, first_name, last_name, avatar_url, 
-              email_verified, created_at, last_login_at
+      `SELECT id, email, username, first_name, last_name, avatar_url,
+              email_verified, created_at, last_login_at, subscription_tier
        FROM users WHERE id = $1`,
       [id]
     );

@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom';
 import PeopleIcon from '@mui/icons-material/People';
 import TranslateIcon from '@mui/icons-material/Translate';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 import dataProvider from './dataProvider';
 import authProvider from './authProvider';
@@ -15,6 +16,7 @@ import LoginPage from './components/LoginPage';
 import { UserList, UserShow, UserEdit } from './resources/users';
 import { LanguageList, LanguageShow } from './resources/languages';
 import { AchievementList, AchievementShow, AchievementEdit, AchievementCreate } from './resources/achievements';
+import { SubscriptionPlanList, SubscriptionPlanEdit } from './resources/subscriptionPlans';
 import { AdminLayout } from './layout/AdminLayout';
 
 const App = () => (
@@ -50,6 +52,13 @@ const App = () => (
       create={AchievementCreate}
       icon={EmojiEventsIcon}
       options={{ label: 'Achievements' }}
+    />
+    <Resource
+      name="subscription-plans"
+      list={SubscriptionPlanList}
+      edit={SubscriptionPlanEdit}
+      icon={WorkspacePremiumIcon}
+      options={{ label: 'Subscription Plans' }}
     />
     <CustomRoutes>
       <Route path="/word-import" element={<WordImport />} />

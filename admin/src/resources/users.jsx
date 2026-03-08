@@ -125,6 +125,15 @@ export const UserEdit = () => (
           { id: 'superadmin', name: 'Super Admin' },
         ]}
       />
+      <SelectInput
+        source="subscription_tier"
+        label="Subscription Tier"
+        choices={[
+          { id: 'free', name: 'Free' },
+          { id: 'plus', name: 'Plus' },
+          { id: 'super', name: 'Super' },
+        ]}
+      />
       <BooleanInput source="email_verified" label="Email Verified" />
     </SimpleForm>
   </Edit>

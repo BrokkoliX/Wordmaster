@@ -7,6 +7,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StorageIcon from '@mui/icons-material/Storage';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 const AdminMenu = () => (
   <Menu>
@@ -14,6 +15,7 @@ const AdminMenu = () => (
     <Menu.ResourceItem name="users" primaryText="Users" leftIcon={<PeopleIcon />} />
     <Menu.ResourceItem name="languages" primaryText="Language Pairs" leftIcon={<TranslateIcon />} />
     <Menu.ResourceItem name="achievements" primaryText="Achievements" leftIcon={<EmojiEventsIcon />} />
+    <Menu.ResourceItem name="subscription-plans" primaryText="Subscription Plans" leftIcon={<WorkspacePremiumIcon />} />
     <Menu.Item
       to="/language-manager"
       primaryText="Language Manager"

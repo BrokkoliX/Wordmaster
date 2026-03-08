@@ -35,6 +35,7 @@
 | `VOCABULARY_FILTERING.md` | Word filtering logic | Working with vocabulary |
 | `VOCABULARY_QUICK_START.md` | Quick vocabulary guide | Importing words |
 | `INDEX.md` | This file | Finding documentation |
+| `SUBSCRIPTION_TIERS_PLAN.md` | Subscription tier system plan | Planning / developing Free, Plus, Super tiers |
 
 ### **Component READMEs**
 

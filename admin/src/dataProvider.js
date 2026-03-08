@@ -34,6 +34,7 @@ const RESOURCE_CONFIG = {
   languages: { dataKey: 'languages', hasPagination: false },
   sentences: { dataKey: 'sentences', hasPagination: false },
   achievements: { dataKey: 'achievements', hasPagination: true },
+  'subscription-plans': { dataKey: 'plans', hasPagination: false },
   // Virtual/stats resources are read-only; handled by custom pages
 };
 
