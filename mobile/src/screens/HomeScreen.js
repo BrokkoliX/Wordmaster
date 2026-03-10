@@ -7,6 +7,9 @@ import { getStreakEmoji, getStreakMessage, formatStreakDisplay } from '../servic
 import achievementService from '../services/AchievementService';
 import { showErrorAlert } from '../utils/errorMessages';
 import { LANGUAGE_NAMES } from '../constants/languages';
+import { getMistakeSummary } from '../services/mistakeJournalService';
+import { getTodayChallenge, getChallengeStreak } from '../services/dailyChallengeService';
+import { getWeakAreaSuggestion } from '../services/weakAreaService';
 
 export default function HomeScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -23,6 +26,10 @@ export default function HomeScreen({ navigation }) {
   });
   const [learningLanguage, setLearningLanguage] = useState('es');
   const [loading, setLoading] = useState(true);
+  const [mistakeSummary, setMistakeSummary] = useState(null);
+  const [dailyChallenge, setDailyChallenge] = useState(null);
+  const [challengeStreak, setChallengeStreak] = useState(null);
+  const [weakArea, setWeakArea] = useState(null);
 
   useEffect(() => {
     loadStats();
@@ -37,12 +44,23 @@ export default function HomeScreen({ navigation }) {
 
   const loadStats = async () => {
     try {
-      const statistics = await getUserStatistics();
-      const achStats = await achievementService.getStats();
-      const savedLearningLang = await AsyncStorage.getItem('learningLanguage');
+      const [statistics, achStats, savedLearningLang, mistakes, challenge, chStreak, weak] =
+        await Promise.all([
+          getUserStatistics(),
+          achievementService.getStats(),
+          AsyncStorage.getItem('learningLanguage'),
+          getMistakeSummary(),
+          getTodayChallenge(),
+          getChallengeStreak(),
+          getWeakAreaSuggestion(),
+        ]);
       setStats(statistics);
       setAchievementStats(achStats);
       if (savedLearningLang) setLearningLanguage(savedLearningLang);
+      setMistakeSummary(mistakes);
+      setDailyChallenge(challenge);
+      setChallengeStreak(chStreak);
+      setWeakArea(weak);
     } catch (error) {
       console.error('Error loading statistics:', error);
       showErrorAlert(error, () => loadStats());
@@ -101,6 +119,83 @@ export default function HomeScreen({ navigation }) {
           {stats.longestStreak > 0 && stats.longestStreak !== stats.currentStreak && (
             <Text style={styles.longestStreak}>Personal Best: {stats.longestStreak} days</Text>
           )}
+        </View>
+
+        {/* Daily Challenge Card */}
+        {dailyChallenge && (
+          <TouchableOpacity
+            style={styles.challengeCard}
+            onPress={() => navigation.navigate('Learn', { screen: 'ModeSelection' })}
+            activeOpacity={0.7}
+          >
+            <View style={styles.challengeHeader}>
+              <Text style={styles.challengeTitle}>{dailyChallenge.title}</Text>
+              {dailyChallenge.is_completed ? (
+                <Text style={styles.challengeCheck}>Done</Text>
+              ) : null}
+            </View>
+            <View style={styles.challengeBarTrack}>
+              <View
+                style={[
+                  styles.challengeBarFill,
+                  {
+                    width: `${Math.min(100,
+                      (dailyChallenge.current_value / dailyChallenge.target_value) * 100
+                    )}%`,
+                    backgroundColor: dailyChallenge.is_completed ? '#27AE60' : '#3498DB',
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.challengeProgress}>
+              {dailyChallenge.current_value} / {dailyChallenge.target_value}
+              {challengeStreak && challengeStreak.currentStreak > 0
+                ? `  |  ${challengeStreak.currentStreak} day streak`
+                : ''}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Weak Area Suggestion */}
+        {weakArea && (
+          <TouchableOpacity
+            style={styles.weakAreaBanner}
+            onPress={() => navigation.navigate('Learn', {
+              screen: 'Learning',
+              params: { source: 'weakArea', weakArea, wordsPerSession: 20 },
+            })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.weakAreaText}>{weakArea.suggestion}</Text>
+            <Text style={styles.weakAreaAction}>Practice Now</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Quick Actions Row */}
+        <View style={styles.quickActionsRow}>
+          {mistakeSummary && mistakeSummary.totalMistakeWords > 0 && (
+            <TouchableOpacity
+              style={styles.quickAction}
+              onPress={() => navigation.navigate('Home', { screen: 'MistakeJournal' })}
+            >
+              <Text style={styles.quickActionIcon}>📝</Text>
+              <Text style={styles.quickActionLabel}>{mistakeSummary.totalMistakeWords} Mistakes</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => navigation.navigate('Home', { screen: 'WordLists' })}
+          >
+            <Text style={styles.quickActionIcon}>📚</Text>
+            <Text style={styles.quickActionLabel}>My Lists</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => navigation.navigate('Home', { screen: 'Analytics' })}
+          >
+            <Text style={styles.quickActionIcon}>📊</Text>
+            <Text style={styles.quickActionLabel}>Analytics</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Stats Cards */}
@@ -325,5 +420,104 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#7F8C8D',
+  },
+  challengeCard: {
+    backgroundColor: 'white',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#3498DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  challengeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  challengeTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    flex: 1,
+  },
+  challengeCheck: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#27AE60',
+    backgroundColor: '#D4EDDA',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  challengeBarTrack: {
+    height: 8,
+    backgroundColor: '#ECF0F1',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  challengeBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  challengeProgress: {
+    fontSize: 12,
+    color: '#7F8C8D',
+  },
+  weakAreaBanner: {
+    backgroundColor: '#FFF3CD',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#F39C12',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  weakAreaText: {
+    fontSize: 13,
+    color: '#856404',
+    flex: 1,
+    marginRight: 8,
+  },
+  weakAreaAction: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#F39C12',
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 14,
+  },
+  quickAction: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    minWidth: 80,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  quickActionIcon: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  quickActionLabel: {
+    fontSize: 11,
+    color: '#7F8C8D',
+    fontWeight: '600',
   },
 });

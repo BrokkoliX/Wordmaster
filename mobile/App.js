@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { initDatabase } from './src/services/database';
@@ -14,6 +14,7 @@ import SignupScreen from './src/screens/SignupScreen';
 import GuestEntryScreen from './src/screens/GuestEntryScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { updateNotificationContent } from './src/services/notificationService';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,9 +23,21 @@ function RootNavigator() {
   const [dbReady, setDbReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [initError, setInitError] = useState(null);
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
     prepareApp();
+  }, []);
+
+  // Refresh notification content when app returns to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appState.current.match(/inactive|background/) && nextState === 'active') {
+        updateNotificationContent().catch(() => {});
+      }
+      appState.current = nextState;
+    });
+    return () => subscription?.remove();
   }, []);
 
   const prepareApp = async () => {

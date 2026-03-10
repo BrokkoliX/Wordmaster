@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllCategories } from '../services/database';
+import { getWeakAreaSuggestion } from '../services/weakAreaService';
 
 const WORD_COUNT_OPTIONS = [20, 50, 100];
 
@@ -15,9 +16,11 @@ export default function ModeSelectionScreen({ navigation }) {
   const [wordsPerSession, setWordsPerSession] = useState(20);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [weakArea, setWeakArea] = useState(null);
 
   useEffect(() => {
     loadCategories();
+    loadWeakArea();
   }, []);
 
   const loadCategories = async () => {
@@ -26,6 +29,15 @@ export default function ModeSelectionScreen({ navigation }) {
       setCategories(cats);
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadWeakArea = async () => {
+    try {
+      const area = await getWeakAreaSuggestion();
+      setWeakArea(area);
+    } catch (error) {
+      console.error('Error loading weak area:', error);
     }
   };
 
@@ -124,6 +136,29 @@ export default function ModeSelectionScreen({ navigation }) {
             ))}
           </ScrollView>
         </View>
+
+        {/* Smart Review (weak areas) */}
+        {weakArea && (
+          <TouchableOpacity
+            style={[styles.modeCard, { borderColor: '#F39C12', borderWidth: 2 }]}
+            onPress={() => navigation.navigate('Learning', {
+              source: 'weakArea',
+              weakArea,
+              wordsPerSession,
+            })}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.modeIconContainer, { backgroundColor: '#FFF3CD' }]}>
+              <Text style={[styles.modeIcon, { color: '#F39C12' }]}>🎯</Text>
+            </View>
+            <View style={styles.modeInfo}>
+              <Text style={styles.modeName}>Smart Review</Text>
+              <Text style={styles.modeDescription}>
+                Focus on your weak areas. {weakArea.suggestion}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Multiple Choice */}
         <TouchableOpacity

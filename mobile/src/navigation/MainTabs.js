@@ -15,6 +15,10 @@ import AchievementsScreen from '../screens/AchievementsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import HelpScreen from '../screens/HelpScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MistakeJournalScreen from '../screens/MistakeJournalScreen';
+import WordListsScreen from '../screens/WordListsScreen';
+import WordListDetailScreen from '../screens/WordListDetailScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -38,6 +42,26 @@ function HomeStack() {
         name="Help"
         component={HelpScreen}
         options={{ title: 'Help & FAQ' }}
+      />
+      <Stack.Screen
+        name="MistakeJournal"
+        component={MistakeJournalScreen}
+        options={{ title: 'Mistake Journal' }}
+      />
+      <Stack.Screen
+        name="WordLists"
+        component={WordListsScreen}
+        options={{ title: 'My Word Lists' }}
+      />
+      <Stack.Screen
+        name="WordListDetail"
+        component={WordListDetailScreen}
+        options={({ route }) => ({ title: route.params?.listName || 'Word List' })}
+      />
+      <Stack.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{ title: 'Analytics' }}
       />
     </Stack.Navigator>
   );

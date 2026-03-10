@@ -22,6 +22,9 @@ import achievementService from '../services/AchievementService';
 import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import ttsService from '../services/TTSService';
 import hapticService from '../services/HapticService';
+import { getReviewSessionFromMistakes } from '../services/mistakeJournalService';
+import { getListWords, toggleFavorite, isWordFavorited } from '../services/wordListService';
+import { generateWeakAreaSession } from '../services/weakAreaService';
 
 const DEFAULT_WORDS_PER_SESSION = 20;
 // Words answered incorrectly are re-queued until the user gets them right
@@ -34,6 +37,9 @@ const REVIEW_RATIO = 0.7;
 export default function LearningScreen({ route, navigation }) {
   const wordsPerSession = route.params?.wordsPerSession || DEFAULT_WORDS_PER_SESSION;
   const category = route.params?.category || null;
+  const source = route.params?.source || null;
+  const listId = route.params?.listId || null;
+  const weakArea = route.params?.weakArea || null;
   const [loading, setLoading] = useState(true);
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,6 +55,7 @@ export default function LearningScreen({ route, navigation }) {
   const [achievementModalVisible, setAchievementModalVisible] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState(null);
   const [achievementQueue, setAchievementQueue] = useState([]);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   // Tracks how many times each word was answered correctly within this session.
   // Words must reach REQUIRED_CORRECT_TO_PASS to stop being re-queued.
@@ -77,19 +84,28 @@ export default function LearningScreen({ route, navigation }) {
       
       // Start achievement tracking
       await achievementService.startSession(newSessionId);
-      
-      // Enforce a review/new word ratio so new vocabulary always gets exposure.
-      // Reserve at least (1 - REVIEW_RATIO) of the session for unseen words.
-      const maxReviewSlots = Math.ceil(wordsPerSession * REVIEW_RATIO);
-      const minNewSlots = wordsPerSession - maxReviewSlots;
 
-      let reviewWords = await getWordsDueForReview(maxReviewSlots, category);
+      let sessionWords = [];
 
-      // Fill remaining slots with new words (guaranteed minimum + any leftover)
-      const newSlotsNeeded = Math.max(minNewSlots, wordsPerSession - reviewWords.length);
-      const newWords = await getNewWords(newSlotsNeeded, category);
-
-      const sessionWords = [...reviewWords, ...newWords];
+      if (source === 'mistakes') {
+        // Mistake Journal: review the user's most-missed words
+        sessionWords = await getReviewSessionFromMistakes(wordsPerSession);
+      } else if (source === 'list' && listId) {
+        // Custom Word List: practice words from a specific list
+        const listWords = await getListWords(listId);
+        sessionWords = listWords.slice(0, wordsPerSession);
+      } else if (source === 'weakArea' && weakArea) {
+        // Weak Area: practice words from a detected weak area
+        sessionWords = await generateWeakAreaSession(weakArea, wordsPerSession);
+      } else {
+        // Default: review/new word mix
+        const maxReviewSlots = Math.ceil(wordsPerSession * REVIEW_RATIO);
+        const minNewSlots = wordsPerSession - maxReviewSlots;
+        let reviewWords = await getWordsDueForReview(maxReviewSlots, category);
+        const newSlotsNeeded = Math.max(minNewSlots, wordsPerSession - reviewWords.length);
+        const newWords = await getNewWords(newSlotsNeeded, category);
+        sessionWords = [...reviewWords, ...newWords];
+      }
       
       // Reset retry tracker for the new session
       retryTracker.current = {};
@@ -115,6 +131,10 @@ export default function LearningScreen({ route, navigation }) {
       setSelectedOption(null);
       setShowFeedback(false);
       setStartTime(Date.now());
+
+      // Check if word is favorited
+      const favStatus = await isWordFavorited(word.id);
+      setIsFavorited(favStatus);
       
       // Pronounce the word automatically (if enabled)
       // Speak in the target language (the language being learned)
@@ -400,6 +420,17 @@ export default function LearningScreen({ route, navigation }) {
             >
               <Text style={styles.speakerIcon}>🔊</Text>
             </TouchableOpacity>
+            {/* Bookmark / Favorite button */}
+            <TouchableOpacity
+              style={styles.bookmarkButton}
+              onPress={async () => {
+                hapticService.light();
+                const result = await toggleFavorite(question.word.id);
+                setIsFavorited(result);
+              }}
+            >
+              <Text style={styles.bookmarkIcon}>{isFavorited ? '⭐' : '☆'}</Text>
+            </TouchableOpacity>
           </View>
 
           <Text style={styles.instructionText}>Select the correct translation:</Text>
@@ -577,6 +608,26 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   speakerIcon: {
+    fontSize: 20,
+  },
+  bookmarkButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    padding: 6,
+    backgroundColor: '#FFF5E6',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  bookmarkIcon: {
     fontSize: 20,
   },
   instructionText: {

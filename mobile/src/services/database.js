@@ -5,6 +5,7 @@ import { syncWordsFromApi, isSyncNeeded } from './wordApiService';
 import { syncSentencesFromApi, isSentenceSyncNeeded, initSentenceTable } from './sentenceApiService';
 import { initAchievementTables } from './achievementDatabase';
 import { syncProgressToServer } from './progressSyncService';
+import { updateChallengeProgress } from './dailyChallengeService';
 import { GRAMMATICAL_FILTER_W } from '../constants/sqlFilters';
 import { getLevelsUpTo } from '../constants/cefrLevels';
 import db from './db';
@@ -90,6 +91,52 @@ export const initDatabase = async () => {
       
       CREATE INDEX IF NOT EXISTS idx_words_difficulty 
       ON words(difficulty);
+
+      CREATE TABLE IF NOT EXISTS word_lists (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        icon TEXT DEFAULT '📝',
+        color TEXT DEFAULT '#3498DB',
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS word_list_items (
+        id TEXT PRIMARY KEY,
+        list_id TEXT NOT NULL,
+        word_id TEXT NOT NULL,
+        added_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (list_id) REFERENCES word_lists(id) ON DELETE CASCADE,
+        FOREIGN KEY (word_id) REFERENCES words(id),
+        UNIQUE(list_id, word_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_word_list_items_list
+      ON word_list_items(list_id);
+
+      CREATE TABLE IF NOT EXISTS daily_challenges (
+        id TEXT PRIMARY KEY,
+        date TEXT NOT NULL UNIQUE,
+        challenge_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        target_value INTEGER NOT NULL,
+        current_value INTEGER DEFAULT 0,
+        is_completed INTEGER DEFAULT 0,
+        category_filter TEXT,
+        cefr_filter TEXT,
+        completed_at TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS challenge_streaks (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        current_streak INTEGER DEFAULT 0,
+        longest_streak INTEGER DEFAULT 0,
+        last_completed_date TEXT,
+        total_completed INTEGER DEFAULT 0
+      );
     `);
     
     // Sync words from backend API (only the user's language pair + level)
@@ -138,6 +185,21 @@ export const initDatabase = async () => {
     
     // Initialize Achievement System tables
     await initAchievementTables();
+
+    // Auto-create built-in Favorites list
+    const favExists = await db.getFirstAsync(
+      "SELECT id FROM word_lists WHERE id = '__favorites__'"
+    );
+    if (!favExists) {
+      await db.runAsync(
+        "INSERT INTO word_lists (id, name, description, icon, color) VALUES ('__favorites__', 'Favorites', 'Your bookmarked words', '⭐', '#FFB84D')"
+      );
+    }
+
+    // Initialize challenge streaks row
+    await db.runAsync(
+      'INSERT OR IGNORE INTO challenge_streaks (id, current_streak, longest_streak, total_completed) VALUES (1, 0, 0, 0)'
+    );
     
     console.log('Database initialized successfully');
     return true;
@@ -528,6 +590,9 @@ export const completeSession = async (sessionId, wordsReviewed, correctAnswers) 
     // Check for milestone
     const milestone = checkMilestoneReached(oldStreak, newStreak);
     
+    // Update daily challenge progress (fire-and-forget)
+    updateChallengeProgress(wordsReviewed, correctAnswers, accuracy, 0).catch(() => {});
+
     // Background sync: push changed progress to the backend.
     // Fire-and-forget so it never blocks the UI or breaks the session.
     syncProgressToServer().catch(() => {});
@@ -559,7 +624,155 @@ export const getAllCategories = async () => {
   }
 };
 
-// NOTE: getCategoryById, getWordsByCategory, getWordsByDifficulty, searchWords,
-// getCategoryStats, getMasteredWordsInCategory, and getTotalWordCount were
-// removed as dead code — they were exported but never imported anywhere.
-// Re-add them here if a future feature needs them.
+// ---------------------------------------------------------------------------
+// Shared aggregate query helpers
+// Used by Mistake Journal, Analytics, Weak Area Detection, Daily Challenges
+// ---------------------------------------------------------------------------
+
+// Get words with the highest error rate
+export const getWordsWithHighestErrorRate = async (limit = 50) => {
+  try {
+    const words = await db.getAllAsync(`
+      SELECT w.*, p.times_incorrect, p.times_correct, p.times_shown,
+             p.status, p.confidence_level, p.consecutive_correct,
+             p.ease_factor, p.interval_days, p.last_reviewed_at,
+             CASE WHEN p.times_shown > 0
+               THEN ROUND((p.times_incorrect * 100.0 / p.times_shown), 1)
+               ELSE 0
+             END as error_rate
+      FROM words w
+      INNER JOIN user_word_progress p ON w.id = p.word_id
+      WHERE p.times_incorrect > 0
+      ORDER BY error_rate DESC, p.times_incorrect DESC
+      LIMIT ?
+    `, [limit]);
+    return words;
+  } catch (error) {
+    console.error('Error getting words with highest error rate:', error);
+    return [];
+  }
+};
+
+// Get accuracy grouped by CEFR level
+export const getAccuracyByCefrLevel = async () => {
+  try {
+    const rows = await db.getAllAsync(`
+      SELECT w.cefr_level,
+             COUNT(*) as total_words,
+             COUNT(CASE WHEN p.status = 'mastered' OR p.status = 'retired' THEN 1 END) as mastered,
+             COUNT(CASE WHEN p.status = 'learning' OR p.status = 'familiar' THEN 1 END) as learning,
+             SUM(p.times_correct) as total_correct,
+             SUM(p.times_shown) as total_shown,
+             CASE WHEN SUM(p.times_shown) > 0
+               THEN ROUND((SUM(p.times_correct) * 100.0 / SUM(p.times_shown)), 1)
+               ELSE 0
+             END as accuracy
+      FROM words w
+      INNER JOIN user_word_progress p ON w.id = p.word_id
+      WHERE p.times_shown > 0
+      GROUP BY w.cefr_level
+      ORDER BY
+        CASE w.cefr_level
+          WHEN 'A1' THEN 1 WHEN 'A2' THEN 2 WHEN 'B1' THEN 3
+          WHEN 'B2' THEN 4 WHEN 'C1' THEN 5 WHEN 'C2' THEN 6
+          ELSE 7
+        END
+    `);
+    return rows;
+  } catch (error) {
+    console.error('Error getting accuracy by CEFR level:', error);
+    return [];
+  }
+};
+
+// Get accuracy grouped by category
+export const getAccuracyByCategory = async () => {
+  try {
+    const rows = await db.getAllAsync(`
+      SELECT w.category,
+             c.name as category_name, c.icon as category_icon,
+             COUNT(*) as total_words,
+             COUNT(CASE WHEN p.status = 'mastered' OR p.status = 'retired' THEN 1 END) as mastered,
+             SUM(p.times_correct) as total_correct,
+             SUM(p.times_shown) as total_shown,
+             CASE WHEN SUM(p.times_shown) > 0
+               THEN ROUND((SUM(p.times_correct) * 100.0 / SUM(p.times_shown)), 1)
+               ELSE 0
+             END as accuracy
+      FROM words w
+      INNER JOIN user_word_progress p ON w.id = p.word_id
+      LEFT JOIN categories c ON w.category = c.id
+      WHERE p.times_shown > 0
+      GROUP BY w.category
+      HAVING COUNT(*) >= 3
+      ORDER BY accuracy ASC
+    `);
+    return rows;
+  } catch (error) {
+    console.error('Error getting accuracy by category:', error);
+    return [];
+  }
+};
+
+// Get daily review counts for the last N days
+export const getDailyReviewCounts = async (days = 30) => {
+  try {
+    const rows = await db.getAllAsync(`
+      SELECT DATE(completed_at) as date,
+             COUNT(*) as sessions,
+             SUM(words_reviewed) as words_reviewed,
+             SUM(correct_answers) as correct_answers,
+             AVG(accuracy) as avg_accuracy,
+             SUM(new_words_introduced) as new_words
+      FROM sessions
+      WHERE completed_at IS NOT NULL
+        AND DATE(completed_at) >= DATE('now', '-' || ? || ' days')
+      GROUP BY DATE(completed_at)
+      ORDER BY date ASC
+    `, [days]);
+    return rows;
+  } catch (error) {
+    console.error('Error getting daily review counts:', error);
+    return [];
+  }
+};
+
+// Get word progress distribution (how many words at each status)
+export const getWordProgressDistribution = async () => {
+  try {
+    const rows = await db.getAllAsync(`
+      SELECT
+        COALESCE(p.status, 'unseen') as status,
+        COUNT(*) as count
+      FROM words w
+      LEFT JOIN user_word_progress p ON w.id = p.word_id
+      GROUP BY COALESCE(p.status, 'unseen')
+      ORDER BY
+        CASE COALESCE(p.status, 'unseen')
+          WHEN 'unseen' THEN 0 WHEN 'new' THEN 1 WHEN 'learning' THEN 2
+          WHEN 'familiar' THEN 3 WHEN 'mastered' THEN 4 WHEN 'retired' THEN 5
+          ELSE 6
+        END
+    `);
+    return rows;
+  } catch (error) {
+    console.error('Error getting word progress distribution:', error);
+    return [];
+  }
+};
+
+// Get words due for review count (used by notifications and daily challenge)
+export const getWordsDueCount = async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const result = await db.getFirstAsync(`
+      SELECT COUNT(*) as count
+      FROM user_word_progress
+      WHERE next_review_date <= ?
+    `, [today]);
+    return result?.count || 0;
+  } catch (error) {
+    console.error('Error getting words due count:', error);
+    return 0;
+  }
+};

@@ -16,6 +16,7 @@ import db from '../services/db';
 import exportService from '../services/exportService';
 import { syncWordsFromApi, isSyncNeeded } from '../services/wordApiService';
 import ttsService from '../services/TTSService';
+import notificationService from '../services/notificationService';
 import { LANGUAGE_LIST as LANGUAGES } from '../constants/languages';
 
 const CEFR_LEVELS = [
@@ -41,6 +42,8 @@ export default function SettingsScreen({ navigation }) {
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  const [remindersEnabled, setRemindersEnabled] = useState(false);
+  const [reminderHour, setReminderHour] = useState(9);
 
   useEffect(() => {
     loadSettings();
@@ -61,6 +64,10 @@ export default function SettingsScreen({ navigation }) {
       if (savedLearningLang) setLearningLanguage(savedLearningLang);
       if (savedLevel) setCefrLevel(savedLevel);
       setVoiceEnabled(savedVoice === 'true');
+
+      const reminderSettings = await notificationService.getReminderSettings();
+      setRemindersEnabled(reminderSettings.enabled);
+      setReminderHour(reminderSettings.preferredHour);
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -255,6 +262,28 @@ export default function SettingsScreen({ navigation }) {
     }
   };
 
+  const handleReminderToggle = async (value) => {
+    if (value) {
+      const granted = await notificationService.requestPermissions();
+      if (!granted) {
+        Alert.alert(
+          'Notifications Disabled',
+          'Enable notifications in your device settings to receive reminders.'
+        );
+        return;
+      }
+    }
+    setRemindersEnabled(value);
+    await notificationService.saveReminderSettings(value, reminderHour);
+  };
+
+  const handleReminderHourChange = async (hour) => {
+    setReminderHour(hour);
+    if (remindersEnabled) {
+      await notificationService.saveReminderSettings(true, hour);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
@@ -433,6 +462,51 @@ export default function SettingsScreen({ navigation }) {
               thumbColor={voiceEnabled ? '#3498DB' : '#F4F3F4'}
             />
           </View>
+        </View>
+
+        {/* Review Reminders */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Review Reminders</Text>
+          <View style={styles.voiceToggleRow}>
+            <View style={styles.voiceToggleInfo}>
+              <Text style={styles.voiceToggleLabel}>Daily reminder</Text>
+              <Text style={styles.voiceToggleDescription}>
+                Get notified when words are due for review
+              </Text>
+            </View>
+            <Switch
+              value={remindersEnabled}
+              onValueChange={handleReminderToggle}
+              trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
+              thumbColor={remindersEnabled ? '#3498DB' : '#F4F3F4'}
+            />
+          </View>
+          {remindersEnabled && (
+            <View style={styles.reminderTimeRow}>
+              <Text style={styles.reminderTimeLabel}>Remind me at:</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {[7, 8, 9, 10, 12, 14, 17, 19, 21].map((hour) => (
+                  <TouchableOpacity
+                    key={hour}
+                    style={[
+                      styles.reminderTimePill,
+                      reminderHour === hour && styles.reminderTimePillActive,
+                    ]}
+                    onPress={() => handleReminderHourChange(hour)}
+                  >
+                    <Text
+                      style={[
+                        styles.reminderTimePillText,
+                        reminderHour === hour && styles.reminderTimePillTextActive,
+                      ]}
+                    >
+                      {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
 
         {/* Current Selection Summary */}
@@ -931,5 +1005,43 @@ const styles = StyleSheet.create({
     color: '#95A5A6',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  reminderTimeRow: {
+    marginTop: 12,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  reminderTimeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#34495E',
+    marginBottom: 8,
+  },
+  reminderTimePill: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    backgroundColor: '#F5F7FA',
+    marginRight: 8,
+    borderWidth: 1.5,
+    borderColor: '#E0E6ED',
+  },
+  reminderTimePillActive: {
+    backgroundColor: '#3498DB',
+    borderColor: '#3498DB',
+  },
+  reminderTimePillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#7F8C8D',
+  },
+  reminderTimePillTextActive: {
+    color: 'white',
   },
 });
