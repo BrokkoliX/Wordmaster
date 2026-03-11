@@ -27,7 +27,7 @@ SERVER_IP="3.211.219.221"
 PEM_KEY="$(dirname "$0")/../wordmaster-key.pem"
 REMOTE_DIR="/home/ubuntu/Wordmaster"
 BRANCH="main"
-HEALTH_URL="https://word-master.org/api/words/count?source_lang=en&target_lang=es"
+HEALTH_URL="https://word-master.org/health"
 HEALTH_RETRIES=6
 HEALTH_DELAY=5   # seconds between retries
 
@@ -45,7 +45,7 @@ health_check() {
   echo "  Running health check against $HEALTH_URL ..."
   for i in $(seq 1 $HEALTH_RETRIES); do
     response=$(curl -sf --max-time 8 "$HEALTH_URL" 2>/dev/null || true)
-    if echo "$response" | grep -q '"total"'; then
+    if echo "$response" | grep -q '"status"'; then
       echo "  Health check passed (attempt $i): $response"
       return 0
     fi
