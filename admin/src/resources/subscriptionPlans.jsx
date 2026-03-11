@@ -11,11 +11,10 @@ import {
   useNotify,
   useRefresh,
   TopToolbar,
-  SaveButton,
-  Toolbar,
 } from 'react-admin';
 import {
   Box,
+  Button,
   Chip,
   Typography,
   Switch,
@@ -191,14 +190,14 @@ const SubscriptionPlanEditForm = () => {
       )}
 
       <Box sx={{ mt: 3 }}>
-        <Toolbar>
-          <SaveButton
-            label={saving ? 'Saving…' : 'Save Plan'}
-            disabled={saving}
-            onClick={handleSave}
-            type="button"
-          />
-        </Toolbar>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={saving}
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
+        >
+          {saving ? 'Saving…' : 'Save Plan'}
+        </Button>
       </Box>
     </Box>
   );
