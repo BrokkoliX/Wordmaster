@@ -5,6 +5,8 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+const serverConfig = require('./config/serverConfig');
+
 const app = express();
 
 // Trust the first proxy hop (Nginx on localhost).
@@ -24,38 +26,37 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // --- Rate Limiting ---
-// Global: 100 requests per 15 minutes per IP
+// Each limiter reads max and windowMs live from the serverConfig singleton
+// so values can be changed via the admin UI without a server restart.
+
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: () => serverConfig.get('rate_limit.global', { windowMs: 900000 }).windowMs,
+  max:       () => serverConfig.get('rate_limit.global', { max: 100 }).max,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many requests, please try again later', code: 'RATE_LIMITED' } },
 });
 app.use(globalLimiter);
 
-// Auth: 10 requests per 15 minutes per IP (login, register, password reset)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: () => serverConfig.get('rate_limit.auth', { windowMs: 900000 }).windowMs,
+  max:       () => serverConfig.get('rate_limit.auth', { max: 10 }).max,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many auth attempts, please try again later', code: 'AUTH_RATE_LIMITED' } },
 });
 
-// Admin: 30 requests per 15 minutes per IP
 const adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
+  windowMs: () => serverConfig.get('rate_limit.admin', { windowMs: 900000 }).windowMs,
+  max:       () => serverConfig.get('rate_limit.admin', { max: 200 }).max,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many admin requests, please try again later', code: 'ADMIN_RATE_LIMITED' } },
 });
 
-// Subscriptions: 60 requests per 15 minutes per IP
 const subscriptionLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 60,
+  windowMs: () => serverConfig.get('rate_limit.subscription', { windowMs: 900000 }).windowMs,
+  max:       () => serverConfig.get('rate_limit.subscription', { max: 60 }).max,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: { message: 'Too many subscription requests, please try again later', code: 'SUBSCRIPTION_RATE_LIMITED' } },
@@ -106,10 +107,18 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-});
+async function start() {
+  // Load system settings into the in-memory cache before accepting traffic.
+  // Non-fatal: hardcoded defaults remain in effect if the DB is unreachable.
+  await serverConfig.load();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  });
+}
+
+start();
 
 module.exports = app;

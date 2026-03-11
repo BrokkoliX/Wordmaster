@@ -5,6 +5,7 @@ const { isAdmin } = require('../middleware/isAdmin.middleware');
 const adminController = require('../controllers/admin.controller');
 const subscriptionController = require('../controllers/subscription.controller');
 const languageConfigController = require('../controllers/languageConfig.controller');
+const serverConfigController = require('../controllers/serverConfig.controller');
 
 // All admin routes require authentication + admin role
 router.use(authenticate);
@@ -127,5 +128,12 @@ router.get('/subscription-plans/:id', subscriptionController.getSubscriptionPlan
 
 // PUT /api/admin/subscription-plans/:id - Update plan features / metadata
 router.put('/subscription-plans/:id', subscriptionController.updateSubscriptionPlan);
+
+// ========== SYSTEM SETTINGS ==========
+// GET /api/admin/server-config        - All settings grouped by category
+router.get('/server-config', serverConfigController.getAll);
+
+// PUT /api/admin/server-config/:key   - Update one setting (validates type)
+router.put('/server-config/:key', serverConfigController.update);
 
 module.exports = router;

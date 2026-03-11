@@ -13,6 +13,7 @@ import WordImport from './components/WordImport';
 import DatabaseQuery from './components/DatabaseQuery';
 import LanguageManager from './components/LanguageManager';
 import LanguageConfig from './components/LanguageConfig';
+import SystemSettings from './components/SystemSettings';
 import LoginPage from './components/LoginPage';
 import { UserList, UserShow, UserEdit } from './resources/users';
 import { LanguageList, LanguageShow } from './resources/languages';
@@ -65,6 +66,7 @@ const App = () => (
       <Route path="/word-import" element={<WordImport />} />
       <Route path="/language-manager" element={<LanguageManager />} />
       <Route path="/language-config" element={<LanguageConfig />} />
+      <Route path="/system-settings" element={<SystemSettings />} />
       <Route path="/database-query" element={<DatabaseQuery />} />
     </CustomRoutes>
   </Admin>
