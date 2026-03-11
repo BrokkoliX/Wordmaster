@@ -30,11 +30,11 @@ const handleResponse = async (response) => {
  * and any path overrides.
  */
 const RESOURCE_CONFIG = {
-  users: { dataKey: 'users', hasPagination: true },
-  languages: { dataKey: 'languages', hasPagination: false },
-  sentences: { dataKey: 'sentences', hasPagination: false },
-  achievements: { dataKey: 'achievements', hasPagination: true },
-  'subscription-plans': { dataKey: 'plans', hasPagination: false },
+  users:                { dataKey: 'users',         singleKey: 'user',              hasPagination: true  },
+  languages:            { dataKey: 'languages',     singleKey: 'language',          hasPagination: false },
+  sentences:            { dataKey: 'sentences',     singleKey: 'sentence',          hasPagination: false },
+  achievements:         { dataKey: 'achievements',  singleKey: 'achievement',       hasPagination: true  },
+  'subscription-plans': { dataKey: 'plans',         singleKey: 'plan',              hasPagination: false },
   // Virtual/stats resources are read-only; handled by custom pages
 };
 
@@ -92,8 +92,8 @@ const dataProvider = {
       await fetch(url, { headers: getAuthHeaders() })
     );
 
-    // The backend wraps single-resource responses in a key (e.g. { user: {...} })
-    const singularKey = resource.replace(/s$/, ''); // users → user
+    const config = RESOURCE_CONFIG[resource];
+    const singularKey = config?.singleKey || resource.replace(/s$/, '');
     const data = json[singularKey] || json;
 
     return { data };
@@ -101,15 +101,14 @@ const dataProvider = {
 
   // ─── GET MANY (by IDs) ───────────────────────────────────
   getMany: async (resource, params) => {
+    const config = RESOURCE_CONFIG[resource];
+    const singularKey = config?.singleKey || resource.replace(/s$/, '');
     // Backend doesn't have a bulk-get endpoint, so fetch one-by-one
     const results = await Promise.all(
       params.ids.map((id) =>
         fetch(`${API_URL}/${resource}/${id}`, { headers: getAuthHeaders() })
           .then(handleResponse)
-          .then((json) => {
-            const singularKey = resource.replace(/s$/, '');
-            return json[singularKey] || json;
-          })
+          .then((json) => json[singularKey] || json)
       )
     );
     return { data: results };
