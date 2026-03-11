@@ -79,6 +79,8 @@ app.use('/api/sentences', require('./routes/sentences.routes'));
 app.use('/api/follow', require('./routes/follow.routes'));
 app.use('/api/admin', adminLimiter, require('./routes/admin.routes'));
 app.use('/api/subscriptions', subscriptionLimiter, require('./routes/subscription.routes'));
+// Public config endpoint (no auth) – consumed by mobile app on startup
+app.use('/api/config', require('./routes/config.routes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

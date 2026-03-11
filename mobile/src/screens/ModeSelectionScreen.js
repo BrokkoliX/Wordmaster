@@ -9,14 +9,24 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllCategories } from '../services/database';
 import { getWeakAreaSuggestion } from '../services/weakAreaService';
+import { useLanguageConfig } from '../contexts/LanguageConfigContext';
+import { getPairFeatures } from '../services/languageConfigService';
 
 const WORD_COUNT_OPTIONS = [20, 50, 100];
 
-export default function ModeSelectionScreen({ navigation }) {
+export default function ModeSelectionScreen({ navigation, route }) {
   const [wordsPerSession, setWordsPerSession] = useState(20);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [weakArea, setWeakArea] = useState(null);
+
+  // Derive the active language pair from route params, falling back to
+  // a sensible default so the screen works without explicit params.
+  const sourceLang = route?.params?.sourceLang || 'en';
+  const targetLang = route?.params?.targetLang || 'es';
+
+  const { config } = useLanguageConfig();
+  const features = getPairFeatures(config, sourceLang, targetLang);
 
   useEffect(() => {
     loadCategories();
@@ -138,7 +148,7 @@ export default function ModeSelectionScreen({ navigation }) {
         </View>
 
         {/* Smart Review (weak areas) */}
-        {weakArea && (
+        {features.smart_review && weakArea && (
           <TouchableOpacity
             style={[styles.modeCard, { borderColor: '#F39C12', borderWidth: 2 }]}
             onPress={() => navigation.navigate('Learning', {
@@ -161,72 +171,80 @@ export default function ModeSelectionScreen({ navigation }) {
         )}
 
         {/* Multiple Choice */}
-        <TouchableOpacity
-          style={styles.modeCard}
-          onPress={() => navigation.navigate('Learning', navParams)}
-          activeOpacity={0.8}
-        >
-          <View style={styles.modeIconContainer}>
-            <Text style={styles.modeIcon}>ABCD</Text>
-          </View>
-          <View style={styles.modeInfo}>
-            <Text style={styles.modeName}>Multiple Choice</Text>
-            <Text style={styles.modeDescription}>
-              See a word and pick the correct translation from four options.
-            </Text>
-          </View>
-        </TouchableOpacity>
+        {features.multiple_choice && (
+          <TouchableOpacity
+            style={styles.modeCard}
+            onPress={() => navigation.navigate('Learning', navParams)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.modeIconContainer}>
+              <Text style={styles.modeIcon}>ABCD</Text>
+            </View>
+            <View style={styles.modeInfo}>
+              <Text style={styles.modeName}>Multiple Choice</Text>
+              <Text style={styles.modeDescription}>
+                See a word and pick the correct translation from four options.
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Matching Pairs */}
-        <TouchableOpacity
-          style={styles.modeCard}
-          onPress={() => navigation.navigate('MatchingPairs', navParams)}
-          activeOpacity={0.8}
-        >
-          <View style={[styles.modeIconContainer, styles.modeIconMatching]}>
-            <Text style={styles.modeIcon}>||</Text>
-          </View>
-          <View style={styles.modeInfo}>
-            <Text style={styles.modeName}>Matching Pairs</Text>
-            <Text style={styles.modeDescription}>
-              Two columns of words -- match each word with its translation.
-            </Text>
-          </View>
-        </TouchableOpacity>
+        {features.matching_pairs && (
+          <TouchableOpacity
+            style={styles.modeCard}
+            onPress={() => navigation.navigate('MatchingPairs', navParams)}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.modeIconContainer, styles.modeIconMatching]}>
+              <Text style={styles.modeIcon}>||</Text>
+            </View>
+            <View style={styles.modeInfo}>
+              <Text style={styles.modeName}>Matching Pairs</Text>
+              <Text style={styles.modeDescription}>
+                Two columns of words -- match each word with its translation.
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Type Translation */}
-        <TouchableOpacity
-          style={styles.modeCard}
-          onPress={() => navigation.navigate('TypeTranslation', navParams)}
-          activeOpacity={0.8}
-        >
-          <View style={[styles.modeIconContainer, styles.modeIconTyping]}>
-            <Text style={styles.modeIcon}>⌨</Text>
-          </View>
-          <View style={styles.modeInfo}>
-            <Text style={styles.modeName}>Type Translation</Text>
-            <Text style={styles.modeDescription}>
-              See a word and type the correct translation yourself.
-            </Text>
-          </View>
-        </TouchableOpacity>
+        {features.type_translation && (
+          <TouchableOpacity
+            style={styles.modeCard}
+            onPress={() => navigation.navigate('TypeTranslation', navParams)}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.modeIconContainer, styles.modeIconTyping]}>
+              <Text style={styles.modeIcon}>⌨</Text>
+            </View>
+            <View style={styles.modeInfo}>
+              <Text style={styles.modeName}>Type Translation</Text>
+              <Text style={styles.modeDescription}>
+                See a word and type the correct translation yourself.
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Fill in the Blank */}
-        <TouchableOpacity
-          style={styles.modeCard}
-          onPress={() => navigation.navigate('FillInBlank', navParams)}
-          activeOpacity={0.8}
-        >
-          <View style={[styles.modeIconContainer, styles.modeIconGrammar]}>
-            <Text style={styles.modeIcon}>_ab</Text>
-          </View>
-          <View style={styles.modeInfo}>
-            <Text style={styles.modeName}>Fill in the Blank</Text>
-            <Text style={styles.modeDescription}>
-              Complete sentences by choosing the correct missing word. Trains grammar in context.
-            </Text>
-          </View>
-        </TouchableOpacity>
+        {features.fill_in_blank && (
+          <TouchableOpacity
+            style={styles.modeCard}
+            onPress={() => navigation.navigate('FillInBlank', navParams)}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.modeIconContainer, styles.modeIconGrammar]}>
+              <Text style={styles.modeIcon}>_ab</Text>
+            </View>
+            <View style={styles.modeInfo}>
+              <Text style={styles.modeName}>Fill in the Blank</Text>
+              <Text style={styles.modeDescription}>
+                Complete sentences by choosing the correct missing word. Trains grammar in context.
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

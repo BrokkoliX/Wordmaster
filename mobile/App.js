@@ -14,6 +14,7 @@ import SignupScreen from './src/screens/SignupScreen';
 import GuestEntryScreen from './src/screens/GuestEntryScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { LanguageConfigProvider } from './src/contexts/LanguageConfigContext';
 import { updateNotificationContent } from './src/services/notificationService';
 
 const Stack = createNativeStackNavigator();
@@ -118,9 +119,11 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
+        <LanguageConfigProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </LanguageConfigProvider>
       </AuthProvider>
       <StatusBar style="auto" />
     </ErrorBoundary>

@@ -4,6 +4,7 @@ const { authenticate } = require('../middleware/auth.middleware');
 const { isAdmin } = require('../middleware/isAdmin.middleware');
 const adminController = require('../controllers/admin.controller');
 const subscriptionController = require('../controllers/subscription.controller');
+const languageConfigController = require('../controllers/languageConfig.controller');
 
 // All admin routes require authentication + admin role
 router.use(authenticate);
@@ -37,6 +38,16 @@ router.post('/languages', adminController.addLanguage);
 
 // DELETE /api/admin/languages/:id - Delete all words for a language pair
 router.delete('/languages/:id', adminController.deleteLanguagePair);
+
+// ========== LANGUAGE CONFIG (toggle) ==========
+// GET  /api/admin/language-config       - List all language/pair config entries
+router.get('/language-config', languageConfigController.getAll);
+
+// GET  /api/admin/language-config/:id   - Get one entry (e.g. 'en' or 'en-fr')
+router.get('/language-config/:id', languageConfigController.getOne);
+
+// PUT  /api/admin/language-config/:id   - Upsert enabled flag + feature flags
+router.put('/language-config/:id', languageConfigController.upsert);
 
 // GET /api/admin/words/stats - Get word database statistics
 router.get('/words/stats', adminController.getWordStats);

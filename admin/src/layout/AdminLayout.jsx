@@ -3,6 +3,7 @@ import { Layout, Menu } from 'react-admin';
 import PeopleIcon from '@mui/icons-material/People';
 import TranslateIcon from '@mui/icons-material/Translate';
 import LanguageIcon from '@mui/icons-material/Language';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -20,6 +21,11 @@ const AdminMenu = () => (
       to="/language-manager"
       primaryText="Language Manager"
       leftIcon={<LanguageIcon />}
+    />
+    <Menu.Item
+      to="/language-config"
+      primaryText="Language Config"
+      leftIcon={<ToggleOnIcon />}
     />
     <Menu.Item
       to="/word-import"
