@@ -139,17 +139,26 @@ ssh_exec "
   git reset --hard origin/$BRANCH
 "
 
-# 3. Install dependencies
+# 3. Install backend dependencies
 echo ""
-echo "[3/5] Installing backend dependencies..."
+echo "[3/6] Installing backend dependencies..."
 ssh_exec "
   cd $REMOTE_DIR/backend
   npm install --omit=dev --silent
 "
 
-# 4. Reload with PM2 (zero-downtime)
+# 4. Build admin UI
 echo ""
-echo "[4/5] Reloading API via PM2..."
+echo "[4/6] Building admin UI..."
+ssh_exec "
+  cd $REMOTE_DIR/admin
+  npm install --silent
+  npm run build
+"
+
+# 5. Reload with PM2 (zero-downtime)
+echo ""
+echo "[5/6] Reloading API via PM2..."
 ssh_exec "
   cd $REMOTE_DIR/backend
   # Use ecosystem file if present, otherwise fall back to named reload
@@ -163,9 +172,9 @@ ssh_exec "
 echo "  Waiting for process to stabilise..."
 sleep 5
 
-# 5. Health check — auto-rollback on failure
+# 6. Health check — auto-rollback on failure
 echo ""
-echo "[5/5] Health check..."
+echo "[6/6] Health check..."
 if health_check; then
   echo ""
   echo "========================================="
