@@ -32,6 +32,16 @@ const LANGUAGES = {
     name: 'Hungarian',
     file: path.join(__dirname, '../../data/hungarian/hu_50k.txt'),
     flag: '🇭🇺'
+  },
+  it: {
+    name: 'Italian',
+    file: path.join(__dirname, '../../data/italian/it_50k.txt'),
+    flag: '🇮🇹'
+  },
+  pl: {
+    name: 'Polish',
+    file: path.join(__dirname, '../../data/polish/pl_50k.txt'),
+    flag: '🇵🇱'
   }
 };
 

@@ -68,6 +68,22 @@ const LANGUAGES = {
     kaikkiFile: '../../dictionaries/russian.jsonl',
     outputFile: 'words_russian.json',
     reverseFile: 'words_russian_to_english.json'
+  },
+  it: {
+    name: 'Italian',
+    flag: '🇮🇹',
+    frequencyFile: '../../../FrequencyWords/content/2018/it/it_50k.txt',
+    kaikkiFile: '../../dictionaries/italian.jsonl',
+    outputFile: 'words_italian.json',
+    reverseFile: 'words_italian_to_english.json'
+  },
+  pl: {
+    name: 'Polish',
+    flag: '🇵🇱',
+    frequencyFile: '../../../FrequencyWords/content/2018/pl/pl_50k.txt',
+    kaikkiFile: '../../dictionaries/polish.jsonl',
+    outputFile: 'words_polish.json',
+    reverseFile: 'words_polish_to_english.json'
   }
 };
 
