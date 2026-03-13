@@ -10,6 +10,7 @@ import { LANGUAGE_NAMES } from '../constants/languages';
 import { getMistakeSummary } from '../services/mistakeJournalService';
 import { getTodayChallenge, getChallengeStreak } from '../services/dailyChallengeService';
 import { getWeakAreaSuggestion } from '../services/weakAreaService';
+import { getLocalTotal } from '../services/xpService';
 
 export default function HomeScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -30,6 +31,7 @@ export default function HomeScreen({ navigation }) {
   const [dailyChallenge, setDailyChallenge] = useState(null);
   const [challengeStreak, setChallengeStreak] = useState(null);
   const [weakArea, setWeakArea] = useState(null);
+  const [localXp, setLocalXp] = useState(0);
 
   useEffect(() => {
     loadStats();
@@ -44,7 +46,7 @@ export default function HomeScreen({ navigation }) {
 
   const loadStats = async () => {
     try {
-      const [statistics, achStats, savedLearningLang, mistakes, challenge, chStreak, weak] =
+      const [statistics, achStats, savedLearningLang, mistakes, challenge, chStreak, weak, xp] =
         await Promise.all([
           getUserStatistics(),
           achievementService.getStats(),
@@ -53,6 +55,7 @@ export default function HomeScreen({ navigation }) {
           getTodayChallenge(),
           getChallengeStreak(),
           getWeakAreaSuggestion(),
+          getLocalTotal(),
         ]);
       setStats(statistics);
       setAchievementStats(achStats);
@@ -61,6 +64,7 @@ export default function HomeScreen({ navigation }) {
       setDailyChallenge(challenge);
       setChallengeStreak(chStreak);
       setWeakArea(weak);
+      setLocalXp(xp);
     } catch (error) {
       console.error('Error loading statistics:', error);
       showErrorAlert(error, () => loadStats());
@@ -225,6 +229,19 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
+        {/* XP Card */}
+        <TouchableOpacity
+          style={styles.xpCard}
+          onPress={() => navigation.navigate('Progress', { screen: 'Leaderboard' })}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.xpCardIcon}>⚡</Text>
+          <View style={styles.xpCardInfo}>
+            <Text style={styles.xpCardValue}>{localXp.toLocaleString()} XP</Text>
+            <Text style={styles.xpCardLabel}>View Leaderboard →</Text>
+          </View>
+        </TouchableOpacity>
+
         {/* Main CTA Button */}
         <TouchableOpacity
           style={styles.startButton}
@@ -371,6 +388,34 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#7F8C8D',
     textAlign: 'center',
+  },
+  xpCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EBF5FB',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 4,
+    marginBottom: 4,
+    borderWidth: 2,
+    borderColor: '#3498DB',
+  },
+  xpCardIcon: {
+    fontSize: 28,
+    marginRight: 12,
+  },
+  xpCardInfo: {
+    flex: 1,
+  },
+  xpCardValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#3498DB',
+  },
+  xpCardLabel: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    marginTop: 2,
   },
   startButton: {
     backgroundColor: '#3498DB',

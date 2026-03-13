@@ -6,9 +6,10 @@ import { syncSentencesFromApi, isSentenceSyncNeeded, initSentenceTable } from '.
 import { initAchievementTables } from './achievementDatabase';
 import { syncProgressToServer } from './progressSyncService';
 import { updateChallengeProgress } from './dailyChallengeService';
+import { initXpTable, awardXp } from './xpService';
 import { GRAMMATICAL_FILTER_W } from '../constants/sqlFilters';
 import { getLevelsUpTo } from '../constants/cefrLevels';
-import db from './db';
+import db from './sqliteConnection';
 
 // Initialize database with schema
 export const initDatabase = async () => {
@@ -185,6 +186,9 @@ export const initDatabase = async () => {
     
     // Initialize Achievement System tables
     await initAchievementTables();
+
+    // Initialize XP event queue table
+    await initXpTable();
 
     // Auto-create built-in Favorites list
     const favExists = await db.getFirstAsync(
@@ -589,6 +593,15 @@ export const completeSession = async (sessionId, wordsReviewed, correctAnswers) 
     
     // Check for milestone
     const milestone = checkMilestoneReached(oldStreak, newStreak);
+
+    // Award streak XP (fire-and-forget)
+    if (streakDiff === 1) {
+      awardXp('daily_streak_maintained', today).catch(() => {});
+    }
+    if (milestone) {
+      const milestoneType = `streak_milestone_${milestone.days}`;
+      awardXp(milestoneType, String(milestone.days)).catch(() => {});
+    }
     
     // Update daily challenge progress (fire-and-forget)
     updateChallengeProgress(wordsReviewed, correctAnswers, accuracy, 0).catch(() => {});

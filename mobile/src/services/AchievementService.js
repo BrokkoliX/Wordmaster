@@ -14,6 +14,7 @@ import {
 } from './achievementDatabase';
 import { getUserStatistics } from './database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { awardXp } from './xpService';
 
 /**
  * Achievement Service
@@ -135,11 +136,11 @@ class AchievementService {
 
       // Check consecutive correct achievements
       if (this.consecutiveCorrect === 10) {
-        const unlocked = await unlockAchievement('perfect_10');
+        const unlocked = await this._unlockAndAwardXp('perfect_10');
         if (unlocked) newlyUnlocked.push('perfect_10');
       }
       if (this.consecutiveCorrect === 20) {
-        const unlocked = await unlockAchievement('perfect_20');
+        const unlocked = await this._unlockAndAwardXp('perfect_20');
         if (unlocked) newlyUnlocked.push('perfect_20');
       }
 
@@ -147,7 +148,7 @@ class AchievementService {
       if (this.sessionWordCount === 1) {
         const stats = await getUserStatistics();
         if (stats.totalReviews === 1) {
-          const unlocked = await unlockAchievement('first_word');
+          const unlocked = await this._unlockAndAwardXp('first_word');
           if (unlocked) newlyUnlocked.push('first_word');
         }
       }
@@ -170,44 +171,44 @@ class AchievementService {
 
       // First session achievement
       if (stats.sessionsCompleted === 1) {
-        const unlocked = await unlockAchievement('first_session');
+        const unlocked = await this._unlockAndAwardXp('first_session');
         if (unlocked) newlyUnlocked.push('first_session');
       }
 
       // Perfect session (100% accuracy, 20+ words)
       if (wordCount >= 20 && correctCount === wordCount) {
-        const unlocked = await unlockAchievement('session_100_percent');
+        const unlocked = await this._unlockAndAwardXp('session_100_percent');
         if (unlocked) newlyUnlocked.push('session_100_percent');
       }
 
       // Speed achievements
       // Quick Learner: 20 words in under 10 minutes
       if (wordCount >= 20 && durationSeconds <= 600) {
-        const unlocked = await unlockAchievement('speed_20_in_10min');
+        const unlocked = await this._unlockAndAwardXp('speed_20_in_10min');
         if (unlocked) newlyUnlocked.push('speed_20_in_10min');
       }
 
       // Speed Demon: 50 words in one session
       if (wordCount >= 50) {
-        const unlocked = await unlockAchievement('speed_50_in_session');
+        const unlocked = await this._unlockAndAwardXp('speed_50_in_session');
         if (unlocked) newlyUnlocked.push('speed_50_in_session');
       }
 
       // Marathon Runner: 100 words in one session
       if (wordCount >= 100) {
-        const unlocked = await unlockAchievement('speed_100_in_session');
+        const unlocked = await this._unlockAndAwardXp('speed_100_in_session');
         if (unlocked) newlyUnlocked.push('speed_100_in_session');
       }
 
       // Early Bird: Session before 8 AM
       if (hourOfDay < 8) {
-        const unlocked = await unlockAchievement('morning_learner');
+        const unlocked = await this._unlockAndAwardXp('morning_learner');
         if (unlocked) newlyUnlocked.push('morning_learner');
       }
 
       // Night Owl: Session between midnight and 5 AM
       if (hourOfDay >= 0 && hourOfDay < 5) {
-        const unlocked = await unlockAchievement('night_owl');
+        const unlocked = await this._unlockAndAwardXp('night_owl');
         if (unlocked) newlyUnlocked.push('night_owl');
       }
 
@@ -239,7 +240,7 @@ class AchievementService {
 
       for (const ach of streakAchievements) {
         if (stats.currentStreak >= ach.value) {
-          const unlocked = await unlockAchievement(ach.id);
+          const unlocked = await this._unlockAndAwardXp(ach.id);
           if (unlocked) newlyUnlocked.push(ach.id);
         }
         // Update progress for next tier
@@ -259,7 +260,7 @@ class AchievementService {
 
       for (const ach of masteryAchievements) {
         if (stats.wordsMastered >= ach.value) {
-          const unlocked = await unlockAchievement(ach.id);
+          const unlocked = await this._unlockAndAwardXp(ach.id);
           if (unlocked) newlyUnlocked.push(ach.id);
         }
         // Update progress
@@ -268,7 +269,7 @@ class AchievementService {
 
       // Accuracy achievement (90%+ over 100 words)
       if (stats.totalReviews >= 100 && stats.avgAccuracy >= 90) {
-        const unlocked = await unlockAchievement('avg_accuracy_90');
+        const unlocked = await this._unlockAndAwardXp('avg_accuracy_90');
         if (unlocked) newlyUnlocked.push('avg_accuracy_90');
       }
       if (stats.totalReviews >= 10) {
@@ -278,14 +279,14 @@ class AchievementService {
       // Category explorer achievement
       const categoriesCount = await getUniqueCategoriesPracticed();
       if (categoriesCount >= 10) {
-        const unlocked = await unlockAchievement('categories_10');
+        const unlocked = await this._unlockAndAwardXp('categories_10');
         if (unlocked) newlyUnlocked.push('categories_10');
       }
       await updateAchievementProgress('categories_10', categoriesCount, 10);
 
       // First day achievement
       if (stats.currentStreak >= 1) {
-        const unlocked = await unlockAchievement('first_day');
+        const unlocked = await this._unlockAndAwardXp('first_day');
         if (unlocked) newlyUnlocked.push('first_day');
       }
 
@@ -313,15 +314,15 @@ class AchievementService {
 
       // Polyglot achievements
       if (languageCount >= 2) {
-        const unlocked = await unlockAchievement('languages_2');
+        const unlocked = await this._unlockAndAwardXp('languages_2');
         if (unlocked) newlyUnlocked.push('languages_2');
       }
       if (languageCount >= 3) {
-        const unlocked = await unlockAchievement('languages_3');
+        const unlocked = await this._unlockAndAwardXp('languages_3');
         if (unlocked) newlyUnlocked.push('languages_3');
       }
       if (languageCount >= 5) {
-        const unlocked = await unlockAchievement('languages_5');
+        const unlocked = await this._unlockAndAwardXp('languages_5');
         if (unlocked) newlyUnlocked.push('languages_5');
       }
 
@@ -365,7 +366,7 @@ class AchievementService {
    */
   async checkSettingsAchievements() {
     try {
-      const unlocked = await unlockAchievement('settings_visited');
+      const unlocked = await this._unlockAndAwardXp('settings_visited');
       return unlocked ? ['settings_visited'] : [];
     } catch (error) {
       console.error('Error checking settings achievements:', error);
@@ -385,7 +386,7 @@ class AchievementService {
       );
 
       if (daysSinceLastActivity >= 30) {
-        const unlocked = await unlockAchievement('comeback_kid');
+        const unlocked = await this._unlockAndAwardXp('comeback_kid');
         return unlocked ? ['comeback_kid'] : [];
       }
 
@@ -394,6 +395,27 @@ class AchievementService {
       console.error('Error checking comeback achievement:', error);
       return [];
     }
+  }
+
+  /**
+   * Helper: unlock an achievement and award XP if newly unlocked.
+   * Looks up the achievement's points value and passes it as baseXpOverride.
+   */
+  async _unlockAndAwardXp(achievementId) {
+    const unlocked = await unlockAchievement(achievementId);
+    if (unlocked) {
+      try {
+        const ach = await (await import('./db')).default.getFirstAsync(
+          'SELECT points FROM achievements WHERE id = ?',
+          [achievementId]
+        );
+        const points = ach?.points || 0;
+        await awardXp('achievement_unlocked', achievementId, points);
+      } catch (e) {
+        console.warn('XP award for achievement failed:', e.message);
+      }
+    }
+    return unlocked;
   }
 
   /**

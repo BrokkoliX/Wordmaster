@@ -1,11 +1,12 @@
 const ProgressModel = require('../models/progress.model');
+const XpModel = require('../models/xp.model');
 
 /**
  * Sync user progress
  */
 exports.syncProgress = async (req, res) => {
   try {
-    const { progress, sessions, achievements, settings } = req.body;
+    const { progress, sessions, achievements, settings, xpEvents } = req.body;
 
     const results = {};
 
@@ -32,6 +33,15 @@ exports.syncProgress = async (req, res) => {
       results.settings = await ProgressModel.updateSettings(req.user.id, settings);
     }
 
+    // Sync XP events
+    if (xpEvents && Array.isArray(xpEvents)) {
+      results.xpProcessed = await XpModel.processEvents(
+        req.user.id,
+        xpEvents,
+        req.user.subscription_tier
+      );
+    }
+
     res.json({
       message: 'Progress synced successfully',
       synced: {
@@ -39,6 +49,7 @@ exports.syncProgress = async (req, res) => {
         sessions: results.sessionsSynced?.length || 0,
         achievements: results.achievementsSynced?.length || 0,
         settingsUpdated: !!results.settings,
+        xp: results.xpProcessed || { accepted: 0, rejected: 0, totalAwarded: 0 },
       },
     });
   } catch (error) {

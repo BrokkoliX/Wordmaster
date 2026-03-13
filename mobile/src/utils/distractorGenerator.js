@@ -1,4 +1,4 @@
-import db from '../services/db';
+import db from '../services/sqliteConnection';
 import { LANGUAGE_NAMES } from '../constants/languages';
 import { GRAMMATICAL_FILTER } from '../constants/sqlFilters';
 

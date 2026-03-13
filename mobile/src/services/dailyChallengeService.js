@@ -5,8 +5,9 @@
  * tracks progress, and manages challenge streaks.
  */
 
-import db from './db';
+import db from './sqliteConnection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { awardXp } from './xpService';
 
 const CHALLENGE_TYPES = [
   {
@@ -158,6 +159,7 @@ export const updateChallengeProgress = async (wordsReviewed, correctAnswers, acc
     // Update challenge streak if completed
     if (isCompleted) {
       await updateChallengeStreak(today);
+      await awardXp('daily_challenge_completed', challenge.id);
     }
 
     return {

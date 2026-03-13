@@ -78,6 +78,7 @@ app.use('/api/progress', require('./routes/progress.routes'));
 app.use('/api/words', require('./routes/words.routes'));
 app.use('/api/sentences', require('./routes/sentences.routes'));
 app.use('/api/follow', require('./routes/follow.routes'));
+app.use('/api/leaderboard', require('./routes/leaderboard.routes'));
 app.use('/api/admin', adminLimiter, require('./routes/admin.routes'));
 app.use('/api/subscriptions', subscriptionLimiter, require('./routes/subscription.routes'));
 // Public config endpoint (no auth) – consumed by mobile app on startup

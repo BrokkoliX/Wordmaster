@@ -81,6 +81,22 @@ function getFlag(code) {
   return LANGUAGES[code]?.flag || '';
 }
 
+/**
+ * Convenience map: language code -> display name.
+ */
+const LANGUAGE_NAMES = Object.fromEntries(
+  Object.entries(LANGUAGES).map(([code, meta]) => [code, meta.name])
+);
+
+/**
+ * Array format used by picker components: [{ code, name, flag }].
+ */
+const LANGUAGE_LIST = Object.entries(LANGUAGES).map(([code, meta]) => ({
+  code,
+  name: meta.name,
+  flag: meta.flag,
+}));
+
 module.exports = {
   LANGUAGES,
   HUB_LANGUAGES,
@@ -88,4 +104,6 @@ module.exports = {
   buildHubPairs,
   formatPairName,
   getFlag,
+  LANGUAGE_NAMES,
+  LANGUAGE_LIST,
 };

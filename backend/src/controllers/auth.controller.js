@@ -77,6 +77,16 @@ exports.register = async (req, res) => {
     // Generate tokens
     const tokens = generateTokens(user);
 
+    // Persist the refresh token so it can be validated on refresh and
+    // invalidated on logout.
+    const { query: dbQuery } = require('../config/database');
+    const decoded = jwt.decode(tokens.refreshToken);
+    await dbQuery(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, to_timestamp($3))`,
+      [user.id, tokens.refreshToken, decoded.exp]
+    );
+
     res.status(201).json({
       message: 'User registered successfully',
       user: {
@@ -145,6 +155,16 @@ exports.login = async (req, res) => {
     // Generate tokens
     const tokens = generateTokens(user);
 
+    // Persist the refresh token so it can be validated on refresh and
+    // invalidated on logout.
+    const { query: dbQuery } = require('../config/database');
+    const decoded = jwt.decode(tokens.refreshToken);
+    await dbQuery(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, to_timestamp($3))`,
+      [user.id, tokens.refreshToken, decoded.exp]
+    );
+
     res.json({
       message: 'Login successful',
       user: {
@@ -183,8 +203,24 @@ exports.refreshToken = async (req, res) => {
       });
     }
 
-    // Verify refresh token
+    // Verify refresh token signature
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Verify the token exists in the database (not revoked by logout)
+    const { query: dbQuery } = require('../config/database');
+    const tokenResult = await dbQuery(
+      `SELECT id FROM refresh_tokens WHERE token = $1 AND user_id = $2`,
+      [refreshToken, decoded.userId]
+    );
+
+    if (tokenResult.rows.length === 0) {
+      return res.status(401).json({
+        error: {
+          message: 'Refresh token has been revoked',
+          code: 'REFRESH_TOKEN_REVOKED',
+        },
+      });
+    }
 
     // Get user
     const user = await UserModel.findById(decoded.userId);
@@ -209,8 +245,24 @@ exports.refreshToken = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
     );
 
+    // Rotate the refresh token: delete the old one and issue a new one.
+    const newRefreshToken = jwt.sign(
+      { userId: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+    );
+    const newDecoded = jwt.decode(newRefreshToken);
+
+    await dbQuery(`DELETE FROM refresh_tokens WHERE token = $1`, [refreshToken]);
+    await dbQuery(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, to_timestamp($3))`,
+      [user.id, newRefreshToken, newDecoded.exp]
+    );
+
     res.json({
       accessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     console.error('Refresh token error:', error);
@@ -232,13 +284,12 @@ exports.logout = async (req, res) => {
 
     if (refreshToken) {
       try {
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-        // Invalidate all refresh tokens for this user so stolen tokens
-        // cannot be reused after the user explicitly logs out.
+        // Delete this specific refresh token so it can no longer be used.
+        // Other devices' tokens remain valid.
         const { query: dbQuery } = require('../config/database');
         await dbQuery(
-          `DELETE FROM refresh_tokens WHERE user_id = $1`,
-          [decoded.userId]
+          `DELETE FROM refresh_tokens WHERE token = $1`,
+          [refreshToken]
         );
       } catch {
         // Token may already be expired/invalid — that's fine during logout.

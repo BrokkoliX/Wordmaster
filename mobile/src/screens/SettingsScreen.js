@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import db from '../services/db';
+import db from '../services/sqliteConnection';
 import exportService from '../services/exportService';
 import { syncWordsFromApi, isSyncNeeded } from '../services/wordApiService';
 import ttsService from '../services/TTSService';

@@ -49,6 +49,8 @@ tmp/
 temp/
 /tmp/
 *.tmp
+*.xdxf
+_archive/
 
 # Environment
 .env

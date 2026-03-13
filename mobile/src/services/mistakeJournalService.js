@@ -5,7 +5,7 @@
  * words the user struggles with and generate focused review sessions.
  */
 
-import db from './db';
+import db from './sqliteConnection';
 
 /**
  * Get words the user has answered incorrectly, ordered by error rate.

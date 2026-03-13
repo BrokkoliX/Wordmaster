@@ -226,8 +226,7 @@ EC2_IP="3.211.219.221"
 Update references in these files:
 - `docs/ADMIN_DEPLOYMENT.md`
 - `docs/AWS_DEPLOYMENT_GUIDE.md`
-- `QUICK_START.md`
-- `CURRENT_STATUS.md`
+- `README.md`
 
 Replace `https://3.211.219.221` with `https://word-master.org` in all URL contexts. Keep the raw IP in SSH commands (`ssh -i wordmaster-key.pem ubuntu@3.211.219.221`) since SSH uses the IP directly.
 

@@ -5,7 +5,7 @@
  * All data is stored locally in SQLite.
  */
 
-import db from './db';
+import db from './sqliteConnection';
 
 const FAVORITES_LIST_ID = '__favorites__';
 

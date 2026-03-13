@@ -1,15 +1,45 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getStreakEmoji, formatStreakDisplay } from '../services/streakService';
+import { awardXp } from '../services/xpService';
+import { syncProgressToServer } from '../services/progressSyncService';
 
 export default function SummaryScreen({ route, navigation }) {
   const { 
     accuracy = 0, 
     wordsReviewed = 0, 
     correctAnswers = 0,
-    streak = null 
+    streak = null,
+    sessionId = null,
   } = route.params || {};
+
+  const xpAwarded = useRef(false);
+
+  useEffect(() => {
+    if (xpAwarded.current) return;
+    xpAwarded.current = true;
+
+    const awardSessionXp = async () => {
+      const refId = sessionId || `session_${Date.now()}`;
+
+      await awardXp('session_completed', refId);
+
+      if (accuracy === 100 && wordsReviewed >= 20) {
+        await awardXp('perfect_session', refId);
+      }
+
+      // Award per-word XP (capped server-side at 50/day via daily_cap)
+      for (let i = 0; i < wordsReviewed; i++) {
+        await awardXp('words_reviewed', `${refId}_w${i}`);
+      }
+
+      // Trigger background sync to push XP events to the server
+      syncProgressToServer().catch(() => {});
+    };
+
+    awardSessionXp();
+  }, []);
 
   const getEncouragementMessage = (acc) => {
     if (acc >= 90) return "Excellent work! 🌟";

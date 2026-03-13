@@ -11,7 +11,7 @@
 
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import db from './db';
+import db from './sqliteConnection';
 
 // Bundled JSON data for offline/fallback use
 import wordsEnToEs from '../data/words_translated.json';

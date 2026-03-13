@@ -1,38 +1,32 @@
 # Shared Code
 
-Common utilities, types, and constants used across multiple Wordmaster apps.
+Constants used across the mobile app, backend, and admin panel.
 
 ## Structure
 
 ```
 shared/
-├── types/           # TypeScript type definitions
-├── constants/       # Shared constants (API endpoints, CEFR levels, etc.)
-├── utils/           # Utility functions
-└── validators/      # Validation schemas
+└── constants/
+    ├── cefr-levels.js   CEFR level definitions, ordering, and comparison
+    └── languages.js     Supported languages, hub designations, pair generation
 ```
 
 ## Usage
 
-Each app can import from this folder:
+The backend and scripts can require these files directly:
 
 ```javascript
-// From backend
-const { CEFR_LEVELS } = require('../shared/constants/levels');
-
-// From mobile/web/admin
-import { validateEmail } from '../../shared/utils/validators';
-import { UserRole } from '../../shared/types/user';
+const { CEFR_LEVELS } = require('../../shared/constants/cefr-levels');
+const { LANGUAGES, buildHubPairs } = require('../../shared/constants/languages');
 ```
 
-## Future Content
+The mobile app cannot resolve paths outside its project root with Metro's default configuration. `mobile/metro.config.js` is configured with `watchFolders` and `extraNodeModules` to make `shared/` importable:
 
-As code is duplicated across projects, move it here:
+```javascript
+import { CEFR_LEVELS } from 'shared/constants/cefr-levels';
+import { LANGUAGES } from 'shared/constants/languages';
+```
 
-- API response types
-- User role enums
-- Language codes
-- CEFR level definitions
-- Common validation functions
-- Date/time utilities
-- API client configurations
+## Adding Shared Code
+
+When the same constant, type, or utility is duplicated between projects, move the canonical copy here and import from both consumers.

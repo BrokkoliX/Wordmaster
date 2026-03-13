@@ -11,8 +11,9 @@
  */
 
 import api from './api';
-import db from './db';
+import db from './sqliteConnection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import xpService from './xpService';
 
 const SYNC_TIMESTAMP_KEY = 'lastProgressSyncAt';
 const MAX_BATCH_SIZE = 200;
@@ -72,7 +73,13 @@ export const syncProgressToServer = async () => {
       lastReviewed: r.last_reviewed_at,
     }));
 
-    await api.post('/progress/sync', { progress });
+    // Drain pending XP events from the local queue
+    const pendingXpEvents = await xpService.flushQueue();
+
+    await api.post('/progress/sync', {
+      progress,
+      xpEvents: pendingXpEvents.length > 0 ? pendingXpEvents : undefined,
+    });
 
     // Record the timestamp of the newest synced record so next time
     // we only send what changed after this point.
@@ -81,10 +88,15 @@ export const syncProgressToServer = async () => {
       await AsyncStorage.setItem(SYNC_TIMESTAMP_KEY, newestTimestamp);
     }
 
+    // Purge old synced XP events to keep SQLite lean
+    await xpService.purgeOldEvents();
+
     console.log(`Synced ${rows.length} progress records to server`);
     return { synced: rows.length };
   } catch (error) {
     // Non-fatal: the delta stays in SQLite and will be picked up next time.
+    // Roll back XP queue so events are retried on next sync.
+    await xpService.resetQueue();
     console.warn('Progress sync failed (will retry later):', error.message);
     return { synced: 0 };
   }

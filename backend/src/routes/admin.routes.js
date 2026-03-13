@@ -109,10 +109,16 @@ router.post('/database/backup', adminController.createBackup);
 router.get('/database/health', adminController.checkDatabaseHealth);
 
 // POST /api/admin/database/query - Execute a read-only SQL query
-router.post('/database/query', adminController.executeQuery);
-
-// GET /api/admin/database/schema - Get database schema metadata
-router.get('/database/schema', adminController.getSchema);
+// Disabled in production — arbitrary SQL is too risky even with regex guards.
+if (process.env.NODE_ENV !== 'production') {
+  router.post('/database/query', adminController.executeQuery);
+  router.get('/database/schema', adminController.getSchema);
+} else {
+  const blocked = (_req, res) =>
+    res.status(403).json({ error: { message: 'Endpoint disabled in production' } });
+  router.post('/database/query', blocked);
+  router.get('/database/schema', blocked);
+}
 
 // ========== SUBSCRIPTION PLAN MANAGEMENT ==========
 // GET /api/admin/subscription-plans/feature-keys - List all valid feature keys

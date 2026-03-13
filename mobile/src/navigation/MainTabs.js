@@ -19,6 +19,7 @@ import MistakeJournalScreen from '../screens/MistakeJournalScreen';
 import WordListsScreen from '../screens/WordListsScreen';
 import WordListDetailScreen from '../screens/WordListDetailScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
+import LeaderboardScreen from '../screens/LeaderboardScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -128,6 +129,11 @@ function ProgressStack() {
         name="AchievementsList"
         component={AchievementsScreen}
         options={{ title: 'Achievements' }}
+      />
+      <Stack.Screen
+        name="Leaderboard"
+        component={LeaderboardScreen}
+        options={{ title: 'Leaderboard' }}
       />
     </Stack.Navigator>
   );

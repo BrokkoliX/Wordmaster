@@ -5,7 +5,7 @@
  * struggles, then generates focused review sessions for those areas.
  */
 
-import db from './db';
+import db from './sqliteConnection';
 import { getAccuracyByCefrLevel, getAccuracyByCategory } from './database';
 
 const WEAK_ACCURACY_THRESHOLD = 70;

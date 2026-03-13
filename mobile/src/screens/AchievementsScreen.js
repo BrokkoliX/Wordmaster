@@ -206,7 +206,15 @@ function AchievementsScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       {/* Header with Stats */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏆 Achievements</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>🏆 Achievements</Text>
+          <TouchableOpacity
+            style={styles.leaderboardButton}
+            onPress={() => navigation.navigate('Leaderboard')}
+          >
+            <Text style={styles.leaderboardButtonText}>Leaderboard →</Text>
+          </TouchableOpacity>
+        </View>
         {stats && (
           <View style={styles.statsContainer}>
             <View style={styles.statBox}>
@@ -301,11 +309,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB'
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: 10
+  },
+  leaderboardButton: {
+    backgroundColor: '#3498DB',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  leaderboardButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
   },
   statsContainer: {
     flexDirection: 'row',

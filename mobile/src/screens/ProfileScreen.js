@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import followService from '../services/followService';
+import leaderboardService from '../services/leaderboardService';
 
 const TABS = {
   FOLLOWERS: 'followers',
@@ -31,6 +32,9 @@ export default function ProfileScreen({ navigation }) {
     following_count: 0,
     pending_count: 0,
   });
+
+  // XP rank
+  const [myRank, setMyRank] = useState(null);
 
   // Active tab
   const [activeTab, setActiveTab] = useState(TABS.FOLLOWERS);
@@ -57,6 +61,8 @@ export default function ProfileScreen({ navigation }) {
     if (isGuest) return;
     const { data } = await followService.getCounts();
     if (data) setCounts(data);
+    const rankResult = await leaderboardService.getMyRank();
+    if (rankResult.data) setMyRank(rankResult.data);
   }, [isGuest]);
 
   const loadFollowers = useCallback(async () => {
@@ -461,6 +467,13 @@ export default function ProfileScreen({ navigation }) {
           {user?.username && (
             <Text style={styles.profileUsername}>@{user.username}</Text>
           )}
+          {myRank && (
+            <View style={styles.rankBadge}>
+              <Text style={styles.rankBadgeText}>
+                #{myRank.globalRank} Global  ·  {(myRank.totalXp || 0).toLocaleString()} XP
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Stats row */}
@@ -608,6 +621,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#7F8C8D',
     marginTop: 2,
+  },
+  rankBadge: {
+    backgroundColor: '#EBF5FB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#3498DB',
+  },
+  rankBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#3498DB',
   },
 
   // Stats

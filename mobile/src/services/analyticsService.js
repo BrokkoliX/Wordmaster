@@ -6,7 +6,7 @@
  * and sessions tables.
  */
 
-import db from './db';
+import db from './sqliteConnection';
 import {
   getAccuracyByCefrLevel,
   getAccuracyByCategory,
