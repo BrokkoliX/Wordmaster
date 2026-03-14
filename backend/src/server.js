@@ -113,6 +113,21 @@ async function start() {
   // Non-fatal: hardcoded defaults remain in effect if the DB is unreachable.
   await serverConfig.load();
 
+  // Seed achievement definitions (idempotent — uses ON CONFLICT).
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const { query: dbQuery } = require('./config/database');
+    const seedSql = fs.readFileSync(
+      path.join(__dirname, 'scripts', 'migrations', 'seed_achievement_definitions.sql'),
+      'utf8'
+    );
+    await dbQuery(seedSql);
+    console.log('✅ Achievement definitions seeded');
+  } catch (err) {
+    console.warn('⚠️  Achievement seed skipped:', err.message);
+  }
+
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
