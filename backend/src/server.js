@@ -137,6 +137,26 @@ async function start() {
     console.warn('⚠️  Achievement seed skipped:', err.message);
   }
 
+  // Run hearts system migration (idempotent — IF NOT EXISTS / ON CONFLICT).
+  // Seeds tables, subscription plan features, server_config rows for hearts
+  // tuning, hearts rate limiter, and JWT token expiry settings.
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const { query: dbQuery } = require('./config/database');
+    const heartsSql = fs.readFileSync(
+      path.join(__dirname, 'scripts', 'migrations', 'add_hearts_system.sql'),
+      'utf8'
+    );
+    await dbQuery(heartsSql);
+    console.log('✅ Hearts system migration applied');
+
+    // Reload serverConfig so new server_config rows are available immediately.
+    await serverConfig.reload();
+  } catch (err) {
+    console.warn('⚠️  Hearts migration skipped:', err.message);
+  }
+
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);

@@ -40,23 +40,44 @@ INSERT INTO user_hearts (user_id, current_hearts)
 ON CONFLICT DO NOTHING;
 
 -- ─── 4. Update subscription_plans with heart-related feature values ──────────
--- Free: hearts enabled, 5 max, 20 min refill, +3 per ad, 3 ads/day cap
-UPDATE subscription_plans
-SET features = features
-  || '{"hearts_enabled": true, "hearts_max": 5, "hearts_refill_minutes": 20, "hearts_ad_refill": 3, "daily_ad_cap": 3, "streak_save_enabled": false}'::jsonb
-WHERE id = 'free';
+-- Only seeds the defaults when hearts_enabled is not yet present in the
+-- plan's features JSONB, so admin-tuned values are never overwritten.
+DO $$
+BEGIN
+  -- Free: hearts enabled, 5 max, 20 min refill, +3 per ad, 3 ads/day cap
+  IF NOT EXISTS (
+    SELECT 1 FROM subscription_plans
+    WHERE id = 'free' AND features ? 'hearts_enabled'
+  ) THEN
+    UPDATE subscription_plans
+    SET features = features
+      || '{"hearts_enabled": true, "hearts_max": 5, "hearts_refill_minutes": 20, "hearts_ad_refill": 3, "daily_ad_cap": 3, "streak_save_enabled": false}'::jsonb
+    WHERE id = 'free';
+  END IF;
 
--- Plus: hearts disabled (unlimited)
-UPDATE subscription_plans
-SET features = features
-  || '{"hearts_enabled": false, "hearts_max": 0, "hearts_refill_minutes": 0, "hearts_ad_refill": 0, "daily_ad_cap": 0, "streak_save_enabled": true}'::jsonb
-WHERE id = 'plus';
+  -- Plus: hearts disabled (unlimited)
+  IF NOT EXISTS (
+    SELECT 1 FROM subscription_plans
+    WHERE id = 'plus' AND features ? 'hearts_enabled'
+  ) THEN
+    UPDATE subscription_plans
+    SET features = features
+      || '{"hearts_enabled": false, "hearts_max": 0, "hearts_refill_minutes": 0, "hearts_ad_refill": 0, "daily_ad_cap": 0, "streak_save_enabled": true}'::jsonb
+    WHERE id = 'plus';
+  END IF;
 
--- Super: hearts disabled (unlimited)
-UPDATE subscription_plans
-SET features = features
-  || '{"hearts_enabled": false, "hearts_max": 0, "hearts_refill_minutes": 0, "hearts_ad_refill": 0, "daily_ad_cap": 0, "streak_save_enabled": true}'::jsonb
-WHERE id = 'super';
+  -- Super: hearts disabled (unlimited)
+  IF NOT EXISTS (
+    SELECT 1 FROM subscription_plans
+    WHERE id = 'super' AND features ? 'hearts_enabled'
+  ) THEN
+    UPDATE subscription_plans
+    SET features = features
+      || '{"hearts_enabled": false, "hearts_max": 0, "hearts_refill_minutes": 0, "hearts_ad_refill": 0, "daily_ad_cap": 0, "streak_save_enabled": true}'::jsonb
+    WHERE id = 'super';
+  END IF;
+END
+$$;
 
 -- ─── 5. Seed server_config rows for hearts tuning ───────────────────────────
 -- These keys are read by hearts.model.js and hearts.controller.js via
