@@ -14,6 +14,7 @@ import { getLocalSentenceTemplates } from '../services/sentenceApiService';
 import achievementService from '../services/AchievementService';
 import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import hapticService from '../services/HapticService';
+import heartsService from '../services/heartsService';
 
 const DEFAULT_SENTENCES_PER_SESSION = 20;
 
@@ -37,6 +38,8 @@ export default function FillInBlankScreen({ route, navigation }) {
   const [achievementModalVisible, setAchievementModalVisible] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState(null);
   const [achievementQueue, setAchievementQueue] = useState([]);
+  const [heartsState, setHeartsState] = useState(null);
+  const [heartsEnabled, setHeartsEnabled] = useState(false);
 
   useEffect(() => {
     initializeSession();
@@ -54,6 +57,14 @@ export default function FillInBlankScreen({ route, navigation }) {
       const newSessionId = await createSession();
       setSessionId(newSessionId);
       await achievementService.startSession(newSessionId);
+
+      // Fetch heart state from server (falls back to cache if offline).
+      const hearts = await heartsService.fetchHearts()
+        || await heartsService.getCachedHearts();
+      if (hearts && hearts.hearts_enabled) {
+        setHeartsEnabled(true);
+        setHeartsState(hearts);
+      }
 
       const templates = await getLocalSentenceTemplates(wordsPerSession);
       setSentences(templates);
@@ -116,6 +127,23 @@ export default function FillInBlankScreen({ route, navigation }) {
       setTimeout(() => handleNext(), 800);
     } else {
       hapticService.error();
+
+      // Deduct a heart on incorrect answer (free tier only).
+      if (heartsEnabled) {
+        const heartResult = await heartsService.useHeart();
+        if (heartResult) {
+          setHeartsState(prev => ({ ...prev, ...heartResult }));
+          if (heartResult.hearts_depleted) {
+            navigation.navigate('OutOfHearts', {
+              heartsMax: heartsState?.hearts_max || 5,
+              nextRefillAt: heartsState?.next_refill_at,
+              adsRemaining: heartsState?.ads_remaining || 0,
+              onRefillRoute: 'FillInBlank',
+            });
+            return;
+          }
+        }
+      }
     }
 
     // Track for achievements

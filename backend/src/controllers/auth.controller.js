@@ -1,11 +1,27 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const UserModel = require('../models/user.model');
+const serverConfig = require('../config/serverConfig');
 
 /**
- * Generate JWT tokens
+ * Generate JWT tokens.
+ *
+ * Expiry is resolved in priority order:
+ *   1. server_config (admin UI tunable, no restart required)
+ *   2. .env variable
+ *   3. hardcoded fallback
  */
 const generateTokens = (user) => {
+  const accessExpiresIn =
+    serverConfig.get('jwt.access_expires_in')
+    || process.env.JWT_EXPIRES_IN
+    || '15m';
+
+  const refreshExpiresIn =
+    serverConfig.get('jwt.refresh_expires_in')
+    || process.env.JWT_REFRESH_EXPIRES_IN
+    || '7d';
+
   const accessToken = jwt.sign(
     {
       userId: user.id,
@@ -16,13 +32,13 @@ const generateTokens = (user) => {
       subscription_tier: user.subscription_tier || 'free',
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+    { expiresIn: accessExpiresIn }
   );
 
   const refreshToken = jwt.sign(
     { userId: user.id },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+    { expiresIn: refreshExpiresIn }
   );
 
   return { accessToken, refreshToken };
@@ -235,6 +251,11 @@ exports.refreshToken = async (req, res) => {
 
     // Generate new access token — re-fetch subscription_tier from the DB so
     // any tier change made by an admin is picked up at the next token refresh.
+    const accessExpiresIn =
+      serverConfig.get('jwt.access_expires_in')
+      || process.env.JWT_EXPIRES_IN
+      || '15m';
+
     const accessToken = jwt.sign(
       {
         userId: user.id,
@@ -242,14 +263,19 @@ exports.refreshToken = async (req, res) => {
         subscription_tier: user.subscription_tier || 'free',
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+      { expiresIn: accessExpiresIn }
     );
 
     // Rotate the refresh token: delete the old one and issue a new one.
+    const refreshExpiresIn =
+      serverConfig.get('jwt.refresh_expires_in')
+      || process.env.JWT_REFRESH_EXPIRES_IN
+      || '7d';
+
     const newRefreshToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+      { expiresIn: refreshExpiresIn }
     );
     const newDecoded = jwt.decode(newRefreshToken);
 

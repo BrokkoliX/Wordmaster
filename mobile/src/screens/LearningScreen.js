@@ -25,6 +25,7 @@ import hapticService from '../services/HapticService';
 import { getReviewSessionFromMistakes } from '../services/mistakeJournalService';
 import { getListWords, toggleFavorite, isWordFavorited } from '../services/wordListService';
 import { generateWeakAreaSession } from '../services/weakAreaService';
+import heartsService from '../services/heartsService';
 
 const DEFAULT_WORDS_PER_SESSION = 20;
 // Words answered incorrectly are re-queued until the user gets them right
@@ -56,6 +57,8 @@ export default function LearningScreen({ route, navigation }) {
   const [currentAchievement, setCurrentAchievement] = useState(null);
   const [achievementQueue, setAchievementQueue] = useState([]);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [heartsState, setHeartsState] = useState(null);
+  const [heartsEnabled, setHeartsEnabled] = useState(false);
 
   // Tracks how many times each word was answered correctly within this session.
   // Words must reach REQUIRED_CORRECT_TO_PASS to stop being re-queued.
@@ -84,6 +87,14 @@ export default function LearningScreen({ route, navigation }) {
       
       // Start achievement tracking
       await achievementService.startSession(newSessionId);
+
+      // Fetch heart state from server (falls back to cache if offline).
+      const hearts = await heartsService.fetchHearts()
+        || await heartsService.getCachedHearts();
+      if (hearts && hearts.hearts_enabled) {
+        setHeartsEnabled(true);
+        setHeartsState(hearts);
+      }
 
       let sessionWords = [];
 
@@ -217,6 +228,24 @@ export default function LearningScreen({ route, navigation }) {
 
         if (!alreadyQueued) {
           setWords(prev => [...prev, question.word]);
+        }
+
+        // Deduct a heart on incorrect answer (free tier only).
+        if (heartsEnabled) {
+          const result = await heartsService.useHeart();
+          if (result) {
+            setHeartsState(prev => ({ ...prev, ...result }));
+            if (result.hearts_depleted) {
+              // Hearts are gone — show recovery screen.
+              navigation.navigate('OutOfHearts', {
+                heartsMax: heartsState?.hearts_max || 5,
+                nextRefillAt: heartsState?.next_refill_at,
+                adsRemaining: heartsState?.ads_remaining || 0,
+                onRefillRoute: 'Learning',
+              });
+              return;
+            }
+          }
         }
       }
       
@@ -389,10 +418,18 @@ export default function LearningScreen({ route, navigation }) {
               ]}
             />
           </View>
-          <Text style={styles.progressText}>
-            {Math.min(currentIndex + 1, originalWordCount.current)} / {originalWordCount.current}
-            {words.length > originalWordCount.current ? ' (+ retry)' : ''}
-          </Text>
+          <View style={styles.progressRow}>
+            <Text style={styles.progressText}>
+              {Math.min(currentIndex + 1, originalWordCount.current)} / {originalWordCount.current}
+              {words.length > originalWordCount.current ? ' (+ retry)' : ''}
+            </Text>
+            {heartsEnabled && heartsState && (
+              <Text style={styles.heartsCounter}>
+                {'❤️'.repeat(Math.max(0, heartsState.current_hearts || 0))}
+                {'🤍'.repeat(Math.max(0, (heartsState.hearts_max || 5) - (heartsState.current_hearts || 0)))}
+              </Text>
+            )}
+          </View>
         </View>
 
         <Animated.View style={[
@@ -558,10 +595,19 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#3498DB',
   },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   progressText: {
     fontSize: 14,
     color: '#7F8C8D',
     textAlign: 'center',
+  },
+  heartsCounter: {
+    fontSize: 14,
+    letterSpacing: 2,
   },
   questionContainer: {
     flex: 1,

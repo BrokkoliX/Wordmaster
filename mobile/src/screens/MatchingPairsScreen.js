@@ -20,6 +20,7 @@ import achievementService from '../services/AchievementService';
 import AchievementUnlockModal from '../components/AchievementUnlockModal';
 import hapticService from '../services/HapticService';
 import { LANGUAGE_NAMES } from '../constants/languages';
+import heartsService from '../services/heartsService';
 
 const PAIRS_PER_ROUND = 5;
 const DEFAULT_WORDS_PER_SESSION = 20;
@@ -63,6 +64,8 @@ export default function MatchingPairsScreen({ route, navigation }) {
   const [achievementModalVisible, setAchievementModalVisible] = useState(false);
   const [currentAchievement, setCurrentAchievement] = useState(null);
   const [achievementQueue, setAchievementQueue] = useState([]);
+  const [heartsState, setHeartsState] = useState(null);
+  const [heartsEnabled, setHeartsEnabled] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -84,6 +87,14 @@ export default function MatchingPairsScreen({ route, navigation }) {
       const newSessionId = await createSession();
       setSessionId(newSessionId);
       await achievementService.startSession(newSessionId);
+
+      // Fetch heart state from server (falls back to cache if offline).
+      const hearts = await heartsService.fetchHearts()
+        || await heartsService.getCachedHearts();
+      if (hearts && hearts.hearts_enabled) {
+        setHeartsEnabled(true);
+        setHeartsState(hearts);
+      }
 
       let reviewWords = await getWordsDueForReview(wordsPerSession, category);
       if (reviewWords.length < wordsPerSession) {
@@ -231,6 +242,23 @@ export default function MatchingPairsScreen({ route, navigation }) {
         );
       } catch (error) {
         console.error('Error updating word progress:', error);
+      }
+
+      // Deduct a heart on incorrect match (free tier only).
+      if (heartsEnabled) {
+        const heartResult = await heartsService.useHeart();
+        if (heartResult) {
+          setHeartsState(prev => ({ ...prev, ...heartResult }));
+          if (heartResult.hearts_depleted) {
+            navigation.navigate('OutOfHearts', {
+              heartsMax: heartsState?.hearts_max || 5,
+              nextRefillAt: heartsState?.next_refill_at,
+              adsRemaining: heartsState?.ads_remaining || 0,
+              onRefillRoute: 'MatchingPairs',
+            });
+            return;
+          }
+        }
       }
 
       // Clear selection after a brief delay so the user can see the error

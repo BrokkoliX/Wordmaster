@@ -14,9 +14,12 @@ UPDATE users SET role = 'user' WHERE role IS NULL;
 -- Optional: Promote specific user to admin (update with your email)
 -- UPDATE users SET role = 'admin' WHERE email = 'your-admin-email@example.com';
 
--- Add constraint to ensure only valid roles
-ALTER TABLE users 
-ADD CONSTRAINT check_user_role 
+-- Add constraint to ensure only valid roles (safe to re-run)
+ALTER TABLE users
+DROP CONSTRAINT IF EXISTS check_user_role;
+
+ALTER TABLE users
+ADD CONSTRAINT check_user_role
 CHECK (role IN ('user', 'admin', 'superadmin', 'moderator'));
 
 COMMENT ON COLUMN users.role IS 'User role: user, admin, superadmin, or moderator';

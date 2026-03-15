@@ -14,6 +14,7 @@ import api from './api';
 import db from './sqliteConnection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import xpService from './xpService';
+import { syncPendingHeartUses } from './heartsService';
 
 const SYNC_TIMESTAMP_KEY = 'lastProgressSyncAt';
 const MAX_BATCH_SIZE = 200;
@@ -90,6 +91,9 @@ export const syncProgressToServer = async () => {
 
     // Purge old synced XP events to keep SQLite lean
     await xpService.purgeOldEvents();
+
+    // Flush any queued heart-use events from offline sessions.
+    await syncPendingHeartUses().catch(() => {});
 
     console.log(`Synced ${rows.length} progress records to server`);
     return { synced: rows.length };

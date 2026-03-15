@@ -195,12 +195,47 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers to auto-update updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Hearts system (monetization)
+CREATE TABLE IF NOT EXISTS user_hearts (
+  user_id        UUID        PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  current_hearts INTEGER     NOT NULL DEFAULT 5,
+  last_refill_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-CREATE TRIGGER update_user_settings_updated_at BEFORE UPDATE ON user_settings
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TABLE IF NOT EXISTS user_ad_events (
+  id          UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  event_type  VARCHAR(50) NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-CREATE TRIGGER update_user_word_progress_updated_at BEFORE UPDATE ON user_word_progress
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE INDEX IF NOT EXISTS idx_ad_events_user_date
+  ON user_ad_events(user_id, created_at);
+
+-- Idempotent trigger creation: each trigger is only created when absent
+-- so that re-running this file against an existing database is safe.
+DO $$
+DECLARE
+  _tbl  TEXT;
+  _trig TEXT;
+BEGIN
+  -- (table_name, trigger_name) pairs
+  FOR _tbl, _trig IN
+    VALUES ('users',              'update_users_updated_at'),
+           ('user_settings',      'update_user_settings_updated_at'),
+           ('user_word_progress', 'update_user_word_progress_updated_at'),
+           ('user_hearts',        'update_user_hearts_updated_at')
+  LOOP
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_trigger WHERE tgname = _trig
+    ) THEN
+      EXECUTE format(
+        'CREATE TRIGGER %I BEFORE UPDATE ON %I '
+        'FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()',
+        _trig, _tbl
+      );
+    END IF;
+  END LOOP;
+END
+$$;

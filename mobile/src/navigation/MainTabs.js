@@ -20,6 +20,7 @@ import WordListsScreen from '../screens/WordListsScreen';
 import WordListDetailScreen from '../screens/WordListDetailScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
+import OutOfHeartsScreen from '../screens/OutOfHeartsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -102,6 +103,14 @@ function LearnStack() {
         name="FillInBlank"
         component={FillInBlankScreen}
         options={{ title: 'Fill in the Blank' }}
+      />
+      <Stack.Screen
+        name="OutOfHearts"
+        component={OutOfHeartsScreen}
+        options={{
+          title: 'Out of Hearts',
+          headerLeft: () => null,
+        }}
       />
       <Stack.Screen
         name="Summary"

@@ -62,6 +62,14 @@ const subscriptionLimiter = rateLimit({
   message: { error: { message: 'Too many subscription requests, please try again later', code: 'SUBSCRIPTION_RATE_LIMITED' } },
 });
 
+const heartsLimiter = rateLimit({
+  windowMs: () => serverConfig.get('rate_limit.hearts', { windowMs: 900000 }).windowMs,
+  max:       () => serverConfig.get('rate_limit.hearts', { max: 60 }).max,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: 'Too many hearts requests, please try again later', code: 'HEARTS_RATE_LIMITED' } },
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -81,6 +89,7 @@ app.use('/api/follow', require('./routes/follow.routes'));
 app.use('/api/leaderboard', require('./routes/leaderboard.routes'));
 app.use('/api/admin', adminLimiter, require('./routes/admin.routes'));
 app.use('/api/subscriptions', subscriptionLimiter, require('./routes/subscription.routes'));
+app.use('/api/hearts', heartsLimiter, require('./routes/hearts.routes'));
 // Public config endpoint (no auth) – consumed by mobile app on startup
 app.use('/api/config', require('./routes/config.routes'));
 
