@@ -26,6 +26,10 @@ import wordsEnToPt from '../data/words_portuguese.json';
 import wordsPtToEn from '../data/words_portuguese_to_english.json';
 import wordsEnToRu from '../data/words_russian.json';
 import wordsRuToEn from '../data/words_russian_to_english.json';
+import wordsEnToIt from '../data/words_italian.json';
+import wordsItToEn from '../data/words_italian_to_english.json';
+import wordsEnToPl from '../data/words_polish.json';
+import wordsPlToEn from '../data/words_polish_to_english.json';
 
 import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
 
@@ -33,7 +37,7 @@ import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
  * Bump this version string whenever the bundled word data or its filtering
  * logic changes in a way that requires a forced re-sync of the local cache.
  */
-const WORD_DATA_VERSION = '2';
+const WORD_DATA_VERSION = '4';
 
 const PAGE_SIZE = 500;
 
@@ -105,6 +109,10 @@ const getLocalDataForPair = (sourceLang, targetLang) => {
     pt_en: wordsPtToEn,
     en_ru: wordsEnToRu,
     ru_en: wordsRuToEn,
+    en_it: wordsEnToIt,
+    it_en: wordsItToEn,
+    en_pl: wordsEnToPl,
+    pl_en: wordsPlToEn,
   };
   return map[key] || null;
 };
