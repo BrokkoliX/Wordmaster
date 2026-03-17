@@ -1,35 +1,20 @@
 /**
  * Fetches words from the backend API and caches them in local SQLite.
  *
- * The backend holds all 210k+ words across every language pair and level.
- * This service downloads only the subset the user needs (one language pair
- * at one CEFR level and below) and stores it locally so the existing
- * SQLite-based learning queries continue to work unchanged.
- *
- * When the API is unreachable, falls back to bundled JSON data files.
+ * Architecture:
+ *   1. Primary source   — backend API (all words, all levels)
+ *   2. Local cache      — SQLite (survives offline after first sync)
+ *   3. Starter fallback — A1-only JSON bundled in the app (~800 KB)
+ *      Used only on the very first launch when the API is unreachable.
  */
 
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import db from './sqliteConnection';
 
-// Bundled JSON data for offline/fallback use
-import wordsEnToEs from '../data/words_translated.json';
-import wordsEnToFr from '../data/words_french.json';
-import wordsEnToDe from '../data/words_german.json';
-import wordsEnToHu from '../data/words_hungarian.json';
-import wordsEsToEn from '../data/words_spanish_to_english.json';
-import wordsFrToEn from '../data/words_french_to_english.json';
-import wordsDeToEn from '../data/words_german_to_english.json';
-import wordsHuToEn from '../data/words_hungarian_to_english.json';
-import wordsEnToPt from '../data/words_portuguese.json';
-import wordsPtToEn from '../data/words_portuguese_to_english.json';
-import wordsEnToRu from '../data/words_russian.json';
-import wordsRuToEn from '../data/words_russian_to_english.json';
-import wordsEnToIt from '../data/words_italian.json';
-import wordsItToEn from '../data/words_italian_to_english.json';
-import wordsEnToPl from '../data/words_polish.json';
-import wordsPlToEn from '../data/words_polish_to_english.json';
+// Compact A1-only starter set for first-launch fallback (~800 KB).
+// Keyed by "sourceLang_targetLang" (e.g. "en_es", "fr_en").
+import starterWords from '../data/starter_words.json';
 
 import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
 
@@ -37,7 +22,7 @@ import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
  * Bump this version string whenever the bundled word data or its filtering
  * logic changes in a way that requires a forced re-sync of the local cache.
  */
-const WORD_DATA_VERSION = '5';
+const WORD_DATA_VERSION = '6';
 
 const PAGE_SIZE = 500;
 
@@ -91,40 +76,21 @@ const cleanSourceWord = (text) => {
 };
 
 /**
- * Returns the bundled JSON dataset for a given language pair, or null if
- * no local data is available.
+ * Returns the bundled A1 starter dataset for a given language pair, or
+ * null if no starter data is available for the pair.
  */
 const getLocalDataForPair = (sourceLang, targetLang) => {
-  const key = `${sourceLang}_${targetLang}`;
-  const map = {
-    en_es: wordsEnToEs,
-    en_fr: wordsEnToFr,
-    en_de: wordsEnToDe,
-    en_hu: wordsEnToHu,
-    es_en: wordsEsToEn,
-    fr_en: wordsFrToEn,
-    de_en: wordsDeToEn,
-    hu_en: wordsHuToEn,
-    en_pt: wordsEnToPt,
-    pt_en: wordsPtToEn,
-    en_ru: wordsEnToRu,
-    ru_en: wordsRuToEn,
-    en_it: wordsEnToIt,
-    it_en: wordsItToEn,
-    en_pl: wordsEnToPl,
-    pl_en: wordsPlToEn,
-  };
-  return map[key] || null;
+  return starterWords[`${sourceLang}_${targetLang}`] || null;
 };
 
 /**
- * Imports words from the bundled JSON data into SQLite as a fallback when
- * the backend API is unreachable.
+ * Imports words from the A1 starter set into SQLite as a fallback when
+ * the backend API is unreachable on first launch.
  */
 const importFromLocalData = async (sourceLang, targetLang, cefrLevel) => {
   const data = getLocalDataForPair(sourceLang, targetLang);
   if (!data || data.length === 0) {
-    console.log(`⚠️  No bundled data for ${sourceLang}→${targetLang}`);
+    console.log(`⚠️  No starter data for ${sourceLang}→${targetLang}`);
     return 0;
   }
 
@@ -176,7 +142,7 @@ const importFromLocalData = async (sourceLang, targetLang, cefrLevel) => {
     await db.execAsync('COMMIT');
   }
 
-  console.log(`📦 Imported ${imported.toLocaleString()} words from bundled data (${sourceLang}→${targetLang})`);
+  console.log(`📦 Imported ${imported.toLocaleString()} A1 starter words (${sourceLang}→${targetLang})`);
   return imported;
 };
 
@@ -204,7 +170,7 @@ export const syncWordsFromApi = async () => {
     console.log(`   ${total.toLocaleString()} words available`);
 
     if (total === 0) {
-      console.log('⚠️  No words on API for this pair, falling back to bundled data...');
+      console.log('⚠️  No words on API for this pair, falling back to starter data...');
       imported = await importFromLocalData(knownLanguage, learningLanguage, cefrLevel);
     } else {
       // Clear existing words for this language pair (keep other pairs if any)
@@ -247,7 +213,7 @@ export const syncWordsFromApi = async () => {
       }
     }
   } catch (apiError) {
-    console.warn(`⚠️  API sync failed (${apiError.message}), falling back to bundled data...`);
+    console.warn(`⚠️  API sync failed (${apiError.message}), falling back to starter data...`);
     imported = await importFromLocalData(knownLanguage, learningLanguage, cefrLevel);
   }
 
