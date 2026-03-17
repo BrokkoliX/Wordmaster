@@ -37,7 +37,7 @@ import { CEFR_LEVELS, getLevelsUpTo } from '../constants/cefrLevels';
  * Bump this version string whenever the bundled word data or its filtering
  * logic changes in a way that requires a forced re-sync of the local cache.
  */
-const WORD_DATA_VERSION = '4';
+const WORD_DATA_VERSION = '5';
 
 const PAGE_SIZE = 500;
 
