@@ -32,6 +32,10 @@ const LANGUAGE_FILES = [
   'words_portuguese_to_english.json',
   'words_russian.json',
   'words_russian_to_english.json',
+  'words_italian.json',
+  'words_italian_to_english.json',
+  'words_polish.json',
+  'words_polish_to_english.json',
 ];
 
 const BATCH_SIZE = 500;
@@ -184,7 +188,15 @@ async function seedWords() {
           const query = `
             INSERT INTO words (id, word, translation, difficulty, category, frequency_rank, cefr_level, source_lang, target_lang)
             VALUES ${values.join(', ')}
-            ON CONFLICT (id) DO NOTHING
+            ON CONFLICT (id) DO UPDATE SET
+              word           = EXCLUDED.word,
+              translation    = EXCLUDED.translation,
+              difficulty     = EXCLUDED.difficulty,
+              category       = EXCLUDED.category,
+              frequency_rank = EXCLUDED.frequency_rank,
+              cefr_level     = EXCLUDED.cefr_level,
+              source_lang    = EXCLUDED.source_lang,
+              target_lang    = EXCLUDED.target_lang
           `;
           const result = await client.query(query, params);
           fileImported += result.rowCount;
